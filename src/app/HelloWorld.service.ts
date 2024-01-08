@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class HelloWorldService {
 
   connection$?: WebSocketSubject<any>;
-  BACKEND_ADDRESS = 'ws://192.168.1.233:8765/'
+  BACKEND_ADDRESS = 'ws://localhost:8765/'
 
   connectToTest(): Observable<any> {
     return this.connect(this.BACKEND_ADDRESS);
@@ -30,6 +30,16 @@ export class HelloWorldService {
       (message) => true
     )
   }
+
+  send(data: Object) {
+		console.log("HelloWorldService sending message")
+		console.log(data)
+		if (this.connection$) {
+			this.connection$.next(data);
+		} else {
+			console.error('Connection has not been created, cannot send ' + String(data))
+		}
+	}
 
   constructor() { }
 
