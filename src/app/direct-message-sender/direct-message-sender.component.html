@@ -1,0 +1,8 @@
+<div>
+    <textarea  [(ngModel)]="messageOut" rows="10" cols="50" type="text" placeholder="Nachricht (sollte JSON sein) hier schreiben"></textarea>
+    <button (click)="sendMessage()">Nachricht abschicken</button>
+    <div *ngIf="response">
+        <p>Antwort: {{ response }}</p>
+      </div>
+</div>
+  
