@@ -40,7 +40,7 @@ export class DirectMessageSenderComponent implements OnInit {
       },
       "plannedCourse": ["Tortuga", "Port Royal", "The Bermuda Triangle"]
     }
-  }';`
+  }`
   response: string = "";
 
   ngOnInit(): void {
@@ -60,7 +60,7 @@ export class DirectMessageSenderComponent implements OnInit {
 
   sendMessage(): void {
     console.log("Direct Message Component Sending message");
-    this.helloWorldService.send(this.messageOut);
+    this.helloWorldService.sendJSONString(this.messageOut);
   }
 
   constructor(private helloWorldService:HelloWorldService) { }
