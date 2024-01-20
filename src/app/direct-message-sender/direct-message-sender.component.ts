@@ -52,7 +52,8 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
   override handleMessages(message: any): void {
     console.log("Direct Message Component received message");
     console.log(message);
-    this.setResponse(message);
+    console.log(JSON.stringify(message));
+    this.setResponse(JSON.stringify(message));
   }
 
   override handleError(error: any): void {
@@ -62,7 +63,10 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
   }
 
   setResponse(message: string): void {
+    console.log("setResponse called");
+    console.log(message);
     this.response = message
+    console.log(this.response);
   }
 
   receiveInput(): void {
