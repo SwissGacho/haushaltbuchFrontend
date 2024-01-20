@@ -33,24 +33,13 @@ export class HelloWorldService {
 
   send(data: Object) {
 		console.log("HelloWorldService sending message")
+		console.log(data)
 		if (this.connection$) {
-      console.log(data)
 			this.connection$.next(data);
 		} else {
 			console.error('Connection has not been created, cannot send ' + String(data))
 		}
 	}
-
-  sendJSONString(str: string) {
-    console.log("HelloWorldService sending JSON string")
-    if (this.connection$) {
-      const deserialized = JSON.parse(str);
-      console.log(deserialized)
-      this.connection$.next(deserialized);
-    } else {
-      console.error('Connection has not been created, cannot send ' + String(str))
-    }
-  }
 
   constructor() { }
 

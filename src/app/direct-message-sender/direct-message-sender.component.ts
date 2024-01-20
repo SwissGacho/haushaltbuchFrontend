@@ -69,9 +69,10 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
     console.log(this.response);
   }
 
-  sendMessage(): void {
-    console.log("Direct Message Component Sending message");
-    this.helloWorldService.sendJSONString(this.messageOut);
+  receiveInput(): void {
+    console.log("Direct Message Component received input");
+    const message:any = JSON.parse(this.messageOut);
+    this.sendMessage(message);
   }
 
 }
