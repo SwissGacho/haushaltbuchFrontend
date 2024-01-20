@@ -46,7 +46,7 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
       },
       "plannedCourse": ["Tortuga", "Port Royal", "The Bermuda Triangle"]
     }
-  }';`
+  }`
   response: string = "";
 
   override handleMessages(message: any): void {
