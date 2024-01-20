@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ConnectionService } from '../connection-service.service';
+import { HelloMessage, Message, MessageType } from '../Message';
 
 @Component({
     selector: 'app-ConnectedComponent',
@@ -18,16 +19,29 @@ export class ConnectedComponent implements OnInit, OnDestroy {
     constructor(private connectionService: ConnectionService) {
     }
     
-    private componentID: string = '';
+    private componentID: string | null = null;
     private connection!: Observable<any>;
+    private token: string  | null = null;
 
     // Sends a message to the backend.
-    sendMessage(message: Object) {
+    sendMessage(message: Message) {
+        console.log("Sending message:", message);
+        if (this.token == null) {
+            console.error("Cannot send message without token. Did you forget to wait for the HelloMessage?", message);
+            return;
+        }
+        if (this.componentID == null) {
+            throw new Error("Cannot send message without componentID. The componentID should be set in the ngOnInit method.");
+        }
+        message.token = this.token;
         this.connectionService.sendMessage(this.componentID, message);
     }
 
     /// This method closes the connection to the backend when the component is destroyed.
     ngOnDestroy(): void {
+        if (this.componentID == null) {
+            return;
+        }
         this.connectionService.removeConnection(this.componentID);
     }
 
@@ -52,10 +66,40 @@ export class ConnectedComponent implements OnInit, OnDestroy {
         const [connection, componentID] = this.connectionService.getNewConnection();
         this.connection = connection;
         this.componentID = componentID;
-        this.connection.subscribe({
-            next: (message) => this.handleMessages(message),
+        const helloSubscription = this.connection.subscribe({
+            next: (message) => {
+                // The first message received from the backend should be a HelloMessage with a token.
+                const helloMessage = ConnectedComponent.createHelloMessage(message);
+                if (helloMessage != null) {
+                    console.log("Received HelloMessage:", helloMessage);
+                    this.token = message.token;
+                    this.connection.subscribe({
+                        next: (message) => this.handleMessages(message)
+                    });
+                    helloSubscription.unsubscribe();
+                } else {
+                    console.error("Received invalid HelloMessage:", helloMessage);
+                }
+            },
             error: (error) => this.handleError(error),
             complete: () => this.handleComplete()
         });
+    }
+
+    private static createHelloMessage(json: string): HelloMessage | null {
+        console.log("Trying to create a HelloMessage from JSON:", json);
+        try {
+          const jsonObject = json as any;
+    
+          if ('type' in jsonObject && jsonObject.type === MessageType.Hello &&
+              'token' in jsonObject) {
+            return new HelloMessage(jsonObject.token, jsonObject.status);
+          } else {
+            return null;
+          }
+        } catch (error) {
+          console.error("Failed to parse JSON:", error);
+          return null;
         }
+      }
 }

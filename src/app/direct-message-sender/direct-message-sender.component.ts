@@ -46,7 +46,7 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
       },
       "plannedCourse": ["Tortuga", "Port Royal", "The Bermuda Triangle"]
     }
-  }';`
+  }`
   response: string = "";
 
   override handleMessages(message: any): void {
@@ -71,8 +71,8 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
 
   receiveInput(): void {
     console.log("Direct Message Component received input");
-    this.messageOut = (this.messageOut);
-    this.sendMessage(this.messageOut);
+    const message:any = JSON.parse(this.messageOut);
+    this.sendMessage(message);
   }
 
 }
