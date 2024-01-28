@@ -6,13 +6,15 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HelloWorldComponent } from './HelloWorldComponent/HelloWorld/HelloWorld.component';
 import { DirectMessageSenderComponent } from './direct-message-sender/direct-message-sender.component';
+import { ConnectedComponent } from './ConnectedComponent/ConnectedComponent.component';
 
 @NgModule({
-  declarations: [
+  declarations: [	
     AppComponent,
     HelloWorldComponent,
     DirectMessageSenderComponent,
-  ],
+      ConnectedComponent
+   ],
   imports: [
     BrowserModule,
     AppRoutingModule,

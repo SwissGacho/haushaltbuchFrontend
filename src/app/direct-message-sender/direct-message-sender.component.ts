@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HelloWorldService } from '../HelloWorld.service';
+import { ConnectedComponent } from '../ConnectedComponent/ConnectedComponent.component';
+import { ConnectionService } from '../connection-service.service';
 
 /**
  * This component allows users to send messages and view responses.
@@ -17,7 +19,11 @@ import { HelloWorldService } from '../HelloWorld.service';
   templateUrl: './direct-message-sender.component.html',
   styleUrls: ['./direct-message-sender.component.css']
 })
-export class DirectMessageSenderComponent implements OnInit {
+export class DirectMessageSenderComponent extends ConnectedComponent implements OnInit {
+
+  constructor(private specificService:ConnectionService) {
+    super(specificService);
+  }
 
   messageOut: string = `{
     "pirateMessage": {
@@ -43,26 +49,30 @@ export class DirectMessageSenderComponent implements OnInit {
   }`
   response: string = "";
 
-  ngOnInit(): void {
-    console.log("Starting Direct Message Sender Component");
-    this.helloWorldService.connectToTest().subscribe({
-      next:     message => this.setResponse(message),
-      error:    error => console.error(error),
-      complete: () => console.warn("Direct Message sender connection lost or closed")
-    }
-    )
+  override handleMessages(message: any): void {
+    console.log("Direct Message Component received message");
+    console.log(message);
+    console.log(JSON.stringify(message));
+    this.setResponse(JSON.stringify(message));
   }
 
-  
+  override handleError(error: any): void {
+    console.error("Direct Message Component received error");
+    console.error(error);
+    throw new Error(error);
+  }
+
   setResponse(message: string): void {
+    console.log("setResponse called");
+    console.log(message);
     this.response = message
+    console.log(this.response);
   }
 
-  sendMessage(): void {
-    console.log("Direct Message Component Sending message");
-    this.helloWorldService.sendJSONString(this.messageOut);
+  receiveInput(): void {
+    console.log("Direct Message Component received input");
+    const message:any = JSON.parse(this.messageOut);
+    this.sendMessage(message);
   }
-
-  constructor(private helloWorldService:HelloWorldService) { }
 
 }
