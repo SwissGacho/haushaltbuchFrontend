@@ -7,11 +7,7 @@ describe('ConnectionServiceService', () => {
   let service: ConnectionService = null!;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [
-        ConnectionService
-      ]
-    });
+    TestBed.configureTestingModule({});
     service = TestBed.inject(ConnectionService);
     service.BACKEND_ADDRESS = 'MockBackendAddress'
   });
