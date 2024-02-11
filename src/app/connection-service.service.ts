@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { WebSocketSubject } from 'rxjs/webSocket';
+import { Message, MessageType } from './Message';
 
 @Injectable({
     providedIn: 'root'
@@ -17,6 +18,7 @@ export class ConnectionService {
 
     BACKEND_ADDRESS = 'ws://localhost:8765/'
     private connections: { [componentId: string]: WebSocketSubject<any> } = {};
+    private sessionToken: string = "";
     componentCounter: number = 0;
 
     // Create a new connection and return it.
@@ -29,8 +31,14 @@ export class ConnectionService {
     }
 
     // Send a message to the backend.
-    sendMessage(senderComponentID: string, message: Object) {
+    sendMessage(senderComponentID: string, message: Message) {
         let connection = this.connections[senderComponentID];
+        const type: MessageType = message.type;
+        if (this.sessionToken == "" && ![MessageType.Login, MessageType.Hello].includes(type)) {
+            console.error("Cannot send message without session token. Need to send a login message first.", message);
+            return;
+        }
+        message.ses_token = this.sessionToken;
         connection.next(message);
     }
 
@@ -48,5 +56,11 @@ export class ConnectionService {
         const componentId = `component-${this.componentCounter}`;
         this.componentCounter++;
         return componentId;
+    }
+
+    // Set the session token, which is used to authenticate messages to the backend.
+    setSessionToken(token: string) {
+        console.log("Setting session token:", token);
+        this.sessionToken = token;
     }
 }
