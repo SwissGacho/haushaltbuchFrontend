@@ -11,7 +11,7 @@ export interface Message {
     status?: string;
     ses_token?: string;
   }
-  
+
 class BasicMessage implements Message {
     type: MessageType;
     token?: string;
@@ -40,6 +40,14 @@ export class LoginMessage extends BasicMessage {
       this.user = user;
     }
   }
+
+export class LoginMessageWithSessionToken extends BasicMessage {
+  ses_token: string;
+  constructor(ses_token: string, token?: string, status?: string) {
+    super(MessageType.Login, token, status);
+    this.ses_token = ses_token;
+  }
+}
 
 export class WelcomeMessage extends BasicMessage {
   ses_token: string = "";

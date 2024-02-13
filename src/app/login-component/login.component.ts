@@ -19,7 +19,10 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
   override handleMessages(message: any): void {
     console.log("Login Component received message");
     console.log(JSON.stringify(message));
-    this.specificService.setSessionToken(message.ses_token);
+    if (this.token == null) {
+      throw new Error("Tried to handle message before the connection token was set");
+    }
+    this.specificService.setSessionToken(message.ses_token, this.token);
   }
 
   override handleError(error: any): void {

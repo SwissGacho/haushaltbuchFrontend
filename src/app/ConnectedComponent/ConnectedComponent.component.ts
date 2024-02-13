@@ -21,20 +21,17 @@ export class ConnectedComponent implements OnInit, OnDestroy {
     
     private componentID: string | null = null;
     private connection!: Observable<any>;
-    private token: string  | null = null;
+    protected token: string  | null = null;
 
     // Sends a message to the backend.
     sendMessage(message: Message) {
-        console.log("Sending message:", message);
+        console.log("Connected Component prepares to send message:", message);
         if (this.token == null) {
-            console.error("Cannot send message without token. Did you forget to wait for the HelloMessage?", message);
+            console.warn("Tried to send a message before the connection token was set", message);
             return;
         }
-        if (this.componentID == null) {
-            throw new Error("Cannot send message without componentID. The componentID should be set in the ngOnInit method.");
-        }
         message.token = this.token;
-        this.connectionService.sendMessage(this.componentID, message);
+        this.connectionService.sendMessage(this.token, message);
     }
 
     /// This method closes the connection to the backend when the component is destroyed.
@@ -63,43 +60,11 @@ export class ConnectedComponent implements OnInit, OnDestroy {
     // Creates the connection to the backend when the component is initialized.
     // Subclasses should call super.ngOnInit() in their ngOnInit method instead creating their own connection.
     ngOnInit() {
-        const [connection, componentID] = this.connectionService.getNewConnection();
-        this.connection = connection;
-        this.componentID = componentID;
-        const helloSubscription = this.connection.subscribe({
-            next: (message) => {
-                // The first message received from the backend should be a HelloMessage with a token.
-                const helloMessage = ConnectedComponent.createHelloMessage(message);
-                if (helloMessage != null) {
-                    console.log("Received HelloMessage:", helloMessage);
-                    this.token = message.token;
-                    this.connection.subscribe({
-                        next: (message) => this.handleMessages(message)
-                    });
-                    helloSubscription.unsubscribe();
-                } else {
-                    console.error("Received invalid HelloMessage:", helloMessage);
-                }
-            },
-            error: (error) => this.handleError(error),
-            complete: () => this.handleComplete()
-        });
+        this.connectionService.getNewConnection(this);
     }
 
-    private static createHelloMessage(json: string): HelloMessage | null {
-        console.log("Trying to create a HelloMessage from JSON:", json);
-        try {
-          const jsonObject = json as any;
-    
-          if ('type' in jsonObject && jsonObject.type === MessageType.Hello &&
-              'token' in jsonObject) {
-            return new HelloMessage(jsonObject.token, jsonObject.status);
-          } else {
-            return null;
-          }
-        } catch (error) {
-          console.error("Failed to parse JSON:", error);
-          return null;
-        }
+
+      public setToken(token: string) {
+        this.token = token;
       }
 }
