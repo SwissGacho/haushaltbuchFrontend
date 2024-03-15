@@ -12,6 +12,7 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
 
   constructor(private specificService:ConnectionService) {
     super(specificService);
+    this.componentID='LoginComponent'
   }
 
   username: string = "";

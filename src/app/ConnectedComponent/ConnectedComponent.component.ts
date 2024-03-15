@@ -19,7 +19,7 @@ export class ConnectedComponent implements OnInit, OnDestroy {
     constructor(private connectionService: ConnectionService) {
     }
     
-    private componentID: string | null = null;
+    protected componentID: string | null = null;
     private connection!: Observable<any>;
     protected token: string  | null = null;
 
@@ -64,7 +64,7 @@ export class ConnectedComponent implements OnInit, OnDestroy {
     }
 
 
-      public setToken(token: string) {
+    public setToken(token: string) {
         this.token = token;
-      }
+    }
 }

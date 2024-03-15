@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { HelloWorldService } from '../HelloWorld.service';
 import { ConnectedComponent } from '../ConnectedComponent/ConnectedComponent.component';
 import { ConnectionService } from '../connection-service.service';
 
 /**
  * This component allows users to send messages and view responses.
- * It interacts with the HelloWorldService to send messages and subscribe
+ * It interacts with the ConnectionService to send messages and subscribe
  * to incoming responses. The component provides an input field for users
  * to enter their messages and displays the responses received from the
  * service.

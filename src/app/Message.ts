@@ -10,30 +10,51 @@ export interface Message {
     token?: string;
     status?: string;
     ses_token?: string;
+    reason?: string;
   }
 
-class BasicMessage implements Message {
+export function deserialize(event: MessageEvent): Message {
+    let data = JSON.parse(event.data)
+    let message: Message;
+    switch (data.type) {
+      case MessageType.Hello:
+        return new HelloMessage(data);
+      case MessageType.Welcome:
+        return new WelcomeMessage(data);
+      case MessageType.Bye:
+        return new ByeMessage(data);
+      default:
+        return new IncomingMessage(data);
+    }
+  }
+
+class IncomingMessage implements Message {
     type: MessageType;
-    token?: string;
+    token: string;
     status?: string;
-    constructor(type: MessageType, token?: string, status?: string) {
-      this.type = type;
-      this.token = token;
-      this.status = status;
+    constructor(data: Message) {
+      this.type = data.type;
+      this.token = data.token || '';
+      this.status = data.status;
     }
-    serialize(): string {
-      return JSON.stringify(this);
-    }
+}
+
+class OutgoingMessage implements Message {
+  type: MessageType;
+  token?: string;
+  status?: string;
+  constructor(type: MessageType, token?: string, status?: string) {
+    this.type = type;
+    this.token = token;
+    this.status = status;
   }
+}
 
 
-export class HelloMessage extends BasicMessage {
-    constructor(token?: string, status?: string) {
-      super(MessageType.Hello, token, status);
-    }
-  }
+export class HelloMessage extends IncomingMessage {
+}
 
-export class LoginMessage extends BasicMessage {
+export class LoginMessage extends OutgoingMessage {
     user: string;
     constructor(user:string, token?: string, status?: string) {
       super(MessageType.Login, token, status);
@@ -41,7 +62,7 @@ export class LoginMessage extends BasicMessage {
     }
   }
 
-export class LoginMessageWithSessionToken extends BasicMessage {
+export class LoginMessageWithSessionToken extends OutgoingMessage {
   ses_token: string;
   constructor(ses_token: string, token?: string, status?: string) {
     super(MessageType.Login, token, status);
@@ -49,6 +70,13 @@ export class LoginMessageWithSessionToken extends BasicMessage {
   }
 }
 
-export class WelcomeMessage extends BasicMessage {
-  ses_token: string = "";
+export class WelcomeMessage extends IncomingMessage {
+}
+
+export class ByeMessage extends IncomingMessage {
+  reason: string;
+  constructor(data: Message) {
+    super(data);
+    this.reason = data.reason || '';
+  }
 }

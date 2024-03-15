@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { WebSocketSubject } from 'rxjs/webSocket';
-import { HelloMessage, LoginMessage, LoginMessageWithSessionToken, Message, MessageType } from './Message';
+import { WebSocketSubject, WebSocketSubjectConfig} from 'rxjs/webSocket';
+import { HelloMessage, LoginMessage, LoginMessageWithSessionToken, Message, MessageType, deserialize } from './Message';
 import { ConnectedComponent } from './ConnectedComponent/ConnectedComponent.component';
 
 @Injectable({
@@ -18,16 +18,46 @@ export class ConnectionService {
     constructor() { }
 
     BACKEND_ADDRESS = 'ws://localhost:8765/'
-    private connections: { [componentId: string]: WebSocketSubject<any> } = {};
+    private connections: { [componentId: string]: WebSocketSubject<object> } = {};
     private sessionToken: string = "";
     componentCounter: number = 0;
 
+    // Create a WS Subject; used locally to allow patching in unit test
+    // This method is not tested by any spec, change with utmost care
+    _createWebSocketSubject(url: string): WebSocketSubject<Message> {
+        return new WebSocketSubject({url: url, deserializer: deserialize});
+    }
     // Create a new connection and return it.
     // Users of the connection must provide the returned componentID when sending messages.
     getNewConnection(subscriber: ConnectedComponent): void {
-        let connection = new WebSocketSubject<any>(this.BACKEND_ADDRESS);
-        connection.subscribe({next: (message) => console.log("Received message", message)});
-        this.sendHelloMessage(connection, subscriber);
+        let connection = this._createWebSocketSubject(this.BACKEND_ADDRESS);
+        connection.subscribe({next: (message: object) => console.log("Received message", message)});
+        this.nextHelloMessage(connection, subscriber);
+    }
+    
+    // Get a connection token from the backend.
+    nextHelloMessage(connection: WebSocketSubject<Message>, subscriber: ConnectedComponent) {
+        const helloSubscription = connection.subscribe({
+            next: (message) => {
+                // The first message received from the backend should be a HelloMessage with a token.
+                if (message instanceof HelloMessage) {
+                    console.group("Received HelloMessage", message, "on connection", connection, "and subscriber", subscriber)
+                    console.debug("this is", this);
+                    subscriber.setToken(message.token);
+                    this.addConnection(message.token, connection);
+                    helloSubscription.unsubscribe();
+                    console.log("Subscribing to connection with connected component message handler", subscriber.handleMessages)
+                    connection.subscribe({
+                        next: (message) => subscriber.handleMessages(message)
+                    });
+                    console.groupEnd();
+                } else {
+                    console.error("Received invalid HelloMessage:", message);
+                }
+            },
+            error: (error) => subscriber.handleError(error),
+            complete: () => subscriber.handleComplete()
+        });
     }
 
     // Send a message to the backend.
@@ -60,7 +90,7 @@ export class ConnectionService {
         }
     }
     
-    // Set the session token, which is used to authenticate messages to the backend.
+    // Set the session token, which is used to authenticate connections to the backend.
     setSessionToken(ses_token: string, originating_token: string) {
         console.log("Setting session token:", ses_token);
         this.sessionToken = ses_token;
@@ -92,46 +122,4 @@ export class ConnectionService {
         this.sendMessage(componentId, message);
     }
 
-    // Get a connection token from the backend.
-    sendHelloMessage(connection: WebSocketSubject<any>, subscriber: ConnectedComponent) {
-        const helloSubscription = connection.subscribe({
-            next: (message) => {
-                // The first message received from the backend should be a HelloMessage with a token.
-                // const helloMessage = ConnectedComponent.createHelloMessage(message);
-                const helloMessage = this.createHelloMessage(message);
-                if (helloMessage != null) {
-                    console.group("Received HelloMessage", helloMessage, "on connection", connection, "and subscriber", subscriber)
-                    console.debug("this is", this);
-                    subscriber.setToken(message.token);
-                    this.addConnection(message.token, connection);
-                    helloSubscription.unsubscribe();
-                    console.log("Subscribing to connection with connected component message handler", subscriber.handleMessages)
-                    connection.subscribe({
-                        next: (message) => subscriber.handleMessages(message)
-                    });
-                    console.groupEnd();
-                } else {
-                    console.error("Received invalid HelloMessage:", helloMessage);
-                }
-            },
-            error: (error) => subscriber.handleError(error),
-            complete: () => subscriber.handleComplete()
-        });
-    }
-    
-    private createHelloMessage(json: string): HelloMessage | null {
-        try {
-          const jsonObject = json as any;
-    
-          if ('type' in jsonObject && jsonObject.type === MessageType.Hello &&
-              'token' in jsonObject) {
-            return new HelloMessage(jsonObject.token, jsonObject.status);
-          } else {
-            return null;
-          }
-        } catch (error) {
-          console.error("Failed to parse JSON:", error);
-          return null;
-        }
-      }
 }
