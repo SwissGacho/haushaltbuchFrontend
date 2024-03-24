@@ -22,6 +22,7 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
 
   constructor(private specificService:ConnectionService) {
     super(specificService);
+    this.componentID = 'Pirate' + Math.floor(Math.random()*100)
   }
 
   messageOut: string = `{

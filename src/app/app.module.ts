@@ -9,12 +9,12 @@ import { ConnectedComponent } from './ConnectedComponent/ConnectedComponent.comp
 import { LoginComponent } from './login-component/login.component';
 
 @NgModule({
-  declarations: [	
+  declarations: [
     AppComponent,
     DirectMessageSenderComponent,
-      ConnectedComponent,
-      LoginComponent
-   ],
+    ConnectedComponent,
+    LoginComponent
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,

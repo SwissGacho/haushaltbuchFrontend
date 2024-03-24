@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ConnectionService } from '../connection-service.service';
-import { HelloMessage, Message, MessageType } from '../Message';
+import { HelloMessage, LoginMessage, Message, MessageType, WelcomeMessage } from '../Message';
 
 @Component({
     selector: 'app-ConnectedComponent',
@@ -19,9 +19,14 @@ export class ConnectedComponent implements OnInit, OnDestroy {
     constructor(private connectionService: ConnectionService) {
     }
     
-    protected componentID: string | null = null;
+    componentID: string = '';
     private connection!: Observable<any>;
     protected token: string  | null = null;
+
+    // remember token of owned connection
+    setToken(to: string) {
+        this.token = this.token;
+    }
 
     // Sends a message to the backend.
     sendMessage(message: Message) {
@@ -31,7 +36,7 @@ export class ConnectedComponent implements OnInit, OnDestroy {
             return;
         }
         message.token = this.token;
-        this.connectionService.sendMessage(this.token, message);
+        this.connectionService.sendMessage(message, this.token);
     }
 
     /// This method closes the connection to the backend when the component is destroyed.
@@ -42,8 +47,15 @@ export class ConnectedComponent implements OnInit, OnDestroy {
         this.connectionService.removeConnection(this.componentID);
     }
 
+    // // Abstract method for components to implement login handling.
+    // // This should only be implemented by LoginComponent
+    // handleLoginMessage(message: Message): void {
+    //     throw new Error('LoginComponent must implement the handleLoginMessage method.');
+    // }
+
     // Abstract method for components to implement their message handling.
-    handleMessages(message: any): void {
+    // Messages after the handshaking
+    handleMessages(message: Message): void {
         throw new Error('Subclasses must implement the handleMessages method.');
     }
 
@@ -58,13 +70,9 @@ export class ConnectedComponent implements OnInit, OnDestroy {
     }
 
     // Creates the connection to the backend when the component is initialized.
-    // Subclasses should call super.ngOnInit() in their ngOnInit method instead creating their own connection.
+    // Subclasses should call super.ngOnInit() in their ngOnInit method instead of
+    // creating their own connection if they don't implement login dialogue
     ngOnInit() {
         this.connectionService.getNewConnection(this);
-    }
-
-
-    public setToken(token: string) {
-        this.token = token;
     }
 }

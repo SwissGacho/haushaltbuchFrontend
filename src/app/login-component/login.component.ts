@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { ConnectedComponent } from '../ConnectedComponent/ConnectedComponent.component';
 import { ConnectionService } from '../connection-service.service';
-import { LoginMessage, WelcomeMessage } from '../Message';
+import { LoginMessage, OutgoingMessage, WelcomeMessage, LoginCredentials } from '../Message';
 
 @Component({
   selector: 'app-login-component',
@@ -16,14 +16,14 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
   }
 
   username: string = "";
+  @Output() loginSubject = new EventEmitter<LoginCredentials>();
 
-  override handleMessages(message: any): void {
+  override handleMessages(message: OutgoingMessage): void {
     console.log("Login Component received message");
     console.log(JSON.stringify(message));
     if (this.token == null) {
       throw new Error("Tried to handle message before the connection token was set");
     }
-    this.specificService.setSessionToken(message.ses_token, this.token);
   }
 
   override handleError(error: any): void {
@@ -31,9 +31,19 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
     throw new Error(error);
   }
 
+  override handleComplete(): void {
+    console.warn('Login connection closed.')
+  }
+
   logIn(): void {
-    console.log("Login button pressed");
-    this.sendMessage(new LoginMessage(this.username));
+    console.log("Login button pressed (", this.username, ')');
+    this.loginSubject.emit({user: this.username});
+  }
+
+  // Creates the connection to the backend when the component is initialized.
+  // The LoginComponent
+  override ngOnInit() {
+    this.specificService.getNewConnection(this, this.loginSubject);
   }
 
 }
