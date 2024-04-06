@@ -1,15 +1,18 @@
 import { TestBed } from '@angular/core/testing';
-import { Observer } from 'rxjs';
+// import { EMPTY } from '../observable/empty';
+// import { Observer, take, skip } from 'rxjs';
+import * as rxjs  from 'rxjs';
 import { WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
 
 import { ConnectionService } from './connection-service.service';
 import { ConnectedComponent } from './ConnectedComponent/ConnectedComponent.component';
-import { HelloMessage, LoginMessage, LoginMessageWithSessionToken, Message, MessageType, deserialize } from './Message';
+import { HelloMessage, IncomingMessage, LoginMessage, Message, MessageType } from './Message';
 
 class Subscription {}
 class MockWebSocketSubject // extends WebSocketSubject<any> 
 {
-  subscribe(observer?: Partial<Observer<any>> | undefined): Subscription | null {
+  pipe(op1: any, ...ops: any[]): MockWebSocketSubject { return this; }
+  subscribe(observer?: Partial<rxjs.Observer<any>> | undefined): Subscription | null {
     return null;
   }
   // constructor() {
@@ -29,45 +32,98 @@ describe('ConnectionServiceService', () => {
   let connectionService: ConnectionService = null!;
   let mockWebSocketSubject: MockWebSocketSubject;
   let mockSubscriber: MockConnectedComponent;
+  let mockTake: rxjs.MonoTypeOperatorFunction<any>;
+  let mockSkip: rxjs.MonoTypeOperatorFunction<any>;
+  const compCounter = 5;
 
   beforeEach(() => {
     connectionService = new ConnectionService;
     connectionService.BACKEND_ADDRESS = 'MockBackendAddress';
     mockWebSocketSubject = new MockWebSocketSubject();
+    mockSubscriber = new MockConnectedComponent(connectionService);
+    mockTake = () => rxjs.EMPTY;
+    mockSkip = () => rxjs.EMPTY;
   });
 
   it('should be created', () => {
     expect(connectionService).toBeTruthy();
   });
 
-  /*
-  it('should generate unique component IDs', () => {
-    let ids = new Set<string>();
-    for (let i = 0; i < 100; i++) {
-      let id = service.generateComponentId();
-      expect(ids.has(id)).toBeFalse();
-      ids.add(id);
-    }
-  });
-  */
-
-  it('should create new connections', () => {
-    const spyOnCreateWebSocketSubject = 
-      spyOn(ConnectionService.prototype, '_createWebSocketSubject')
+  function testGetNewConnection(mockLoginSubject?: rxjs.Subject<any>) {
+    const spyOnDeserialize = spyOn(IncomingMessage,'deserialize');
+    const spyOnWebSocket = 
+      spyOn(connectionService, 'webSocket')
       .and.returnValue(mockWebSocketSubject as WebSocketSubject<Message>);
+    const spyOnPipe = spyOn(mockWebSocketSubject, 'pipe').and.callThrough();
     const spyOnSubscribe = spyOn(mockWebSocketSubject,'subscribe');
-    const spyOnExpextHello = spyOn(connectionService,'nextHelloMessage');
-    connectionService.getNewConnection(mockSubscriber);
-    expect(spyOnCreateWebSocketSubject).toHaveBeenCalledWith(
-      connectionService.BACKEND_ADDRESS
+    const spyOnTake = spyOn(connectionService, 'rxjsTake')
+      .and.returnValue(mockTake);
+      const spyOnSkip = spyOn(connectionService, 'rxjsSkip')
+      .and.returnValue(mockSkip);
+    connectionService.componentCounter = compCounter;
+
+    // call the tested object
+    connectionService.getNewConnection(mockSubscriber,mockLoginSubject);
+
+    expect(spyOnWebSocket).toHaveBeenCalledWith(
+      {url:'MockBackendAddress', deserializer: spyOnDeserialize}
     );
-    expect(spyOnSubscribe).toHaveBeenCalled();
-    expect(spyOnExpextHello).toHaveBeenCalledOnceWith(
-      mockWebSocketSubject as WebSocketSubject<Message>,
-      mockSubscriber
-    );
+    expect(spyOnTake).toHaveBeenCalledOnceWith(2);
+    expect(spyOnSkip).toHaveBeenCalledOnceWith(mockLoginSubject ? 0 : 2);
+    expect(spyOnPipe).toHaveBeenCalledTimes(2);
+    expect(spyOnPipe).toHaveBeenCalledWith(mockTake);
+    expect(spyOnPipe).toHaveBeenCalledWith(mockSkip);
+    expect(spyOnSubscribe).toHaveBeenCalledTimes(2);
+    expect(spyOnSubscribe.calls.argsFor(0)[0]?.next).toBeTruthy();
+    expect(spyOnSubscribe.calls.argsFor(0)[0]?.complete).toBeFalsy();
+    expect(spyOnSubscribe.calls.argsFor(0)[0]?.error).toBeFalsy();
+    const arg0Next = spyOnSubscribe.calls.argsFor(0)[0]?.next;
+    const mockInMsg = new HelloMessage({type: MessageType.Hello, token: ''});
+    if (arg0Next) {
+      const spyOnHandleHandshake = spyOn(connectionService, 'handleHandshakeMessages');
+      arg0Next(mockInMsg);
+      expect(spyOnHandleHandshake).toHaveBeenCalledOnceWith(
+        mockInMsg,
+        {
+          component_num: compCounter+1,
+          service: connectionService,
+          connection: mockWebSocketSubject as WebSocketSubject<Message>,
+          subscriber: mockSubscriber,
+          loginSubject: mockLoginSubject ? mockLoginSubject : ConnectionService.loginBySessionTokenSubject
+        }
+      );
+    }
+    expect(spyOnSubscribe.calls.argsFor(1)[0]?.next).toBeTruthy();
+    expect(spyOnSubscribe.calls.argsFor(1)[0]?.complete).toBeTruthy();
+    expect(spyOnSubscribe.calls.argsFor(1)[0]?.error).toBeTruthy();
+    const arg1Next = spyOnSubscribe.calls.argsFor(1)[0]?.next;
+    if (arg1Next) {
+      const spyOnHandleMessages = spyOn(mockSubscriber, 'handleMessages');
+      arg1Next(mockInMsg);
+      expect(spyOnHandleMessages).toHaveBeenCalledTimes(1);
+      console.log('callhand: ', spyOnHandleMessages.calls.argsFor(0));
+      expect(spyOnHandleMessages).toHaveBeenCalledOnceWith(mockInMsg);
+    }
+    const arg1Complete = spyOnSubscribe.calls.argsFor(1)[0]?.complete;
+    if (arg1Complete) {
+      const spyOnHandleComplete = spyOn(mockSubscriber, 'handleComplete');
+      arg1Complete();
+      expect(spyOnHandleComplete).toHaveBeenCalledOnceWith();
+    }
+    const arg1Error = spyOnSubscribe.calls.argsFor(1)[0]?.error;
+    if (arg1Error) {
+      const spyOnHandleError = spyOn(mockSubscriber, 'handleError');
+      arg1Error('muck');
+      expect(spyOnHandleError).toHaveBeenCalledOnceWith('muck');
+    }
+  }
+  it('should create new connections and subscribe without skip', () => {
+    testGetNewConnection(new rxjs.Subject<{}>());
   });
 
+  it('should create new connections and subscribe with skip', () => {
+    testGetNewConnection(undefined);
+  });
 
   /*
   it('should store new connections in service.connections', () => {

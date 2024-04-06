@@ -25,7 +25,7 @@ export class ConnectedComponent implements OnInit, OnDestroy {
 
     // remember token of owned connection
     setToken(to: string) {
-        this.token = this.token;
+        this.token = to;
     }
 
     // Sends a message to the backend.

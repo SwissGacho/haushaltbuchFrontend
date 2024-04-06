@@ -1,7 +1,9 @@
-import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject, Subject, skip, take } from 'rxjs';
-import { webSocket, WebSocketSubject, WebSocketSubjectConfig} from 'rxjs/webSocket';
-import { HelloMessage, LoginMessage, Message, IncomingMessage, MessageType, deserialize, WelcomeMessage, ByeMessage, LoginCredentials } from './Message';
+import { Injectable, EventEmitter } from '@angular/core';
+// import { Observable, ReplaySubject, Subject, skip, take } from 'rxjs';
+import * as rxjs from 'rxjs';
+// import { webSocket, WebSocketSubject, WebSocketSubjectConfig} from 'rxjs/webSocket';
+import * as rxws from 'rxjs/webSocket';
+import { HelloMessage, LoginMessage, Message, IncomingMessage, MessageType, WelcomeMessage, ByeMessage, LoginCredentials } from './Message';
 import { ConnectedComponent } from './ConnectedComponent/ConnectedComponent.component';
 
 @Injectable({
@@ -20,69 +22,75 @@ export class ConnectionService {
     BACKEND_ADDRESS = 'ws://localhost:8765/';
 
     private static connections: { [componentId: string]: {
-        subject: WebSocketSubject<Message>,
+        subject: rxws.WebSocketSubject<Message>,
         subscriber: ConnectedComponent
     } } = {};
-    private static unconnectedComponents: { 
-        service: ConnectionService;
-        connection: WebSocketSubject<Message>,
-        subscriber: ConnectedComponent,
-        loginSubject: Subject<{user?: string, ses_token?: string}>
-    }[] = [];
 
-    private static loginBySessionTokenSubject = new ReplaySubject<LoginCredentials>();
+    static loginBySessionTokenSubject = new rxjs.ReplaySubject<LoginCredentials>();
     private static _sessionToken: string = "";
+
+    // methods acting as wrappers for imported functions, allowing replacement by unittest spies
+    webSocket(cfg: rxws.WebSocketSubjectConfig<Message>): rxws.WebSocketSubject<Message> {
+        return rxws.webSocket(cfg);
+    }
+    rxjsTake(n: number): rxjs.MonoTypeOperatorFunction<Message> { return rxjs.take(n); }
+    rxjsSkip(n: number): rxjs.MonoTypeOperatorFunction<Message> { return rxjs.skip(n); }
 
     componentCounter: number = 0;
 
-    // Create a WS Subject; used locally to allow patching in unit test
-    // This method is not tested by any spec, change with utmost care
-    _createWebSocketSubject(url: string, comp_num: number): WebSocketSubject<Message> {
-        return webSocket({   // TODO: use rxjs.webSocket instead of new
-            url: url, 
-            deserializer: (e: MessageEvent) => {
-                const m = deserialize(e);
-                m.connection_id = comp_num;
-                return m;
-            }
-        });
-    }
     // Create a new connection and subscribe for the handshake messages (HelloMessage, WelcomeMessage).
     // Subscribe the subscriber for further messages.
     // A Subject delivering the login credentials is determined
-    getNewConnection(subscriber: ConnectedComponent, loginSubject?: Subject<LoginCredentials>): void {
+    getNewConnection(subscriber: ConnectedComponent, loginSubject?: rxjs.Subject<LoginCredentials>): void {
         let comp_num = ++this.componentCounter;
-        console.log('Creating connection for component ', subscriber.componentID, '; comp#: ', comp_num);
-        console.groupCollapsed(); console.log('Subscriber: ', subscriber); console.log('LoginSubject: ',loginSubject);
-        let connection = this._createWebSocketSubject(this.BACKEND_ADDRESS, comp_num);
-        ConnectionService.unconnectedComponents[comp_num] = {
-            service: this,
-            connection: connection,
-            subscriber: subscriber,
-            // use either credentials from the subscriber or the local session token:
-            loginSubject: loginSubject || ConnectionService.loginBySessionTokenSubject
-        };
-        connection.pipe(take(2)).subscribe({next: this.handleHandshakeMessages});
-        connection.pipe(skip(2)).subscribe({next: subscriber.handleMessages, complete: subscriber.handleComplete});
+        console.groupCollapsed('Creating connection for component ', subscriber.componentID, '; comp#: ', comp_num);
+        console.log('Subscriber: ', subscriber); console.log('LoginSubject: ',loginSubject);
+        let connection = this.webSocket({url: this.BACKEND_ADDRESS, deserializer: IncomingMessage.deserialize});
+        connection.pipe(this.rxjsTake(2)).subscribe({
+            next: (message: Message) => this.handleHandshakeMessages(
+                message, {
+                    component_num: comp_num,
+                    service: this,
+                    connection: connection,
+                    subscriber: subscriber,
+                    /* use either credentials from the subscriber or the local session token: */
+                    loginSubject: loginSubject || ConnectionService.loginBySessionTokenSubject 
+                }
+            )
+        });
+        console.log('skip:', loginSubject ? 0 : 2);
+        connection.pipe(this.rxjsSkip(loginSubject ? 0 : 2)).subscribe({
+            next: (message: Message) => subscriber.handleMessages(message),
+            complete: () => subscriber.handleComplete(),
+            error: (error: any) => subscriber.handleError(error)
+        });
         console.groupEnd();
     }
     
     // Handle the first two messages from a new connection, it should be a HelloMessage and a WelcomeMessage
     // If the session token is not set yet, assume we receive it after successfull logon by 
     // LoginComponent and send the ses_token through the sessionTokenSubject
-    handleHandshakeMessages(message: Message) {
-        console.log('handle handshake: ', message.type, '; comp#: ', message.connection_id);
-        console.groupCollapsed(); console.log( message); console.log(this);
+    handleHandshakeMessages(
+        message: Message,
+        that?: {
+            component_num: number,
+            service: ConnectionService,
+            connection: rxws.WebSocketSubject<Message>,
+            subscriber: ConnectedComponent,
+            loginSubject: rxjs.Subject<{user?: string, ses_token?: string}>
+        }
+    ) {
+        console.groupCollapsed('handle handshake: ', message.type, '; comp#: ', that?.component_num);
+        console.log( message); console.log('that:', that);
         console.groupEnd();
-        if (message instanceof HelloMessage && message.connection_id>0) {
-            const comp = ConnectionService.unconnectedComponents[message.connection_id];
-            if (comp) {
-                console.log('attach token ', message.token, ' to component ', comp.subscriber.componentID)
-                ConnectionService.addConnection(message.token, comp.connection, comp.subscriber);
-                comp.loginSubject.pipe(take(1)).subscribe(
+        if (message instanceof HelloMessage) {
+            if (that) {
+                console.log('attach token ', message.token, ' to component ', that.subscriber.componentID)
+                ConnectionService.addConnection(message.token, that.connection, that.subscriber);
+                that.loginSubject.pipe(rxjs.take(1)).subscribe(
                     (credentials: LoginCredentials) => {
                         console.log('Got credentials: ', credentials);
-                        comp.service.sendMessage(new LoginMessage(credentials, message.token));
+                        that.service.sendMessage(new LoginMessage(credentials, message.token));
                     }
                 )
             }
@@ -109,8 +117,8 @@ export class ConnectionService {
     }
 
     // Associate a connection token to the WS connection und the subscribing component
-    static addConnection(token: string, subject: WebSocketSubject<Message>, subscriber: ConnectedComponent) {
-        console.groupCollapsed(); console.log("Adding connection", token);
+    static addConnection(token: string, subject: rxws.WebSocketSubject<Message>, subscriber: ConnectedComponent) {
+        console.groupCollapsed("Adding connection", token);
         console.log('subject:', subject); console.log('subscriber:', subscriber); 
         ConnectionService.connections[token] = {subject: subject, subscriber: subscriber};
         subscriber.setToken(token);

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { ConnectedComponent } from '../ConnectedComponent/ConnectedComponent.component';
 import { ConnectionService } from '../connection-service.service';
-import { LoginMessage, OutgoingMessage, WelcomeMessage, LoginCredentials } from '../Message';
+import { LoginMessage, OutgoingMessage, WelcomeMessage, LoginCredentials, IncomingMessage } from '../Message';
 
 @Component({
   selector: 'app-login-component',
@@ -18,12 +18,10 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
   username: string = "";
   @Output() loginSubject = new EventEmitter<LoginCredentials>();
 
-  override handleMessages(message: OutgoingMessage): void {
-    console.log("Login Component received message");
-    console.log(JSON.stringify(message));
-    if (this.token == null) {
-      throw new Error("Tried to handle message before the connection token was set");
-    }
+  override handleMessages(message: IncomingMessage): void {
+    console.groupCollapsed("Login Component received ", message.type, " message");
+    console.log(message);
+    console.groupEnd();
   }
 
   override handleError(error: any): void {

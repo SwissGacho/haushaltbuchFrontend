@@ -12,36 +12,32 @@ export interface Message {
   status?: string;
   reason?: string;
   ses_token?: string;
-  connection_id?: number;
 }
 
-
-export function deserialize(event: MessageEvent): Message {
-  let data = JSON.parse(event.data)
-  switch (data.type) {
-    case MessageType.Hello:
-      return new HelloMessage(data);
-    case MessageType.Welcome:
-      return new WelcomeMessage(data);
-    case MessageType.Bye:
-      return new ByeMessage(data);
-    default:
-      return new IncomingMessage(data);
-  }
-}
 
 export class IncomingMessage implements Message {
     type: MessageType;
     token: string;
     status?: string;
     ses_token?: string;
-    connection_id: number;
     constructor(data: Message) {
       this.type = data.type;
       this.token = data.token || '';
       this.status = data.status;
       this.ses_token = data.ses_token;
-      this.connection_id = data.connection_id || 0;
+    }
+    static deserialize(event: MessageEvent): Message {
+      let data = JSON.parse(event.data)
+      switch (data.type) {
+        case MessageType.Hello:
+          return new HelloMessage(data);
+        case MessageType.Welcome:
+          return new WelcomeMessage(data);
+        case MessageType.Bye:
+          return new ByeMessage(data);
+        default:
+          return new IncomingMessage(data);
+      }
     }
 }
 
