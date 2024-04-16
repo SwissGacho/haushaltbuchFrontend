@@ -6,6 +6,8 @@ import * as rxws from 'rxjs/webSocket';
 import { HelloMessage, LoginMessage, Message, IncomingMessage, MessageType, WelcomeMessage, ByeMessage, LoginCredentials } from './Message';
 import { ConnectedComponent } from './ConnectedComponent/ConnectedComponent.component';
 
+type LoginSubject = rxjs.Subject<{user?: string, ses_token?: string}>;
+
 @Injectable({
     providedIn: 'root'
 })
@@ -40,12 +42,27 @@ export class ConnectionService {
 
     // Create a new connection and subscribe for the handshake messages (HelloMessage, WelcomeMessage).
     // Subscribe the subscriber for further messages.
-    // A Subject delivering the login credentials is determined
-    getNewConnection(subscriber: ConnectedComponent, loginSubject?: rxjs.Subject<LoginCredentials>): void {
+    // The optional second parameter provides either a Subject or a boolean 
+    // If a Subject is present it will be subscribed for the login credentials, otherwise an internal observer
+    // will be used for accessing the session token as login credential
+    // If the secon parameter is truthy the handshake messages (first 2 messages) will be delivered to the subscriber
+    getNewConnection(subscriber: ConnectedComponent, loginSubject?: rxjs.Subject<LoginCredentials>, isPrimary?: boolean): void;
+    getNewConnection(subscriber: ConnectedComponent, observeHandshake?: boolean, isPrimary?: boolean): void;
+    getNewConnection(
+        subscriber: ConnectedComponent,
+        loginSubjectOrObserveHandshake?: rxjs.Subject<LoginCredentials> | boolean,
+        isPrimary?: boolean
+    ): void {
         let comp_num = ++this.componentCounter;
         console.groupCollapsed('Creating connection for component ', subscriber.componentID, '; comp#: ', comp_num);
-        console.log('Subscriber: ', subscriber); console.log('LoginSubject: ',loginSubject);
+        console.log('Subscriber: ', subscriber); 
+        console.log('LoginSubjectOrObserveHandshake: ',loginSubjectOrObserveHandshake);
+        console.log('is primary: ', isPrimary);
         let connection = this.webSocket({url: this.BACKEND_ADDRESS, deserializer: IncomingMessage.deserialize});
+        let loginSubject: LoginSubject;
+        loginSubject = (loginSubjectOrObserveHandshake instanceof rxjs.Subject)
+            ? loginSubjectOrObserveHandshake
+            : ConnectionService.loginBySessionTokenSubject;
         connection.pipe(this.rxjsTake(2)).subscribe({
             next: (message: Message) => this.handleHandshakeMessages(
                 message, {
@@ -54,12 +71,13 @@ export class ConnectionService {
                     connection: connection,
                     subscriber: subscriber,
                     /* use either credentials from the subscriber or the local session token: */
-                    loginSubject: loginSubject || ConnectionService.loginBySessionTokenSubject 
+                    loginSubject: loginSubject,
+                    isPrimary: isPrimary == true
                 }
             )
         });
-        console.log('skip:', loginSubject ? 0 : 2);
-        connection.pipe(this.rxjsSkip(loginSubject ? 0 : 2)).subscribe({
+        console.log('skip:', loginSubjectOrObserveHandshake ? 0 : 2);
+        connection.pipe(this.rxjsSkip(loginSubjectOrObserveHandshake ? 0 : 2)).subscribe({
             next: (message: Message) => subscriber.handleMessages(message),
             complete: () => subscriber.handleComplete(),
             error: (error: any) => subscriber.handleError(error)
@@ -77,7 +95,8 @@ export class ConnectionService {
             service: ConnectionService,
             connection: rxws.WebSocketSubject<Message>,
             subscriber: ConnectedComponent,
-            loginSubject: rxjs.Subject<{user?: string, ses_token?: string}>
+            loginSubject: LoginSubject,
+            isPrimary: boolean
         }
     ) {
         console.groupCollapsed('handle handshake: ', message.type, '; comp#: ', that?.component_num);
@@ -90,7 +109,7 @@ export class ConnectionService {
                 that.loginSubject.pipe(rxjs.take(1)).subscribe(
                     (credentials: LoginCredentials) => {
                         console.log('Got credentials: ', credentials);
-                        that.service.sendMessage(new LoginMessage(credentials, message.token));
+                        that.service.sendMessage(new LoginMessage(credentials, message.token, that.isPrimary));
                     }
                 )
             }
@@ -128,6 +147,7 @@ export class ConnectionService {
 
     // Remove a connection when a component is done with it.
     removeConnection(componentId: string): void {
+        console.log('-----------------------------------------------------------------------------------------Connections vor Fehler:', ConnectionService.connections)
         const connection = ConnectionService.connections[componentId].subject;
         if (connection) {
             connection.complete();

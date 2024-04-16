@@ -16,7 +16,7 @@ import { HelloMessage, LoginMessage, Message, MessageType, WelcomeMessage } from
 /// They can also call the sendMessage method to send messages.
 export class ConnectedComponent implements OnInit, OnDestroy {
 
-    constructor(private connectionService: ConnectionService) {
+    constructor(protected connectionService: ConnectionService) {
     }
     
     componentID: string = '';
