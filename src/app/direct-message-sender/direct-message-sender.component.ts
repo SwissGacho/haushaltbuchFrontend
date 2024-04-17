@@ -22,7 +22,7 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
 
   constructor(private specificService:ConnectionService) {
     super(specificService);
-    this.componentID = 'Pirate' + Math.floor(Math.random()*100)
+    this.setComponentID('Pirate');
   }
 
   messageOut: string = `{
@@ -45,7 +45,9 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
         "preciousGems": ["Rubies", "Emeralds", "Sapphires"]
       },
       "plannedCourse": ["Tortuga", "Port Royal", "The Bermuda Triangle"]
-    }
+    },
+    "type": "Log",
+    "log_level": "critical"
   }`
   response: string = "";
 
@@ -72,6 +74,7 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
   receiveInput(): void {
     console.log("Direct Message Component received input");
     const message:any = JSON.parse(this.messageOut);
+    console.warn('Har har');
     this.sendMessage(message);
   }
 

@@ -1,4 +1,5 @@
 export enum MessageType {
+    Log = "Log",
     Hello = "Hello",
     Login = "Login",
     Welcome = "Welcome",
@@ -8,7 +9,7 @@ export enum MessageType {
   
 export interface Message {
   type: MessageType;
-  token: string;
+  token?: string;
   status?: string;
   reason?: string;
   ses_token?: string;
@@ -57,12 +58,31 @@ export class ByeMessage extends IncomingMessage {
 
 export class OutgoingMessage implements Message {
   type: MessageType;
-  token: string;
+  token?: string;
   status?: string;
-  constructor(type: MessageType, token: string, status?: string) {
+  constructor(type: MessageType, token?: string, status?: string) {
     this.type = type;
     this.token = token;
     if (status) { this.status = status; }
+  }
+}
+
+export enum LogLevel {
+  Debug = "debug",
+  Info = "info",
+  Warning = "warning",
+  Error = "error",
+  Critical = "critical"
+}
+export class LogMessage extends OutgoingMessage {
+  log_level: LogLevel;
+  message: string;
+  caller?: string;
+  constructor(level: LogLevel, msg: string, caller?: string, token?: string) {
+    super(MessageType.Log, token)
+    this.log_level = level;
+    this.message = msg;
+    if (caller) { this.caller = caller; }
   }
 }
 

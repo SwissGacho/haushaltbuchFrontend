@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BaseComponent } from '../BaseComponent.component';
 import { ConnectionService } from '../connection-service.service';
 import { HelloMessage, LoginMessage, Message, MessageType, WelcomeMessage } from '../Message';
 
@@ -14,12 +15,12 @@ import { HelloMessage, LoginMessage, Message, MessageType, WelcomeMessage } from
 /// Subclasses should implement the handleMessages method to handle incoming messages, and the handleError method to handle errors.
 /// If necessary, they can also implement the handleComplete method to handle the connection closing.
 /// They can also call the sendMessage method to send messages.
-export class ConnectedComponent implements OnInit, OnDestroy {
+export class ConnectedComponent extends BaseComponent implements OnInit, OnDestroy {
 
     constructor(protected connectionService: ConnectionService) {
+        super();
     }
     
-    componentID: string = '';
     private connection!: Observable<any>;
     protected token: string  | null = null;
 
@@ -36,7 +37,7 @@ export class ConnectedComponent implements OnInit, OnDestroy {
             return;
         }
         message.token = this.token;
-        this.connectionService.sendMessage(message, this.token);
+        this.connectionService.sendMessage(message, this.componentID);
     }
 
     /// This method closes the connection to the backend when the component is destroyed.
