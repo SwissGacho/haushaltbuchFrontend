@@ -1,4 +1,5 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit, Output } from '@angular/core';
+import * as rxjs from 'rxjs';
 import { ConnectedComponent } from '../ConnectedComponent/ConnectedComponent.component';
 import { ConnectionService } from '../connection-service.service';
 import { LoginMessage, OutgoingMessage, WelcomeMessage, LoginCredentials, IncomingMessage, MessageType } from '../Message';
@@ -18,16 +19,16 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
   }
 
   username: string = "";
-  @Output() loginSubject = new EventEmitter<LoginCredentials>();
+  loginSubject = new rxjs.ReplaySubject<LoginCredentials>();
 
   override handleMessages(message: IncomingMessage): void {
-    console.groupCollapsed("Login component received ", message.type, " message");
+    console.groupCollapsed(this.componentID, "received", message.type, "message");
     console.log(message);
     console.groupEnd();
     if (message.type == MessageType.Hello) {
       let status = message.status;
       if (status == 'noDB' || status == 'singleUser') {
-        this.loginSubject.emit({user: '-'});
+        this.loginSubject.next({user: '-'});
       } else {
         this.getLoginCredentials = true;
       }
@@ -40,12 +41,12 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
   }
 
   override handleComplete(): void {
-    console.warn('Login connection closed.')
+    console.debug('Login connection closed.')
   }
 
   logIn(): void {
     console.log("Login button pressed (", this.username, ')');
-    this.loginSubject.emit({user: this.username});
+    this.loginSubject.next({user: this.username});
   }
 
   // Creates the connection to the backend when the component is initialized.
