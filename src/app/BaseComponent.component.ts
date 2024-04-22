@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-let nextComponentId = 0;
+let nextComponentId = 1;
 
 @Component({
   template: ''

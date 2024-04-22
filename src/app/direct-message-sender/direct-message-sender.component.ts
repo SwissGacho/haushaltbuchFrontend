@@ -59,7 +59,7 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
   }
 
   override handleError(error: any): void {
-    console.error("Direct Message Component received error");
+    console.error(this.componentID, "received error");
     console.error(error);
     throw new Error(error);
   }
@@ -74,7 +74,6 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
   receiveInput(): void {
     console.log("Direct Message Component received input");
     const message:any = JSON.parse(this.messageOut);
-    console.warn('Har har');
     this.sendMessage(message);
   }
 

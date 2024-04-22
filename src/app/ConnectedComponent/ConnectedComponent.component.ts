@@ -31,7 +31,7 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
 
     // Sends a message to the backend.
     sendMessage(message: Message) {
-        console.log("Connected Component prepares to send message:", message);
+        // console.log("Connected Component prepares to send message:", message);
         if (this.token == null) {
             console.warn("Tried to send a message before the connection token was set", message);
             return;
@@ -45,6 +45,7 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
         if (this.componentID == null) {
             return;
         }
+        console.info(this.componentID, 'is shutting down')
         this.connectionService.removeConnection(this.componentID);
     }
 
