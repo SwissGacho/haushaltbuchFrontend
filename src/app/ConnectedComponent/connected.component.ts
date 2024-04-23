@@ -6,8 +6,8 @@ import { HelloMessage, LoginMessage, Message, MessageType, WelcomeMessage } from
 
 @Component({
     selector: 'app-ConnectedComponent',
-    templateUrl: './ConnectedComponent.component.html',
-    styleUrls: ['./ConnectedComponent.component.css']
+    templateUrl: './connected.component.html',
+    styleUrls: ['./connected.component.css']
 })
 
 /// This class is the base class for all components that need to send and receive messages to and from the backend.
