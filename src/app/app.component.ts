@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ConnectionService } from './connection-service.service';
+import { ConnectionService } from './connection.service';
 import { ConnectedComponent } from './ConnectedComponent/ConnectedComponent.component';
 import { LoginMessage, OutgoingMessage, WelcomeMessage, LoginCredentials, IncomingMessage, MessageType } from './Message';
 
