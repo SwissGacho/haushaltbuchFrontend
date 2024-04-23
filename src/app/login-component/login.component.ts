@@ -1,6 +1,6 @@
 import { Component, OnInit, Output } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { ConnectedComponent } from '../ConnectedComponent/ConnectedComponent.component';
+import { ConnectedComponent } from '../ConnectedComponent/connected.component';
 import { ConnectionService } from '../connection.service';
 import { LoginMessage, OutgoingMessage, WelcomeMessage, LoginCredentials, IncomingMessage, MessageType } from '../Message';
 

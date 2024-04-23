@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ConnectedComponent } from '../ConnectedComponent/ConnectedComponent.component';
+import { ConnectedComponent } from '../ConnectedComponent/connected.component';
 import { ConnectionService } from '../connection.service';
 
 /**
