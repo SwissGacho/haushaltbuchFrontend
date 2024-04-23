@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { BaseComponent } from '../BaseComponent.component';
+import { BaseComponent } from '../base.component';
 import { ConnectionService } from '../connection-service.service';
 import { HelloMessage, LoginMessage, Message, MessageType, WelcomeMessage } from '../Message';
 
