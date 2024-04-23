@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ConnectionService } from './connection.service';
-import { ConnectedComponent } from './ConnectedComponent/connected.component';
+import { ConnectedComponent } from './connected-component/connected.component';
 import { LoginMessage, OutgoingMessage, WelcomeMessage, LoginCredentials, IncomingMessage, MessageType } from './Message';
 
 @Component({

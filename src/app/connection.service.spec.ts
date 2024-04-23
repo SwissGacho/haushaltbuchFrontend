@@ -3,7 +3,7 @@ import * as rxjs  from 'rxjs';
 import * as rxws from 'rxjs/webSocket';
 
 import { ConnectionService, RXJS, Logger } from './connection.service';
-import { ConnectedComponent } from './ConnectedComponent/connected.component';
+import { ConnectedComponent } from './connected-component/connected.component';
 import { HelloMessage, IncomingMessage, LoginMessage, ByeMessage, Message, MessageType, LoginCredentials, WelcomeMessage } from './Message';
 
 class MockSubscription {}

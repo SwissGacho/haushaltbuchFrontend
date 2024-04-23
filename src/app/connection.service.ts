@@ -2,7 +2,7 @@ import { Injectable, EventEmitter } from '@angular/core';
 import * as rxjs from 'rxjs';
 import * as rxws from 'rxjs/webSocket';
 import { LogMessage, LogLevel, HelloMessage, LoginMessage, Message, IncomingMessage, MessageType, WelcomeMessage, ByeMessage, LoginCredentials } from './Message';
-import { ConnectedComponent } from './ConnectedComponent/connected.component';
+import { ConnectedComponent } from './connected-component/connected.component';
 
 export class RXJS {
     static take(n: number): rxjs.MonoTypeOperatorFunction<any> { return rxjs.take(n); }
