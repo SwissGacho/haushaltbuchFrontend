@@ -92,11 +92,20 @@ export class LoginMessage extends OutgoingMessage {
     ses_token?: string;
     prev_token?: string;
     is_primary?: boolean;
-    constructor(credentials: LoginCredentials, token: string, isPrimary: boolean = false, status?: string) {
+    component?: string;
+
+    constructor(
+      credentials: LoginCredentials,
+      token: string,
+      isPrimary: boolean = false,
+      component?: string,
+      status?: string
+    ) {
       super(MessageType.Login, token, status);
       const {user, ses_token} = credentials;
       if (user) { this.user = user; }
       if (ses_token) { this.ses_token = ses_token; }
       this.is_primary = isPrimary;
+      if (component) { this.component = component; }
     }
   }
