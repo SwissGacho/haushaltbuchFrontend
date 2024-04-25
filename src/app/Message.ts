@@ -1,4 +1,5 @@
 export enum MessageType {
+    None = 'None',
     Log = "Log",
     Hello = "Hello",
     Login = "Login",
