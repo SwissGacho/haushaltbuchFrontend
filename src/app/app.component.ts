@@ -26,10 +26,11 @@ export class AppComponent extends ConnectedComponent implements OnInit {
       this.activateLoginComponent = false;
     }
   }
+
   // Creates the connection to the backend when the component is initialized.
   // The App Component ownes the 'promary connection' that is used by the backend
   // to request actions
   override ngOnInit() {
-    this.specificService.getNewConnection(this, true, true);
+    this.getConnection(true, true);
   }
 }

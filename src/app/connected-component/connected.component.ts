@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
+import * as rxjs from 'rxjs';
 import { BaseComponent } from '../base.component';
 import { ConnectionService } from '../connection.service';
-import { HelloMessage, LoginMessage, Message, MessageType, WelcomeMessage } from '../Message';
+import { Message, LoginCredentials } from '../Message';
 
 @Component({
     selector: 'app-ConnectedComponent',
@@ -21,8 +21,16 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
         super();
     }
     
-    private connection!: Observable<any>;
+    connected = false;
     protected token: string  | null = null;
+
+    protected getConnection(
+        loginSubjectOrObserveHandshake?: rxjs.Subject<LoginCredentials> | boolean,
+        isPrimary?: boolean
+    ) {
+        this.connectionService.getNewConnection(this, loginSubjectOrObserveHandshake, isPrimary);
+        this.connected = true;
+    }
 
     // remember token of owned connection
     setToken(to: string) {
@@ -46,7 +54,9 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
             return;
         }
         console.info(this.componentID, 'is shutting down')
-        this.connectionService.removeConnection(this.componentID);
+        if (this.connected) {
+            this.connectionService.removeConnection(this.componentID);
+         }
     }
 
     // // Abstract method for components to implement login handling.
@@ -75,6 +85,6 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
     // Subclasses should call super.ngOnInit() in their ngOnInit method instead of
     // creating their own connection if they don't implement login dialogue
     ngOnInit() {
-        this.connectionService.getNewConnection(this);
+        this.getConnection();
     }
 }
