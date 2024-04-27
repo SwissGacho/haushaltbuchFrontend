@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BaseComponent } from '../BaseComponent.component';
 import { ConnectionService } from '../connection-service.service';
-import { HelloMessage, Message, MessageType } from '../Message';
+import { HelloMessage, LoginMessage, Message, MessageType, WelcomeMessage } from '../Message';
 
 @Component({
     selector: 'app-ConnectedComponent',
@@ -14,27 +15,29 @@ import { HelloMessage, Message, MessageType } from '../Message';
 /// Subclasses should implement the handleMessages method to handle incoming messages, and the handleError method to handle errors.
 /// If necessary, they can also implement the handleComplete method to handle the connection closing.
 /// They can also call the sendMessage method to send messages.
-export class ConnectedComponent implements OnInit, OnDestroy {
+export class ConnectedComponent extends BaseComponent implements OnInit, OnDestroy {
 
-    constructor(private connectionService: ConnectionService) {
+    constructor(protected connectionService: ConnectionService) {
+        super();
     }
     
-    private componentID: string | null = null;
     private connection!: Observable<any>;
-    private token: string  | null = null;
+    protected token: string  | null = null;
+
+    // remember token of owned connection
+    setToken(to: string) {
+        this.token = to;
+    }
 
     // Sends a message to the backend.
     sendMessage(message: Message) {
-        console.log("Sending message:", message);
+        // console.log("Connected Component prepares to send message:", message);
         if (this.token == null) {
-            console.error("Cannot send message without token. Did you forget to wait for the HelloMessage?", message);
+            console.warn("Tried to send a message before the connection token was set", message);
             return;
         }
-        if (this.componentID == null) {
-            throw new Error("Cannot send message without componentID. The componentID should be set in the ngOnInit method.");
-        }
         message.token = this.token;
-        this.connectionService.sendMessage(this.componentID, message);
+        this.connectionService.sendMessage(message, this.componentID);
     }
 
     /// This method closes the connection to the backend when the component is destroyed.
@@ -42,11 +45,19 @@ export class ConnectedComponent implements OnInit, OnDestroy {
         if (this.componentID == null) {
             return;
         }
+        console.info(this.componentID, 'is shutting down')
         this.connectionService.removeConnection(this.componentID);
     }
 
+    // // Abstract method for components to implement login handling.
+    // // This should only be implemented by LoginComponent
+    // handleLoginMessage(message: Message): void {
+    //     throw new Error('LoginComponent must implement the handleLoginMessage method.');
+    // }
+
     // Abstract method for components to implement their message handling.
-    handleMessages(message: any): void {
+    // Messages after the handshaking
+    handleMessages(message: Message): void {
         throw new Error('Subclasses must implement the handleMessages method.');
     }
 
@@ -61,45 +72,9 @@ export class ConnectedComponent implements OnInit, OnDestroy {
     }
 
     // Creates the connection to the backend when the component is initialized.
-    // Subclasses should call super.ngOnInit() in their ngOnInit method instead creating their own connection.
+    // Subclasses should call super.ngOnInit() in their ngOnInit method instead of
+    // creating their own connection if they don't implement login dialogue
     ngOnInit() {
-        const [connection, componentID] = this.connectionService.getNewConnection();
-        this.connection = connection;
-        this.componentID = componentID;
-        const helloSubscription = this.connection.subscribe({
-            next: (message) => {
-                // The first message received from the backend should be a HelloMessage with a token.
-                const helloMessage = ConnectedComponent.createHelloMessage(message);
-                if (helloMessage != null) {
-                    console.log("Received HelloMessage:", helloMessage);
-                    this.token = message.token;
-                    this.connection.subscribe({
-                        next: (message) => this.handleMessages(message)
-                    });
-                    helloSubscription.unsubscribe();
-                } else {
-                    console.error("Received invalid HelloMessage:", helloMessage);
-                }
-            },
-            error: (error) => this.handleError(error),
-            complete: () => this.handleComplete()
-        });
+        this.connectionService.getNewConnection(this);
     }
-
-    private static createHelloMessage(json: string): HelloMessage | null {
-        console.log("Trying to create a HelloMessage from JSON:", json);
-        try {
-          const jsonObject = json as any;
-    
-          if ('type' in jsonObject && jsonObject.type === MessageType.Hello &&
-              'token' in jsonObject) {
-            return new HelloMessage(jsonObject.token, jsonObject.status);
-          } else {
-            return null;
-          }
-        } catch (error) {
-          console.error("Failed to parse JSON:", error);
-          return null;
-        }
-      }
 }

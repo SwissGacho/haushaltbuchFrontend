@@ -1,0 +1,6 @@
+<div *ngIf="getLoginCredentials">
+    <!-- Here, the grand transformation takes place, from a verbose messenger to a silent guardian of entry -->
+    <label for="username">Benutzername:</label>
+    <input type="text" [(ngModel)]="username" id="username" name="username" placeholder="Enter thy name, navigator">
+    <button (click)="logIn()">Enter</button>
+</div>

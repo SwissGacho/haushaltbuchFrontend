@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { HelloWorldService } from '../HelloWorld.service';
 import { ConnectedComponent } from '../ConnectedComponent/ConnectedComponent.component';
 import { ConnectionService } from '../connection-service.service';
 
 /**
  * This component allows users to send messages and view responses.
- * It interacts with the HelloWorldService to send messages and subscribe
+ * It interacts with the ConnectionService to send messages and subscribe
  * to incoming responses. The component provides an input field for users
  * to enter their messages and displays the responses received from the
  * service.
@@ -23,6 +22,7 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
 
   constructor(private specificService:ConnectionService) {
     super(specificService);
+    this.setComponentID('Pirate');
   }
 
   messageOut: string = `{
@@ -45,7 +45,9 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
         "preciousGems": ["Rubies", "Emeralds", "Sapphires"]
       },
       "plannedCourse": ["Tortuga", "Port Royal", "The Bermuda Triangle"]
-    }
+    },
+    "type": "Log",
+    "log_level": "critical"
   }`
   response: string = "";
 
@@ -57,7 +59,7 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
   }
 
   override handleError(error: any): void {
-    console.error("Direct Message Component received error");
+    console.error(this.componentID, "received error");
     console.error(error);
     throw new Error(error);
   }
