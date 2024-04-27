@@ -26,7 +26,7 @@ export class DirectMessageSenderComponent extends ConnectedComponent implements 
   }
 
   messageOut: string = `{
-    "pirateMessage": {
+    "message": {
       "author": "Cap'n Bluebeard",
       "content": "Arrr, me hearties! Spotted a merchant ship off the starboard bow. Ready yer cutlasses, hoist the sails, and prepare to board! Treasure awaits!",
       "location": {

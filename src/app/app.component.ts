@@ -31,6 +31,8 @@ export class AppComponent extends ConnectedComponent implements OnInit {
   // The App Component ownes the 'promary connection' that is used by the backend
   // to request actions
   override ngOnInit() {
-    this.getConnection(true, true);
+    const observeHandshake = true;
+    const isPrimary = true;
+    this.getConnection(observeHandshake, isPrimary);
   }
 }

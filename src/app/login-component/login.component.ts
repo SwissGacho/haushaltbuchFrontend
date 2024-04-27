@@ -52,7 +52,7 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
   // Creates the connection to the backend when the component is initialized.
   // The LoginComponent
   override ngOnInit() {
-    this.specificService.getNewConnection(this, this.loginSubject);
+    this.getConnection(this.loginSubject);
   }
 
 }
