@@ -4,6 +4,11 @@ import * as rxws from 'rxjs/webSocket';
 import { LogMessage, LogLevel, HelloMessage, LoginMessage, Message, IncomingMessage, MessageType, WelcomeMessage, ByeMessage, LoginCredentials } from './Message';
 import { ConnectedComponent } from './ConnectedComponent/ConnectedComponent.component';
 
+export class RXJS {
+    static take(n: number): rxjs.MonoTypeOperatorFunction<any> { return rxjs.take(n); }
+    static skip(n: number): rxjs.MonoTypeOperatorFunction<any> { return rxjs.skip(n); }
+}
+
 export class Logger {
     static takeOverConsole(component: ConnectedComponent){
         var console: any = window.console;
@@ -65,8 +70,6 @@ export class ConnectionService {
     webSocket(cfg: rxws.WebSocketSubjectConfig<Message>): rxws.WebSocketSubject<Message> {
         return rxws.webSocket(cfg);
     }
-    rxjsTake(n: number): rxjs.MonoTypeOperatorFunction<Message> { return rxjs.take(n); }
-    rxjsSkip(n: number): rxjs.MonoTypeOperatorFunction<Message> { return rxjs.skip(n); }
 
     loginCompLoginSubject?: rxjs.Subject<LoginCredentials>;
 
@@ -93,12 +96,12 @@ export class ConnectionService {
             ? loginSubjectOrObserveHandshake
             : ConnectionService.loginBySessionTokenSubject;
         ConnectionService.addConnection(connection, subscriber);
-        connection.pipe(this.rxjsSkip(loginSubjectOrObserveHandshake ? 0 : 2)).subscribe({
+        connection.pipe(RXJS.skip(loginSubjectOrObserveHandshake ? 0 : 2)).subscribe({
             next: (message: Message) => subscriber.handleMessages(message),
             complete: () => subscriber.handleComplete(),
             error: (error: any) => subscriber.handleError(error)
         });
-        connection.pipe(this.rxjsTake(2)).subscribe({
+        connection.pipe(RXJS.take(2)).subscribe({
             next: (message: Message) => this.handleHandshakeMessages(
                 message, {
                     service: this,
@@ -107,6 +110,7 @@ export class ConnectionService {
                     /* use either credentials from the subscriber or the local session token: */
                     loginSubject: loginSubject,
                     isPrimary: isPrimary == true
+                    // ,rxjsTake: RXJS.takeCred
                 }
             )
             // ,complete: () => { console.log('handshake completed for', subscriber.componentID); }
@@ -125,6 +129,7 @@ export class ConnectionService {
             subscriber: ConnectedComponent,
             loginSubject: LoginSubject,
             isPrimary: boolean
+            // ,rxjsTake: (n: number) => rxjs.MonoTypeOperatorFunction<LoginCredentials>
         }
     ) {
         console.groupCollapsed('handle handshake: ', message.type, 'to', that?.subscriber.componentID);
@@ -134,15 +139,15 @@ export class ConnectionService {
             if (that) {
                 console.log(that.subscriber.componentID, 'awaits credentials')
                 that.subscriber.setToken(message.token);
-                that.loginSubject.pipe(rxjs.take(1)).subscribe(
-                    (credentials: LoginCredentials) => {
+                that.loginSubject.pipe(RXJS.take(1)).subscribe({
+                    next: (credentials: LoginCredentials) => {
                         console.log(that.subscriber.componentID, 'got credentials:', credentials);
                         that.service.sendMessage(
-                            new LoginMessage(credentials, message.token, that.isPrimary),
+                            new LoginMessage(credentials, message.token, that.isPrimary, that.subscriber.componentID),
                             that.subscriber.componentID
                         );
                     }
-                );
+                });
                 // no need to unsubscribe because take(1) implicates that
             }
         } else if (message instanceof WelcomeMessage) {
