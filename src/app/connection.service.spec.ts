@@ -2,8 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import * as rxjs  from 'rxjs';
 import * as rxws from 'rxjs/webSocket';
 
-import { ConnectionService, RXJS, Logger } from './connection-service.service';
-import { ConnectedComponent } from './ConnectedComponent/ConnectedComponent.component';
+import { ConnectionService, RXJS, Logger } from './connection.service';
+import { ConnectedComponent } from './connected-component/connected.component';
 import { HelloMessage, IncomingMessage, LoginMessage, ByeMessage, Message, MessageType, LoginCredentials, WelcomeMessage } from './Message';
 
 class MockSubscription {}

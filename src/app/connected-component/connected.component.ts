@@ -1,13 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { BaseComponent } from '../BaseComponent.component';
-import { ConnectionService } from '../connection-service.service';
+import { BaseComponent } from '../base.component';
+import { ConnectionService } from '../connection.service';
 import { HelloMessage, LoginMessage, Message, MessageType, WelcomeMessage } from '../Message';
 
 @Component({
     selector: 'app-ConnectedComponent',
-    templateUrl: './ConnectedComponent.component.html',
-    styleUrls: ['./ConnectedComponent.component.css']
+    templateUrl: './connected.component.html',
+    styleUrls: ['./connected.component.css']
 })
 
 /// This class is the base class for all components that need to send and receive messages to and from the backend.

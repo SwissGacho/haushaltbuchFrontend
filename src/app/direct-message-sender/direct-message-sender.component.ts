@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ConnectedComponent } from '../ConnectedComponent/ConnectedComponent.component';
-import { ConnectionService } from '../connection-service.service';
+import { ConnectedComponent } from '../connected-component/connected.component';
+import { ConnectionService } from '../connection.service';
 
 /**
  * This component allows users to send messages and view responses.
