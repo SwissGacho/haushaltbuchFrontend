@@ -85,6 +85,11 @@ export class ConnectionService {
         subscriber: ConnectedComponent,
         loginSubjectOrObserveHandshake?: rxjs.Subject<LoginCredentials> | boolean,
         isPrimary?: boolean
+    ): void;
+    getNewConnection(
+        subscriber: ConnectedComponent,
+        loginSubjectOrObserveHandshake?: rxjs.Subject<LoginCredentials> | boolean,
+        isPrimary?: boolean
     ): void {
         console.groupCollapsed('Creating connection for component ', subscriber.componentID);
         console.log('Subscriber: ', subscriber); 

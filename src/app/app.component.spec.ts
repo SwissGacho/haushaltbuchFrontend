@@ -1,8 +1,23 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import * as rxjs from 'rxjs';
 import { AppComponent } from './app.component';
+import { WelcomeMessage, ByeMessage, Message, MessageType } from './Message';
+import { ConnectionService } from './connection.service';
+
+class MockConnectionService {
+  getNewConnection(
+    subscriber: AppComponent,
+    loginSubjectOrObserveHandshake?: rxjs.Subject<any> | boolean,
+    isPrimary?: boolean
+  ) {}
+  removeConnection(componentId: string): void {}
+}
 
 describe('AppComponent', () => {
+  let fixture: ComponentFixture<any>;
+  let appComponent: AppComponent;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
@@ -11,21 +26,25 @@ describe('AppComponent', () => {
       declarations: [
         AppComponent
       ],
+      providers: [
+        // AppComponent,
+        { provide: ConnectionService, useClass: MockConnectionService}
+      ]
     }).compileComponents();
+    fixture = TestBed.createComponent(AppComponent);
+    appComponent = fixture.componentInstance;
   });
 
-  /*
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(appComponent).toBeTruthy();
+    expect(appComponent.componentID).toContain('AppComponent_');
   });
 
   it(`should have as title 'haushaltbuchFrontend'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('haushaltbuchFrontend');
+    expect(appComponent.title).toEqual('haushaltbuchFrontend');
   });
+ 
+  /*
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
@@ -33,4 +52,32 @@ describe('AppComponent', () => {
     expect(compiled.querySelector('.content span')?.textContent).toContain('haushaltbuchFrontend app is running!');
   });
   */
+
+  it('should create connection on init', () => {
+    const conSrv = fixture.debugElement.injector.get(ConnectionService);
+    const spyOnGetNewConn = spyOn(conSrv, 'getNewConnection');
+    const spyOnRemoveConn = spyOn(conSrv, 'removeConnection');
+    expect(appComponent.connected).toBeFalse();
+    appComponent.ngOnInit();
+    expect(spyOnGetNewConn).toHaveBeenCalledWith(appComponent, true, true);
+    expect(appComponent.connected).toBeTrue();
+    expect(spyOnRemoveConn).not.toHaveBeenCalled();
+  })
+
+  it('should remove connection on destroy', () => {
+    const conSrv = fixture.debugElement.injector.get(ConnectionService);
+    const spyOnRemoveConn = spyOn(conSrv, 'removeConnection');
+    appComponent.ngOnInit();
+    expect(spyOnRemoveConn).not.toHaveBeenCalled();
+    appComponent.ngOnDestroy();
+    expect(spyOnRemoveConn).toHaveBeenCalled();
+  })
+
+  it('should activate Login until receiving Welcome message', () => {
+    const mockWelcomeMessage = new WelcomeMessage(
+      {type: MessageType.Welcome, token: 'mockToken', ses_token: 'mockSession'});
+    expect(appComponent.activateLoginComponent).withContext('before Welcome').toBeTrue();
+    appComponent.handleMessages(mockWelcomeMessage);
+    expect(appComponent.activateLoginComponent).withContext('after Welcome').toBeFalse();
+  });
 });

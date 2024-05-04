@@ -4,20 +4,27 @@ import * as rxws from 'rxjs/webSocket';
 
 import { ConnectionService, RXJS, Logger } from './connection.service';
 import { ConnectedComponent } from './connected-component/connected.component';
-import { HelloMessage, IncomingMessage, LoginMessage, ByeMessage, Message, MessageType, LoginCredentials, WelcomeMessage } from './Message';
+import { HelloMessage, IncomingMessage, OutgoingMessage, LoginMessage, ByeMessage, Message, MessageType, LoginCredentials, WelcomeMessage, LogMessage } from './Message';
 
+class MockOutMessage extends OutgoingMessage {
+  constructor() {
+    super(MessageType.None);
+  }
+}
 class MockSubscription {}
 class MockWebSocketSubject {
   pipe(op1: any, ...ops: any[]): MockWebSocketSubject { return this; }
   subscribe(observer?: Partial<rxjs.Observer<any>> | undefined): MockSubscription | null {
     return null;
   }
+  next(message: any): void {}
+  complete(): void {}
 }
 class MockSubject {
   pipe(op1: any, ...ops: any[]): MockSubject { return this; }
   subscribe(observer?: Partial<rxjs.Observer<any>>): MockSubscription | null { return null; }
 }
-rxjs.Subject
+
 class MockConnectedComponent extends ConnectedComponent {
   constructor(private connService: ConnectionService) {
     super(connService);
@@ -32,7 +39,7 @@ class MockConnectedComponent extends ConnectedComponent {
 }
 
 
-describe('ConnectionServiceService', () => {
+describe('ConnectionService', () => {
   let connectionService: ConnectionService = null!;
   let mockWebSocketSubject: MockWebSocketSubject;
   let mockSubscriber: MockConnectedComponent;
@@ -50,6 +57,7 @@ describe('ConnectionServiceService', () => {
     mockSubject = new MockSubject();
     mockTake = () => rxjs.EMPTY;
     mockSkip = () => rxjs.EMPTY;
+    ConnectionService.connections = {};
   });
 
   it('should be created', () => {
@@ -57,14 +65,14 @@ describe('ConnectionServiceService', () => {
   });
 
   function testGetNewConnection(
-    mockLoginSubject?: rxjs.Subject<any>,
+    mockLoginSubject?: rxjs.ReplaySubject<LoginCredentials>,
     observeHandshake?: boolean,
     primary?: boolean
   ) {
     const spyOnDeserialize = spyOn(IncomingMessage,'deserialize');
     const spyOnWebSocket = 
       spyOn(connectionService, 'webSocket')
-      .and.returnValue(mockWebSocketSubject as rxws.WebSocketSubject<Message>);
+      .and.returnValue(mockWebSocketSubject as unknown as rxws.WebSocketSubject<Message>);
     const spyOnAddConnection = spyOn(ConnectionService, 'addConnection')
     const spyOnPipe = spyOn(mockWebSocketSubject, 'pipe').and.callThrough();
     const spyOnSubscribe = spyOn(mockWebSocketSubject,'subscribe');
@@ -72,7 +80,6 @@ describe('ConnectionServiceService', () => {
       .and.returnValue(mockTake);
       const spyOnSkip = spyOn(RXJS, 'skip')
       .and.returnValue(mockSkip);
-    ConnectionService.connections = {};
 
     // call the tested object
     if (mockLoginSubject) {
@@ -87,7 +94,7 @@ describe('ConnectionServiceService', () => {
     expect(ConnectionService.connections).toBeTruthy();
     expect(ConnectionService.connections).toEqual({});
     expect(spyOnAddConnection).toHaveBeenCalledOnceWith(
-      mockWebSocketSubject as rxws.WebSocketSubject<Message>,
+      mockWebSocketSubject as unknown as rxws.WebSocketSubject<Message>,
       mockSubscriber
     );
     expect(spyOnTake).toHaveBeenCalledOnceWith(2);
@@ -130,35 +137,36 @@ describe('ConnectionServiceService', () => {
         mockInMsg,
         {
           service: connectionService,
-          connection: mockWebSocketSubject as rxws.WebSocketSubject<Message>,
+          connection: mockWebSocketSubject as unknown as rxws.WebSocketSubject<Message>,
           subscriber: mockSubscriber,
           loginSubject: mockLoginSubject ? mockLoginSubject : ConnectionService.loginBySessionTokenSubject,
           isPrimary: primary==true
-          // ,rxjsTake: (n: number) => mockTakeCred
         }
       );
     }
   }
-  // it('should create new connection and subscribe with credential Subject', () => {
-  //   testGetNewConnection(mockSubject, true);
-  // });
 
-  // it('should create new connection and subscribe without skip', () => {
-  //   testGetNewConnection(undefined, true);
-  // });
+  it('should create new connection and subscribe with credential Subject', () => {
+    const mockReplaySubject = new rxjs.ReplaySubject<LoginCredentials>();
+    testGetNewConnection(mockReplaySubject, true);
+  });
 
-  // it('should create new primary connection and subscribe without skip', () => {
-  //   testGetNewConnection(undefined, true, true);
-  // });
+  it('should create new connection and subscribe without skip', () => {
+    testGetNewConnection(undefined, true);
+  });
 
-  // it('should create new connection and subscribe with skip', () => {
-  //   testGetNewConnection(undefined, false);
-  // });
+  it('should create new primary connection and subscribe without skip', () => {
+    testGetNewConnection(undefined, true, true);
+  });
+
+  it('should create new connection and subscribe with skip', () => {
+    testGetNewConnection(undefined, false);
+  });
 
   function testHandleHandshakeMessage(msg: Message, primary: boolean) {
     const mockContext = {
       service: connectionService,
-      connection: mockWebSocketSubject as rxws.WebSocketSubject<Message>,
+      connection: mockWebSocketSubject as unknown as rxws.WebSocketSubject<Message>,
       subscriber: mockSubscriber,
       loginSubject: mockSubject as rxjs.Subject<any>,
       isPrimary: primary,
@@ -192,36 +200,35 @@ describe('ConnectionServiceService', () => {
       if (arg0Next) {
         arg0Next(mockCred);
         expect(spyOnSendMessage).toHaveBeenCalledTimes(1);
-        console.log('callsend: ', spyOnSendMessage.calls.argsFor(0));
         expect(spyOnSendMessage).toHaveBeenCalledOnceWith(mockLoginMsg, 
           mockContext.subscriber.componentID);
       }
-      expect(spyOnNext).toHaveBeenCalledTimes(0);
-      expect(spyOnTakeOverConsole).toHaveBeenCalledTimes(0);
+      expect(spyOnNext).not.toHaveBeenCalled();
+      expect(spyOnTakeOverConsole).not.toHaveBeenCalled();
       expect(ConnectionService._sessionToken).toBe('mockSes1');
     } else if (msg.type==MessageType.Welcome && msg.ses_token) {
-      expect(spyOnSetToken).toHaveBeenCalledTimes(0);
-      expect(spyOnPipe).toHaveBeenCalledTimes(0);
-      expect(spyOnPipe).toHaveBeenCalledTimes(0);
-      expect(spyOnTake).toHaveBeenCalledTimes(0);
-      expect(spyOnSubscribe).toHaveBeenCalledTimes(0);
+      expect(spyOnSetToken).not.toHaveBeenCalled();
+      expect(spyOnPipe).not.toHaveBeenCalled();
+      expect(spyOnPipe).not.toHaveBeenCalled();
+      expect(spyOnTake).not.toHaveBeenCalled();
+      expect(spyOnSubscribe).not.toHaveBeenCalled();
       if (primary) {
         expect(spyOnNext).toHaveBeenCalledOnceWith({ses_token: msg.ses_token});
         expect(spyOnTakeOverConsole).toHaveBeenCalledOnceWith(mockSubscriber);
         expect(ConnectionService._sessionToken).toBe(msg.ses_token);
       } else {
-        expect(spyOnNext).toHaveBeenCalledTimes(0);
-        expect(spyOnTakeOverConsole).toHaveBeenCalledTimes(0);
+        expect(spyOnNext).not.toHaveBeenCalled();
+        expect(spyOnTakeOverConsole).not.toHaveBeenCalled();
         expect(ConnectionService._sessionToken).toBe('mockSes1');
       }
     } else {
-      expect(spyOnSetToken).toHaveBeenCalledTimes(0);
-      expect(spyOnPipe).toHaveBeenCalledTimes(0);
-      expect(spyOnPipe).toHaveBeenCalledTimes(0);
-      expect(spyOnTake).toHaveBeenCalledTimes(0);
-      expect(spyOnSubscribe).toHaveBeenCalledTimes(0);
-      expect(spyOnNext).toHaveBeenCalledTimes(0);
-      expect(spyOnTakeOverConsole).toHaveBeenCalledTimes(0);
+      expect(spyOnSetToken).not.toHaveBeenCalled();
+      expect(spyOnPipe).not.toHaveBeenCalled();
+      expect(spyOnPipe).not.toHaveBeenCalled();
+      expect(spyOnTake).not.toHaveBeenCalled();
+      expect(spyOnSubscribe).not.toHaveBeenCalled();
+      expect(spyOnNext).not.toHaveBeenCalled();
+      expect(spyOnTakeOverConsole).not.toHaveBeenCalled();
       expect(ConnectionService._sessionToken).toBe('mockSes1');
     }
   }
@@ -255,4 +262,80 @@ describe('ConnectionServiceService', () => {
     testHandleHandshakeMessage(mockByeMessage, false);
   });
 
+  it('should output a message on the components connection', () => {
+    const mockMessage = new MockOutMessage();
+    const mockComponentId = 'MockComponent_99'
+    ConnectionService.connections[mockComponentId] = {
+      subject: mockWebSocketSubject as unknown as rxws.WebSocketSubject<any>,
+      subscriber: mockSubscriber
+    }
+    const spyOnNext = spyOn(
+      ConnectionService.connections[mockComponentId].subject,
+      'next'
+    );
+
+    connectionService.sendMessage(mockMessage, mockComponentId);
+
+    expect(spyOnNext).toHaveBeenCalledOnceWith(mockMessage);
+  });
+
+  it('should add a connection to connections list', () => {
+    expect(ConnectionService.connections).toHaveSize(0);
+    const mockId1 = 'mockComponent_1';
+    const mockSubject1 = new MockWebSocketSubject()  as unknown as rxws.WebSocketSubject<any>;
+    const mockSubscriber1 = new MockConnectedComponent(connectionService);
+    mockSubscriber1.componentID = mockId1;
+
+    ConnectionService.addConnection(mockSubject1, mockSubscriber1);
+    expect(ConnectionService.connections).toHaveSize(1);
+    expect(ConnectionService.connections[mockId1]).toBeTruthy();
+    expect(ConnectionService.connections).toEqual({mockComponent_1:
+      {subject: mockSubject1, subscriber: mockSubscriber1}
+    });
+
+    const mockId2 = 'mockComponent_2';
+    const mockSubject2 = new MockWebSocketSubject()  as unknown as rxws.WebSocketSubject<any>;
+    const mockSubscriber2 = new MockConnectedComponent(connectionService);
+    mockSubscriber2.componentID = mockId2;
+
+    ConnectionService.addConnection(mockSubject2, mockSubscriber2);
+    expect(ConnectionService.connections).toHaveSize(2);
+    expect(ConnectionService.connections[mockId2]).toBeTruthy();
+    expect(ConnectionService.connections).toEqual({
+      mockComponent_1: {subject: mockSubject1, subscriber: mockSubscriber1},
+      mockComponent_2: {subject: mockSubject2, subscriber: mockSubscriber2}
+    });
+  });
+
+  it('should remove connection from connections list', () => {
+    const mockId1 = 'mockComponent_1';
+    const mockSubject1 = new MockWebSocketSubject()  as unknown as rxws.WebSocketSubject<any>;
+    const mockSubscriber1 = new MockConnectedComponent(connectionService);
+    mockSubscriber1.componentID = mockId1;
+    const mockId2 = 'mockComponent_2';
+    const mockSubject2 = new MockWebSocketSubject()  as unknown as rxws.WebSocketSubject<any>;
+    const mockSubscriber2 = new MockConnectedComponent(connectionService);
+    mockSubscriber2.componentID = mockId2;
+    ConnectionService.connections = {
+      mockComponent_1: {subject: mockSubject1, subscriber: mockSubscriber1},
+      mockComponent_2: {subject: mockSubject2, subscriber: mockSubscriber2}
+    };
+    const spyOnComplete1 = spyOn(mockSubject1, 'complete');
+    const spyOnComplete2 = spyOn(mockSubject2, 'complete');
+
+    expect(ConnectionService.connections).toHaveSize(2);
+    expect(ConnectionService.connections).toEqual({
+      mockComponent_1: {subject: mockSubject1, subscriber: mockSubscriber1},
+      mockComponent_2: {subject: mockSubject2, subscriber: mockSubscriber2}
+    });
+
+    connectionService.removeConnection(mockId1);
+    expect(ConnectionService.connections).toHaveSize(1);
+    expect(spyOnComplete1).toHaveBeenCalledOnceWith();
+    expect(spyOnComplete2).not.toHaveBeenCalled();
+    expect(ConnectionService.connections).toEqual({
+      // mockComponent_1: {subject: mockSubject1, subscriber: mockSubscriber1},
+      mockComponent_2: {subject: mockSubject2, subscriber: mockSubscriber2}
+    });
+  });
 });
