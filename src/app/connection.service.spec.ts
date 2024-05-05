@@ -164,7 +164,7 @@ describe('ConnectionService', () => {
     testGetNewConnection(undefined, false);
   });
 
-  function testHandleHandshakeMessage(msg: Message, primary: boolean) {
+  function testHandleHandshakeMessage(msg: Message, primary: boolean, error?: RegExp|string) {
     const mockContext = {
       service: connectionService,
       connection: mockWebSocketSubject as unknown as rxws.WebSocketSubject<Message>,
@@ -182,7 +182,15 @@ describe('ConnectionService', () => {
     const spyOnNext = spyOn(ConnectionService.loginBySessionTokenSubject, 'next');
     const spyOnTakeOverConsole = spyOn(Logger, 'takeOverConsole');
 
-    connectionService.handleHandshakeMessages(msg, mockContext);
+    if (error) {
+      console.log('expect to throw',error)
+      expect( function() {
+        connectionService.handleHandshakeMessages(msg, mockContext);
+      }).toThrowError(error);
+      return;
+    } else {
+      connectionService.handleHandshakeMessages(msg, mockContext);
+    }
 
     if (msg.type==MessageType.Hello && msg.token) {
       expect(spyOnSetToken).toHaveBeenCalledOnceWith('mockToken');
@@ -253,9 +261,15 @@ describe('ConnectionService', () => {
 
   it('should handle later WelcomeMessages', () => {
     const mockWelcomeMessage = new WelcomeMessage(
-      {type: MessageType.Welcome, token: 'mockToken', ses_token: 'mockSession'});
+      {type: MessageType.Welcome, token: 'mockToken', ses_token: 'mockSes1'});
     testHandleHandshakeMessage(mockWelcomeMessage, false);
   });
+
+  it("should throw when session token doesn't match", () => {
+    const mockWelcomeMessage = new WelcomeMessage(
+      {type: MessageType.Welcome, token: 'mockToken', ses_token: 'mockOtherSes'});
+    testHandleHandshakeMessage(mockWelcomeMessage, false, /alien session/);
+  })
 
   it('should handle ByeMessages', () => {
     const mockByeMessage = new ByeMessage(
