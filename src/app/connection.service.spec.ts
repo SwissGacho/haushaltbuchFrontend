@@ -25,6 +25,7 @@ class MockSubject {
   subscribe(observer?: Partial<rxjs.Observer<any>>): MockSubscription | null { return null; }
 }
 
+// use a class derived from ConnectedComponent to allow access to protected members for unittests
 class MockConnectedComponent extends ConnectedComponent {
   constructor(private connService: ConnectionService) {
     super(connService);

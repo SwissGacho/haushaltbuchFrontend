@@ -156,6 +156,12 @@ export class ConnectionService {
                 // no need to unsubscribe because take(1) implicates that
             }
         } else if (message instanceof WelcomeMessage) {
+            // if received session token is from different session this is an error
+            if (message.ses_token && ConnectionService._sessionToken 
+                && message.ses_token != ConnectionService._sessionToken) {
+                    console.error('Received session token of alien session');
+                    throw new Error('Received session token of alien session');
+            }
             // if the session token is not set yet provide it for other connections
             if (message.ses_token && ! ConnectionService._sessionToken ) {
                 ConnectionService._sessionToken = message.ses_token;
