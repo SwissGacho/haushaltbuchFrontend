@@ -29,7 +29,7 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
         isPrimary?: boolean
     ) {
         this.connectionService.getNewConnection(this, loginSubjectOrObserveHandshake, isPrimary);
-        this.connected = true;
+        this.connected = true; // always true if no exception was thrown
     }
 
     // remember token of owned connection
@@ -56,6 +56,7 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
         console.info(this.componentID, 'is shutting down')
         if (this.connected) {
             this.connectionService.removeConnection(this.componentID);
+            this.connected = false;
          }
     }
 
