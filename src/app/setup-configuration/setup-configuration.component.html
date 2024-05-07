@@ -1,0 +1,78 @@
+
+<form (ngSubmit)="submitForm()" #form="ngForm">
+
+    <p>Explanation of single and multi user mode</p>
+    <div>
+        <label for="user-mode">Choose user mode:</label>
+        <select id="user-mode" [(ngModel)]="userMode" name="user-mode" required>
+            <option value="single">Single User</option>
+            <option value="multi">Multi User </option>
+        </select>
+    </div>
+
+    <div *ngIf="userMode === 'multi'">
+        <p>Enter the username and password of the owner</p>
+        <div>
+            <label for="adminuser">User:</label>
+            <input id="adminuser" [(ngModel)]="adminuser" name="adminuser" required />
+        </div>
+        <div>
+            <label for="adminpassword">Password:</label>
+            <input id="adminpassword" [(ngModel)]="adminpassword" name="adminpassword" required />
+        </div>
+    </div>
+
+    <p>Explanation of database db-options</p>
+    <div>
+        <label for="db-option">Choose database:</label>
+        <select id="db-option" [(ngModel)]="selectedDBOption" name="db-option" required>
+            <option value="SQLite">SQLite</option>
+            <option value="MariaDB">MariaDB</option>
+        </select>
+    </div>
+
+    <div *ngIf="selectedDBOption === 'SQLite'">
+        <p>Explanation of the DB filename options</p>
+        <label for="file">DB Filename:</label>
+        <input id="file" [(ngModel)]="file" name="file" required />
+    </div>
+
+    <div *ngIf="selectedDBOption === 'MariaDB'">
+        <p>Explanation of DB credentials</p>
+        <div>
+            <label for="host">Host:</label>
+            <input id="host" [(ngModel)]="host" name="host" required />
+        </div>
+        <div>
+            <label for="db">DB:</label>
+            <input id="db" [(ngModel)]="db" name="db" required />
+        </div>
+        <div>
+            <label for="dbuser">User:</label>
+            <input id="dbuser" [(ngModel)]="dbuser" name="dbuser" required />
+        </div>
+        <div>
+            <label for="dbpassword">Password:</label>
+            <input id="dbpassword" [(ngModel)]="dbpassword" name="dbpassword" required />
+        </div>
+    </div>
+
+    <p>Explanation of DB config file location</p>
+    <div>
+        <label for="dbcfg_loc">Location:</label>
+        <input id="dbcfg_loc" [(ngModel)]="dbcfg_loc" name="dbcfg_loc" required />
+        <label for="dbcfg_file">Filename:</label>
+        <input id="dbcfg_file" [(ngModel)]="dbcfg_file" name="dbcfg_file" required />
+    </div>
+    <div *ngIf="dbcfg_loc !== '' || dbcfg_file !== 'configuration.json'">
+        Explanation how to call the app with option 
+        {{dbcfg_loc}}{{(dbcfg_loc[dbcfg_loc.length-1] !== '/') ? '/' : ''}}{{dbcfg_file}}
+    </div>
+
+    <button type="submit">Erstellen</button>
+</form>
+
+<div *ngIf="result">
+    <h3>Erstelltes Objekt:</h3>
+    <pre>{{ result | json }}</pre>
+</div>
