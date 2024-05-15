@@ -1,11 +1,12 @@
 export enum MessageType {
   None = 'None',
   Log = "Log",
-    Hello = "Hello",
-    Login = "Login",
-    Welcome = "Welcome",
-    Bye = "Bye"
-  }
+  Hello = "Hello",
+  Login = "Login",
+  Welcome = "Welcome",
+  Bye = "Bye",
+  Echo = "Echo"
+}
 
   
 export interface Message {
@@ -89,24 +90,35 @@ export class LogMessage extends OutgoingMessage {
 
 export type LoginCredentials = {user?: string, ses_token?: string};
 export class LoginMessage extends OutgoingMessage {
-    user?: string;
-    ses_token?: string;
-    prev_token?: string;
-    is_primary?: boolean;
-    component?: string;
+  user?: string;
+  ses_token?: string;
+  prev_token?: string;
+  is_primary?: boolean;
+  component?: string;
 
-    constructor(
-      credentials: LoginCredentials,
-      token: string,
-      isPrimary: boolean = false,
-      component?: string,
-      status?: string
-    ) {
-      super(MessageType.Login, token, status);
-      const {user, ses_token} = credentials;
-      if (user) { this.user = user; }
-      if (ses_token) { this.ses_token = ses_token; }
-      this.is_primary = isPrimary;
-      if (component) { this.component = component; }
-    }
+  constructor(
+    credentials: LoginCredentials,
+    token: string,
+    isPrimary: boolean = false,
+    component?: string,
+    status?: string
+  ) {
+    super(MessageType.Login, token, status);
+    const {user, ses_token} = credentials;
+    if (user) { this.user = user; }
+    if (ses_token) { this.ses_token = ses_token; }
+    this.is_primary = isPrimary;
+    if (component) { this.component = component; }
   }
+}
+
+export class EchoMessage extends OutgoingMessage {
+  component: string = '';
+  payload: string;
+
+  constructor(component: string, payload: string) {
+    super(MessageType.Echo);
+    if (component) { this.component = component; }
+    this.payload = payload;
+  }
+}

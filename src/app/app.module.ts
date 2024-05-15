@@ -7,13 +7,15 @@ import { AppComponent } from './app.component';
 import { DirectMessageSenderComponent } from './direct-message-sender/direct-message-sender.component';
 import { ConnectedComponent } from './connected-component/connected.component';
 import { LoginComponent } from './login-component/login.component';
+import { EchoComponent } from './echo/echo.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DirectMessageSenderComponent,
     ConnectedComponent,
-    LoginComponent
+    LoginComponent,
+    EchoComponent
   ],
   imports: [
     BrowserModule,
