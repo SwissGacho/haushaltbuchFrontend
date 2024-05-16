@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
+import { DBs, SetupMessage, UserModes } from '../messages/admin.messages';
 
 @Component({
   selector: 'app-setup-configuration',
@@ -14,14 +15,14 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
     this.setComponentID('SetupConfigComponent');
   }
 
-  userMode: string = 'single';
+  userMode: UserModes = UserModes.single;
   adminuser: string = '';
   adminpassword: string = '';
 
   selectedDBOption: string = 'SQLite';
   file: string = 'db_filename';
   host: string = 'localhost';
-  db: string = '';
+  db: DBs = DBs.sqlite;
   dbuser: string = '';
   dbpassword: string = '';
   dbcfg_file_default: string = 'configuration.json';
@@ -31,14 +32,14 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
 
   submitForm() {
     this.result = {user_mode: this.userMode};
-    if (this.userMode === 'multi') {
+    if (this.userMode === UserModes.multi) {
       this.result.adminuser = {name: this.adminuser, password: this.adminpassword};
     }
     this.result.dbcfg_file = this.dbcfg_file
     this.result.db = this.selectedDBOption;
-    if (this.selectedDBOption === 'SQLite') { 
+    if (this.selectedDBOption === DBs.sqlite) { 
       this.result.db_cfg = { file: this.file }
-    } else if (this.selectedDBOption === 'MariaDB') {
+    } else if (this.selectedDBOption === DBs.mariadb) {
       this.result.db_cfg = {
         host: this.host,
         db: this.db,
@@ -46,5 +47,10 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
         password: this.dbpassword
       }
     }
+    const message = new SetupMessage(this.result);
+    console.groupCollapsed('SetupMessage');
+    console.log(message);
+    console.groupEnd();
+    this.sendMessage(message);
   }
 }

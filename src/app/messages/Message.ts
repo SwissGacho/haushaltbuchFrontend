@@ -7,6 +7,7 @@ export enum MessageType {
     Hello = "Hello",
     Login = "Login",
     Welcome = "Welcome",
+    Setup = "Setup",
     Bye = "Bye"
   }
 
