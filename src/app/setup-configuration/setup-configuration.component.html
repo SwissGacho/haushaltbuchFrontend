@@ -59,14 +59,11 @@
 
     <p>Explanation of DB config file location</p>
     <div>
-        <label for="dbcfg_loc">Location:</label>
-        <input id="dbcfg_loc" [(ngModel)]="dbcfg_loc" name="dbcfg_loc" required />
         <label for="dbcfg_file">Filename:</label>
         <input id="dbcfg_file" [(ngModel)]="dbcfg_file" name="dbcfg_file" required />
     </div>
-    <div *ngIf="dbcfg_loc !== '' || dbcfg_file !== 'configuration.json'">
-        Explanation how to call the app with option 
-        {{dbcfg_loc}}{{(dbcfg_loc[dbcfg_loc.length-1] !== '/') ? '/' : ''}}{{dbcfg_file}}
+    <div *ngIf="dbcfg_file !== '' && dbcfg_file !== dbcfg_file_default">
+        Explanation how to call the app with option ..... {{dbcfg_file}}
     </div>
 
     <button type="submit">Erstellen</button>

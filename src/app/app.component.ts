@@ -10,6 +10,7 @@ import { LoginMessage, OutgoingMessage, WelcomeMessage, LoginCredentials, Incomi
 })
 export class AppComponent extends ConnectedComponent implements OnInit {
   title = 'haushaltbuchFrontend';
+  activateAnyComponent = true;
   activateLoginComponent = true;
   activateSetupConfigComponent = false;
 
@@ -26,7 +27,10 @@ export class AppComponent extends ConnectedComponent implements OnInit {
       // check basic status of backend
       if (message.status == 'noDB') {
         console.log('Open Setup Dialogue');
+        this.activateAnyComponent = false;
         this.activateSetupConfigComponent = true;
+      } else {
+        this.activateAnyComponent = true;
       }
     }
     if (message.type == MessageType.Welcome) {

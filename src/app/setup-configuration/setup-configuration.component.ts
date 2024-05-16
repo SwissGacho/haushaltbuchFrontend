@@ -24,7 +24,7 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
   db: string = '';
   dbuser: string = '';
   dbpassword: string = '';
-  dbcfg_loc: string = '';
+  dbcfg_file_default: string = 'configuration.json';
   dbcfg_file: string = 'configuration.json';
 
   result: any;
@@ -34,7 +34,7 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
     if (this.userMode === 'multi') {
       this.result.adminuser = {name: this.adminuser, password: this.adminpassword};
     }
-    this.result.dbcfg_file = {location: this.dbcfg_loc, name: this.dbcfg_file}
+    this.result.dbcfg_file = this.dbcfg_file
     this.result.db = this.selectedDBOption;
     if (this.selectedDBOption === 'SQLite') { 
       this.result.db_cfg = { file: this.file }
