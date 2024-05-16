@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import * as rxjs from 'rxjs';
 import { AppComponent } from './app.component';
-import { WelcomeMessage, ByeMessage, Message, MessageType } from './Message';
+import { WelcomeMessage, ByeMessage, Message, MessageType } from './messages/Message';
 import { ConnectionService } from './connection.service';
 
 class MockConnectionService {

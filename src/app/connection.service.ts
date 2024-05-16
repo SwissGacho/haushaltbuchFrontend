@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import * as rxjs from 'rxjs';
 import * as rxws from 'rxjs/webSocket';
-import { LogMessage, LogLevel, HelloMessage, LoginMessage, Message, IncomingMessage, MessageType, WelcomeMessage, ByeMessage, LoginCredentials } from './Message';
+import { LogMessage, LogLevel, HelloMessage, LoginMessage, Message, IncomingMessage, MessageType, WelcomeMessage, ByeMessage, LoginCredentials } from './messages/Message';
 import { ConnectedComponent } from './connected-component/connected.component';
 
 export class RXJS {
