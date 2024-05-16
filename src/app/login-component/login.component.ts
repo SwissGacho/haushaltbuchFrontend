@@ -2,7 +2,8 @@ import { Component, OnInit, Output } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
-import { LoginMessage, OutgoingMessage, WelcomeMessage, LoginCredentials, IncomingMessage, MessageType } from '../messages/Message';
+import { IncomingMessage, MessageType } from '../messages/Message';
+import { LoginCredentials } from "../messages/admin.messages";
 
 @Component({
   selector: 'app-login-component',

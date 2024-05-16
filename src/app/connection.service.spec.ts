@@ -4,7 +4,10 @@ import * as rxws from 'rxjs/webSocket';
 
 import { ConnectionService, RXJS, Logger } from './connection.service';
 import { ConnectedComponent } from './connected-component/connected.component';
-import { HelloMessage, IncomingMessage, OutgoingMessage, LoginMessage, ByeMessage, Message, MessageType, LoginCredentials, WelcomeMessage, LogMessage } from './messages/Message';
+import { IncomingMessage, OutgoingMessage, Message, MessageType } from './messages/Message';
+import { LoginMessage, LoginCredentials, LogMessage } from "./messages/admin.messages";
+import { ByeMessage, WelcomeMessage } from "./messages/admin.messages";
+import { HelloMessage } from "./messages/admin.messages";
 
 class MockOutMessage extends OutgoingMessage {
   constructor() {

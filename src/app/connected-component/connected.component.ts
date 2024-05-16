@@ -2,7 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BaseComponent } from '../base.component';
 import { ConnectionService } from '../connection.service';
-import { Message, LoginCredentials } from '../messages/Message';
+import { Message } from '../messages/Message';
+import { LoginCredentials } from "../messages/admin.messages";
 
 @Component({
     selector: 'app-ConnectedComponent',

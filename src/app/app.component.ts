@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ConnectionService } from './connection.service';
 import { ConnectedComponent } from './connected-component/connected.component';
-import { LoginMessage, OutgoingMessage, WelcomeMessage, LoginCredentials, IncomingMessage, MessageType } from './messages/Message';
+import { OutgoingMessage, IncomingMessage, MessageType } from './messages/Message';
+import { LoginMessage, LoginCredentials, WelcomeMessage } from "./messages/admin.messages";
 
 @Component({
   selector: 'app-root',
