@@ -8,7 +8,8 @@ export enum MessageType {
     Login = "Login",
     Welcome = "Welcome",
     Setup = "Setup",
-    Bye = "Bye"
+    Bye = "Bye",
+    Echo = "Echo"
   }
 
   
