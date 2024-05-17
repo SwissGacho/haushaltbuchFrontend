@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ConnectionService } from '../connection.service';
 import { ConnectedComponent } from '../connected-component/connected.component';
-import { IncomingMessage, EchoMessage } from '../Message';
+import { IncomingMessage } from '../messages/Message';
+import { EchoMessage } from '../messages/admin.messages';
 
 @Component({
   selector: 'app-echo',

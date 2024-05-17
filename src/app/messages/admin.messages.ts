@@ -87,3 +87,14 @@ export class SetupMessage extends OutgoingMessage {
         this.db_cfg = db_cfg;
     }
 }
+
+export class EchoMessage extends OutgoingMessage {
+  component: string = '';
+  payload: string;
+
+  constructor(component: string, payload: string) {
+    super(MessageType.Echo);
+    if (component) { this.component = component; }
+    this.payload = payload;
+  }
+}
