@@ -8,6 +8,7 @@ import { DirectMessageSenderComponent } from './direct-message-sender/direct-mes
 import { ConnectedComponent } from './connected-component/connected.component';
 import { LoginComponent } from './login-component/login.component';
 import { SetupConfigurationComponent } from './setup-configuration/setup-configuration.component';
+import { EchoComponent } from './echo/echo.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { SetupConfigurationComponent } from './setup-configuration/setup-configu
     DirectMessageSenderComponent,
     ConnectedComponent,
     LoginComponent,
-    SetupConfigurationComponent
+    SetupConfigurationComponent,
+    EchoComponent
   ],
   imports: [
     BrowserModule,
