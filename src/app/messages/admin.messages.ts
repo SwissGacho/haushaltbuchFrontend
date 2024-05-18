@@ -1,3 +1,4 @@
+import { UserModes, DBs, Configuration } from "../configuration/configuration.component";
 import { MessageType, Message, IncomingMessage, OutgoingMessage } from "../messages/Message";
 
 
@@ -58,33 +59,22 @@ export class LoginMessage extends OutgoingMessage {
   }
 }
 
-export enum UserModes { single='single', multi='multi'}
-export enum DBs { sqlite= 'SQLite', mariadb='MariaDB'}
 export class SetupMessage extends OutgoingMessage {
-    userMode: UserModes|undefined;
-    admin_user?: { name: string, password: string };
-    dbcfg_file: string|undefined;
-    db: DBs|undefined;
-    db_cfg: object|undefined;
+  configuration: Configuration;
+  admin_user?: { name: string, password: string };
+  dbcfg_file: string;
 
     constructor(
-        config: {
-            user_mode: UserModes,
-            adminuser?: { name: string, password: string },
-            dbcfg_file: string,
-            db: DBs,
-            db_cfg?: {file:string}|{host:string,db:string,dbuser:string,password:string}
-        },
+        config: Configuration,
+        dbcfgFile: string,
+        adminUser?: { name: string, password: string },
         token?: string,
         status?: string
       ) {
         super(MessageType.Setup, token, status);
-        const {user_mode,adminuser,dbcfg_file,db,db_cfg} = config;
-        this.userMode = user_mode;
-        if (user_mode == UserModes.multi) { this.admin_user = adminuser; }
-        this.dbcfg_file = dbcfg_file;
-        this.db = db;
-        this.db_cfg = db_cfg;
+        this.configuration = config;
+        if (config.app.userMode == UserModes.multi) { this.admin_user = adminUser; }
+        this.dbcfg_file = dbcfgFile;
     }
 }
 

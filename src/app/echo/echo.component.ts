@@ -35,7 +35,9 @@ export class EchoComponent extends ConnectedComponent implements OnInit {
   }
 
   submitForm() {
-    if (this.selectedConnectionKey==='' || ConnectionService.connections[this.selectedConnectionKey]) {
+    if (this.selectedConnectionKey===''
+      || this.selectedConnectionKey==='*' 
+      || ConnectionService.connections[this.selectedConnectionKey]) {
       this.sendMessage(new EchoMessage(this.selectedConnectionKey, this.payload));
     } else {
       console.error('Unknown Component', this.selectedConnectionKey);

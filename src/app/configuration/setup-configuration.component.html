@@ -1,16 +1,17 @@
+<h3>Setup Configuration ({{componentID}}) </h3>
 
 <form (ngSubmit)="submitForm()" #form="ngForm">
 
     <p>Explanation of single and multi user mode</p>
     <div>
         <label for="user-mode">Choose user mode:</label>
-        <select id="user-mode" [(ngModel)]="userMode" name="user-mode" required>
+        <select id="user-mode" [(ngModel)]="configuration.app.userMode" name="user-mode" required>
             <option value="single">Single User</option>
             <option value="multi">Multi User </option>
         </select>
     </div>
 
-    <div *ngIf="userMode === 'multi'">
+    <div *ngIf="configuration.app.userMode === 'multi'">
         <p>Enter the username and password of the owner</p>
         <div>
             <label for="adminuser">User:</label>
@@ -25,35 +26,35 @@
     <p>Explanation of database db-options</p>
     <div>
         <label for="db-option">Choose database:</label>
-        <select id="db-option" [(ngModel)]="selectedDBOption" name="db-option" required>
+        <select id="db-option" [(ngModel)]="dbOption" name="db-option" required>
             <option value="SQLite">SQLite</option>
             <option value="MariaDB">MariaDB</option>
         </select>
     </div>
 
-    <div *ngIf="selectedDBOption === 'SQLite'">
+    <div *ngIf="dbOption === 'SQLite'">
         <p>Explanation of the DB filename options</p>
         <label for="file">DB Filename:</label>
-        <input id="file" [(ngModel)]="file" name="file" required />
+        <input id="file" [(ngModel)]="configuration.dbConfig.file" name="file" required />
     </div>
 
-    <div *ngIf="selectedDBOption === 'MariaDB'">
+    <div *ngIf="dbOption === 'MariaDB'">
         <p>Explanation of DB credentials</p>
         <div>
             <label for="host">Host:</label>
-            <input id="host" [(ngModel)]="host" name="host" required />
+            <input id="host" [(ngModel)]="configuration.dbConfig.host" name="host" required />
         </div>
         <div>
             <label for="db">DB:</label>
-            <input id="db" [(ngModel)]="db" name="db" required />
+            <input id="db" [(ngModel)]="configuration.dbConfig.dbname" name="db" required />
         </div>
         <div>
             <label for="dbuser">User:</label>
-            <input id="dbuser" [(ngModel)]="dbuser" name="dbuser" required />
+            <input id="dbuser" [(ngModel)]="configuration.dbConfig.dbuser" name="dbuser" required />
         </div>
         <div>
             <label for="dbpassword">Password:</label>
-            <input id="dbpassword" [(ngModel)]="dbpassword" name="dbpassword" required />
+            <input id="dbpassword" [(ngModel)]="configuration.dbConfig.password" name="dbpassword" required />
         </div>
     </div>
 

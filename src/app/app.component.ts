@@ -12,7 +12,7 @@ import { LoginMessage, LoginCredentials, WelcomeMessage } from "./messages/admin
 export class AppComponent extends ConnectedComponent implements OnInit {
   title = 'haushaltbuchFrontend';
   activateAnyComponent = true;
-  activateLoginComponent = true;
+  activateLoginComponent = false;
   activateSetupConfigComponent = false;
 
   constructor(private specificService:ConnectionService) {
@@ -31,6 +31,7 @@ export class AppComponent extends ConnectedComponent implements OnInit {
         this.activateAnyComponent = false;
         this.activateSetupConfigComponent = true;
       } else {
+        this.activateLoginComponent = true;
         this.activateAnyComponent = true;
       }
     }

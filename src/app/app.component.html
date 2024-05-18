@@ -1,10 +1,10 @@
 
-<app-login-component *ngIf="activateLoginComponent"></app-login-component>
-<app-setup-configuration *ngIf="activateSetupConfigComponent"></app-setup-configuration>
+<div class="box" *ngIf="activateLoginComponent"><app-login-component></app-login-component></div>
+<div class="box" *ngIf="activateSetupConfigComponent"><app-setup-configuration></app-setup-configuration></div>
 
 <div class="box"><app-echo></app-echo></div>
 
-<div class="box"><app-direct-message-sender *ngIf="activateAnyComponent"></app-direct-message-sender></div>
+<div class="box" *ngIf="activateAnyComponent"><app-direct-message-sender></app-direct-message-sender></div>
 <!-- 
-<div class="box"><app-direct-message-sender *ngIf="activateAnyComponent"></app-direct-message-sender></div>
+<div class="box" *ngIf="activateAnyComponent><app-direct-message-sender"></app-direct-message-sender></div>
   -->
