@@ -12,7 +12,7 @@ import { IncomingMessage, MessageType } from './messages/Message';
 })
 export class AppComponent extends ConnectedComponent implements OnInit {
   title = 'haushaltbuchFrontend';
-  activateAnyComponent = false;
+  activateAnyComponent = true;
   activateLoginComponent = false;
   activateSetupConfigComponent = false;
 

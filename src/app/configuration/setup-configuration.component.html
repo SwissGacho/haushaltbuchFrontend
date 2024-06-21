@@ -58,16 +58,33 @@
         </div>
     </div>
 
-    <p>Explanation of DB config file location</p>
+    <p> Explanation of DB config file location. Current search path is: {{dbcfg_file_searchpath_as_string}}. 
+    </p>
+    <div>
+        <label for="location">Choose location to store configuration:</label>
+        <select id="location" name="location" [(ngModel)]="dbcfg_file_location">
+          <option *ngFor="let location of dbcfg_file_searchpath" [value]="location">
+            {{ location }}
+          </option>
+          <option value="custom">Custom...</option>
+        </select>
+    </div>
+
     <div>
         <label for="dbcfg_file">Filename:</label>
         <input id="dbcfg_file" [(ngModel)]="dbcfg_file" name="dbcfg_file" required />
     </div>
-    <div *ngIf="dbcfg_file !== '' && dbcfg_file !== dbcfg_file_default">
+    <div *ngIf="dbcfg_file_location == 'custom' && dbcfg_file !== '' && dbcfg_file !== dbcfg_file_default">
         Explanation how to call the app with option ..... {{dbcfg_file}}
     </div>
+    <div *ngIf="dbcfg_file_location != 'custom' && dbcfg_file !== '' && dbcfg_file !== dbcfg_file_default">
+        Explanation how to call the app with option ..... {{dbcfg_file_location}}{{filepath_delimiter}}{{dbcfg_file}}
+    </div>
+    <div *ngIf="dbcfg_file_location == 'custom' && (dbcfg_file == '' || dbcfg_file == dbcfg_file_default)">
+        Specify location. A relative location refers to '{{dbcfg_file_searchpath[0]}}'.
+    </div>
 
-    <button type="submit">Erstellen</button>
+    <button type="submit">Setup</button>
 </form>
 
 <div *ngIf="result">

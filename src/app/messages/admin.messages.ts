@@ -1,6 +1,6 @@
-import { UserModes, DBs, Configuration } from "../configuration/configuration.component";
-import { MessageType, Message, IncomingMessage, OutgoingMessage } from "../messages/Message";
+// console.log('init messages.admin');
 
+import { MessageType, Message, IncomingMessage, OutgoingMessage } from "../messages/Message";
 
 export class HelloMessage extends IncomingMessage {
 }
@@ -57,25 +57,6 @@ export class LoginMessage extends OutgoingMessage {
     this.is_primary = isPrimary;
     if (component) { this.component = component; }
   }
-}
-
-export class SetupMessage extends OutgoingMessage {
-  configuration: Configuration;
-  admin_user?: { name: string, password: string };
-  dbcfg_file: string;
-
-    constructor(
-        config: Configuration,
-        dbcfgFile: string,
-        adminUser?: { name: string, password: string },
-        token?: string,
-        status?: string
-      ) {
-        super(MessageType.Setup, token, status);
-        this.configuration = config;
-        if (config.app.userMode == UserModes.multi) { this.admin_user = adminUser; }
-        this.dbcfg_file = dbcfgFile;
-    }
 }
 
 export class EchoMessage extends OutgoingMessage {

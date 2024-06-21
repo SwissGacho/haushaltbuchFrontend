@@ -1,5 +1,7 @@
-import { WelcomeMessage, ByeMessage } from "./admin.messages";
-import { HelloMessage } from "./admin.messages";
+// console.log('init messages.Message');
+
+import { HelloMessage, WelcomeMessage, ByeMessage } from "./admin.messages";
+import { ObjectMessage } from "./data.messages"
 
 export enum MessageType {
   None = 'None',
@@ -9,7 +11,13 @@ export enum MessageType {
     Welcome = "Welcome",
     Setup = "Setup",
     Bye = "Bye",
-    Echo = "Echo"
+    Echo = "Echo",
+    Fetch = "Fetch",
+    Object = "Object",
+    Store = 'Store',
+    FetchSetup = "FetchSetup",
+    ObjectSetup = "ObjectSetup",
+    StoreSetup = 'StoreSetup'
   }
 
   
@@ -19,33 +27,9 @@ export interface Message {
   status?: string;
   reason?: string;
   ses_token?: string;
-}
-
-
-export class IncomingMessage implements Message {
-    type: MessageType;
-    token: string;
-    status?: string;
-    ses_token?: string;
-    constructor(data: Message) {
-      this.type = data.type;
-      this.token = data.token || '';
-      this.status = data.status;
-      this.ses_token = data.ses_token;
-    }
-    static deserialize(event: MessageEvent): Message {
-      let data = JSON.parse(event.data)
-      switch (data.type) {
-        case MessageType.Hello:
-          return new HelloMessage(data);
-        case MessageType.Welcome:
-          return new WelcomeMessage(data);
-        case MessageType.Bye:
-          return new ByeMessage(data);
-        default:
-          return new IncomingMessage(data);
-      }
-    }
+  object?: string;
+  index?: number | string;
+  payload?: any;
 }
 
 export class OutgoingMessage implements Message {
@@ -58,5 +42,19 @@ export class OutgoingMessage implements Message {
     if (status) { this.status = status; }
   }
 }
+
+export class IncomingMessage implements Message {
+    type: MessageType;
+    token: string;
+    status?: string;
+    ses_token?: string;
+    constructor(data: Message) {
+      this.type = data.type;
+      this.token = data.token || '';
+      this.status = data.status;
+      this.ses_token = data.ses_token;
+    }
+}
+
 
 

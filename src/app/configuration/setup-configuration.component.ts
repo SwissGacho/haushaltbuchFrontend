@@ -1,8 +1,11 @@
+// console.log('init setup component');
+
 import { Component, OnInit } from '@angular/core';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
 import { Configuration, DBs, UserModes, } from "./configuration.component";
-import { SetupMessage } from '../messages/admin.messages';
+import { IncomingMessage, MessageType } from '../messages/Message'
+import { FetchSetupMessage, ObjectSetupMessage, StoreSetupMessage } from '../messages/setup.messages';
 
 @Component({
   selector: 'app-setup-configuration',
@@ -15,6 +18,7 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
     super(connectionService);
     this.setComponentID('SetupConfigComponent');
   }
+
 
   configuration: Configuration = {
     app: { userMode: UserModes.single },
@@ -42,26 +46,52 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
 
   dbuser: string = '';
   dbpassword: string = '';
-  dbcfg_file_default: string = 'configuration.json';
-  dbcfg_file: string = this.dbcfg_file_default;
 
+  dbcfg_file_searchpath: string[] = [''];
+  dbcfg_file_searchpath_as_string: string = '';
+  dbcfg_file_default: string = 'configuration.json';
+  dbcfg_file_location: string = '';
+  dbcfg_file: string = this.dbcfg_file_default;
+  filepath_delimiter: string = '/'
   result: any;
+
+  override handleMessages(message: IncomingMessage): void {
+    if (message.type === MessageType.Hello) {
+      this.token = message.token;
+      const fetch_message = new FetchSetupMessage('setup_config', 'search_path');
+      this.sendMessage(fetch_message);
+    }
+    if (message instanceof(ObjectSetupMessage)) {
+      this.dbcfg_file_searchpath = message.payload;
+      this.dbcfg_file_searchpath_as_string = message.payload.join(' → ');
+      this.dbcfg_file_location = message.payload[0];
+      if (message.payload[0][0] == '/')
+        this.filepath_delimiter = '/';
+      else
+        this.filepath_delimiter = '\\';
+    }
+  }
 
   submitForm() {
     this.result = {configuration: this.configuration};
     if (this.configuration.app.userMode === UserModes.multi) {
       this.result.adminuser = {name: this.adminuser, password: this.adminpassword};
     }
-    this.result.dbcfg_file = this.dbcfg_file
+    if (this.dbcfg_file_location == 'custom'){
+      this.result.dbcfg_file = this.dbcfg_file;
+    } else {
+      this.result.dbcfg_file = this.dbcfg_file_location+this.filepath_delimiter+this.dbcfg_file
+    }
     console.log(this.result)
-    const message = new SetupMessage(
-      this.configuration,
-      this.dbcfg_file,
-      {name: this.adminuser, password: this.adminpassword}
-    );
-    console.groupCollapsed('SetupMessage');
+    const message = new StoreSetupMessage('setup_config', '', this.result);
+    console.groupCollapsed('StoreMessage');
+    console.log(message);
     console.log(JSON.stringify(message));
     console.groupEnd();
     this.sendMessage(message);
+  }
+  override ngOnInit() {
+    const observeHandshake = true;
+    this.getConnection(observeHandshake);
   }
 }
