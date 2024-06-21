@@ -1,11 +1,14 @@
+// console.log('init connection service');
+
 import { Injectable, EventEmitter } from '@angular/core';
 import * as rxjs from 'rxjs';
 import * as rxws from 'rxjs/webSocket';
 import { HelloMessage, WelcomeMessage, ByeMessage, LogMessage, LogLevel, LoginMessage, LoginCredentials } from "./messages/admin.messages";
 import { Message, IncomingMessage, MessageType } from './messages/Message';
+import { deserialize } from './messages/deserialize_message'
 import { ConnectedComponent } from './connected-component/connected.component';
 
-export class RXJS {
+  export class RXJS {
     static take(n: number): rxjs.MonoTypeOperatorFunction<any> { return rxjs.take(n); }
     static skip(n: number): rxjs.MonoTypeOperatorFunction<any> { return rxjs.skip(n); }
 }
@@ -44,11 +47,8 @@ export class Logger {
 
 type LoginSubject = rxjs.Subject<{user?: string, ses_token?: string}>;
 
-@Injectable({
-    providedIn: 'root'
-})
 
-
+@Injectable({ providedIn: 'root' })
 /// This Service manages all WebSocket connections to the backend.
 /// It provides new connections to components that need them, and manages the connections.
 /// Components should call the getNewConnection method to get a new connection.
@@ -96,7 +96,7 @@ export class ConnectionService {
         console.log('Subscriber: ', subscriber); 
         console.log('LoginSubjectOrObserveHandshake: ',loginSubjectOrObserveHandshake);
         console.log('is primary: ', isPrimary);
-        let connection = this.webSocket({url: this.BACKEND_ADDRESS, deserializer: IncomingMessage.deserialize});
+        let connection = this.webSocket({url: this.BACKEND_ADDRESS, deserializer: deserialize});
         let loginSubject: LoginSubject;
         loginSubject = (loginSubjectOrObserveHandshake instanceof rxjs.Subject)
             ? loginSubjectOrObserveHandshake

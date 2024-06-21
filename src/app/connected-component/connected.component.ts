@@ -1,3 +1,5 @@
+// console.log('init connected component');
+
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BaseComponent } from '../base.component';

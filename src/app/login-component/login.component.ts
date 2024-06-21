@@ -1,3 +1,5 @@
+// console.log('init login component');
+
 import { Component, OnInit, Output } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { ConnectedComponent } from '../connected-component/connected.component';

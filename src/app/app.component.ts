@@ -1,8 +1,9 @@
+// console.log('init app component');
+
 import { Component, OnInit } from '@angular/core';
 import { ConnectionService } from './connection.service';
 import { ConnectedComponent } from './connected-component/connected.component';
-import { OutgoingMessage, IncomingMessage, MessageType } from './messages/Message';
-import { LoginMessage, LoginCredentials, WelcomeMessage } from "./messages/admin.messages";
+import { IncomingMessage, MessageType } from './messages/Message';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +12,7 @@ import { LoginMessage, LoginCredentials, WelcomeMessage } from "./messages/admin
 })
 export class AppComponent extends ConnectedComponent implements OnInit {
   title = 'haushaltbuchFrontend';
-  activateAnyComponent = true;
+  activateAnyComponent = false;
   activateLoginComponent = false;
   activateSetupConfigComponent = false;
 

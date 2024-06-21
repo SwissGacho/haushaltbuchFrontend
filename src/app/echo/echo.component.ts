@@ -1,3 +1,5 @@
+// console.log('init echo component');
+
 import { Component, OnInit } from '@angular/core';
 import { ConnectionService } from '../connection.service';
 import { ConnectedComponent } from '../connected-component/connected.component';
