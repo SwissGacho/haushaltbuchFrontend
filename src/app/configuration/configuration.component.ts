@@ -5,7 +5,7 @@ export enum DBs { sqlite = 'SQLite', mariadb = 'MariaDB' }
 
 export class Configuration {
   app: { userMode: UserModes } = { userMode: UserModes.single }
-  dbConfig: {
+  db_cfg: {
     db: DBs,
     file?: string,
     host?: string,

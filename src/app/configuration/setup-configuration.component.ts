@@ -22,25 +22,28 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
 
   configuration: Configuration = {
     app: { userMode: UserModes.single },
-    dbConfig: {
+    db_cfg: {
       db: DBs.sqlite,
       file: 'money_pilot.sqlite.db'
     }
   };
-  get dbOption(): DBs { return this.configuration.dbConfig.db; }
+  get dbOption(): DBs { return this.configuration.db_cfg.db; }
   set dbOption(v: DBs) {
-    this.configuration.dbConfig.db = v;
+    this.configuration.db_cfg.db = v;
     if (v === DBs.sqlite) {
-      if ( ! this.configuration.dbConfig.file) {
-        this.configuration.dbConfig.file = 'money_pilot.sqlite.db';
+      if ( ! this.db_filename) {
+        this.db_filename = 'money_pilot.sqlite.db';
       }
-      delete this.configuration.dbConfig.host;
-      delete this.configuration.dbConfig.dbname;
-      delete this.configuration.dbConfig.dbuser;
-      delete this.configuration.dbConfig.password;
+      delete this.configuration.db_cfg.host;
+      delete this.configuration.db_cfg.dbname;
+      delete this.configuration.db_cfg.dbuser;
+      delete this.configuration.db_cfg.password;
     }
-    if (v === DBs.mariadb) { delete this.configuration.dbConfig.file; }
+    if (v === DBs.mariadb) { delete this.configuration.db_cfg.file; }
   }
+  db_locations: string[] = [''];
+  db_location: string = '';
+  db_filename: string = '';
   adminuser: string = '';
   adminpassword: string = '';
 
@@ -62,17 +65,28 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
       this.sendMessage(fetch_message);
     }
     if (message instanceof(ObjectSetupMessage)) {
-      this.dbcfg_file_searchpath = message.payload;
-      this.dbcfg_file_searchpath_as_string = message.payload.join(' → ');
-      this.dbcfg_file_location = message.payload[0];
-      if (message.payload[0][0] == '/')
-        this.filepath_delimiter = '/';
-      else
+      this.db_locations = message.payload.db_paths;
+      this.db_location = message.payload.db_paths[0];
+      this.db_filename = 'money_pilot.sqlite.db';
+      const search_path = message.payload.search_path;
+      this.dbcfg_file_searchpath = search_path;
+      this.dbcfg_file_searchpath_as_string = search_path.join(' → ');
+      this.dbcfg_file_location = search_path[0];
+      if (message.payload.system == 'Windows')
         this.filepath_delimiter = '\\';
+      else
+        this.filepath_delimiter = '/';
     }
   }
 
   submitForm() {
+    if (this.configuration.db_cfg.db===DBs.sqlite) {
+      if (this.db_location == 'custom') {
+        this.configuration.db_cfg.file = this.db_filename;
+      } else {
+        this.configuration.db_cfg.file = this.db_location+this.filepath_delimiter+this.db_filename;
+      }
+    }
     this.result = {configuration: this.configuration};
     if (this.configuration.app.userMode === UserModes.multi) {
       this.result.adminuser = {name: this.adminuser, password: this.adminpassword};

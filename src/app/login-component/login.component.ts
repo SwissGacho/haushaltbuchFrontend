@@ -30,8 +30,8 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
     console.groupEnd();
     if (message.type == MessageType.Hello) {
       let status = message.status;
-      if (status == 'noDB' || status == 'singleUser') {
-        this.loginSubject.next({user: '-'});
+      if (status == 'singleUser') {
+        this.loginSubject.next({});
       } else {
         this.getLoginCredentials = true;
       }
