@@ -43,6 +43,8 @@ jobs:
     - name: Commit
       working-directory: frontend
       run: |
+        git config --global user.email "frontend@github.com"
+        git config --global user.name "Gacho FE"
         git commit -m 'New frontend commit'
 
 
