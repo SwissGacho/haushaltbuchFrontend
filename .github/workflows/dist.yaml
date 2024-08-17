@@ -45,7 +45,7 @@ jobs:
       run: |
         git config --global user.email "frontend@github.com"
         git config --global user.name "Gacho FE"
-        git add
+        git add .
         git commit -m 'New frontend commit'
 
 
