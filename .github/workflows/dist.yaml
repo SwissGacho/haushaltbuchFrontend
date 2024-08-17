@@ -40,7 +40,9 @@ jobs:
       run: |
         rm -rf dist/moneypilot/frontend/*
         cp -r frontend/dist/haushaltbuchFrontend/* dist/moneypilot/frontend
-    - name: DEBUG
-      run: ls  dist/moneypilot dist/moneypilot/frontend
+    - name: Commit
+      working-directory: frontend
+      run: |
+        git commit -m 'New frontend commit'
 
 
