@@ -1,0 +1,51 @@
+name: Frontend Distribution
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Frontend Repository
+      uses: actions/checkout@v4
+      with:
+        repository: SwissGacho/haushaltbuchFrontend
+        ref: release
+        path: frontend
+
+    - name: Set up Node.js environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: 'latest'
+    - name: Install dependencies
+      working-directory: frontend
+      run: npm install
+
+    - name: Build Angular App
+      working-directory: frontend
+      run: npx ng build
+
+    - name: Checkout Dist Repository
+      uses: actions/checkout@v4
+      with:
+        repository: SwissGacho/Dist
+        ssh-key: ${{secrets.DIST}}
+        ref: main
+        path: dist
+    - name: Copy compiled app to dist repo
+      run: |
+        rm -rf dist/moneypilot/frontend/*
+        cp -r frontend/dist/haushaltbuchFrontend/* dist/moneypilot/frontend
+    - name: Commit
+      working-directory: dist
+      run: |
+        git config --global user.email "frontend@github.com"
+        git config --global user.name "Gacho FE"
+        git add .
+        git commit -m 'New frontend commit'
+        git push
+
+
