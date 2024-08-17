@@ -27,7 +27,7 @@ jobs:
 
     - name: Build Angular App
       working-directory: frontend
-      run: ng build
+      run: npx ng build
 
     - name: Checkout Dist Repository
       uses: actions/checkout@v4
