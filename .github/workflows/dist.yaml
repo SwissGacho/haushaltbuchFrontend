@@ -3,7 +3,8 @@ name: Frontend Distribution
 on:
   push:
     branches:
-      - main  # Branch, auf dem der Workflow ausgelöst wird
+      # - main  # Branch, auf dem der Workflow ausgelöst wird
+      - 26-create-dist-workflow
 
 jobs:
   build:
@@ -13,7 +14,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: SwissGacho/haushaltbuchFrontend
-        # ssh-key: ${{ secrets.DIST2FRONTEND }}
         ref: master
         path: frontend
 
