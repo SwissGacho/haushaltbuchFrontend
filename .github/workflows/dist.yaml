@@ -41,7 +41,7 @@ jobs:
         rm -rf dist/moneypilot/frontend/*
         cp -r frontend/dist/haushaltbuchFrontend/* dist/moneypilot/frontend
     - name: Commit
-      working-directory: frontend
+      working-directory: dist
       run: |
         git config --global user.email "frontend@github.com"
         git config --global user.name "Gacho FE"
