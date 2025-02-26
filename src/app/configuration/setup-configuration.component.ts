@@ -3,7 +3,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
-import { Configuration, DBs, UserModes, } from "./configuration.component";
+import { Configuration, DBs } from "./configuration.component";
 import { IncomingMessage, MessageType } from '../messages/Message'
 import { FetchSetupMessage, ObjectSetupMessage, StoreSetupMessage } from '../messages/setup.messages';
 
@@ -21,7 +21,7 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
 
 
   configuration: Configuration = {
-    app: { userMode: UserModes.single },
+    app: { },
     db_cfg: {
       db: DBs.sqlite,
       file: 'money_pilot.sqlite.db'
@@ -88,9 +88,6 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
       }
     }
     this.result = {configuration: this.configuration};
-    if (this.configuration.app.userMode === UserModes.multi) {
-      this.result.adminuser = {name: this.adminuser, password: this.adminpassword};
-    }
     if (this.dbcfg_file_location == 'custom'){
       this.result.dbcfg_file = this.dbcfg_file;
     } else {

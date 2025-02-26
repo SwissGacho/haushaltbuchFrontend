@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 
-export enum UserModes { single = 'single', multi = 'multi' }
 export enum DBs { sqlite = 'SQLite', mariadb = 'MariaDB' }
 
 export class Configuration {
-  app: { userMode: UserModes } = { userMode: UserModes.single }
+  app: { } = {  }
   db_cfg: {
     db: DBs,
     file?: string,

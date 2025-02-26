@@ -2,27 +2,6 @@
 
 <form (ngSubmit)="submitForm()" #form="ngForm">
 
-    <p>Explanation of single and multi user mode</p>
-    <div>
-        <label for="user-mode">Choose user mode:</label>
-        <select id="user-mode" [(ngModel)]="configuration.app.userMode" name="user-mode" required>
-            <option value="single">Single User</option>
-            <option value="multi">Multi User </option>
-        </select>
-    </div>
-
-    <div *ngIf="configuration.app.userMode === 'multi'">
-        <p>Enter the username and password of the owner</p>
-        <div>
-            <label for="adminuser">User:</label>
-            <input id="adminuser" [(ngModel)]="adminuser" name="adminuser" required />
-        </div>
-        <div>
-            <label for="adminpassword">Password:</label>
-            <input id="adminpassword" [(ngModel)]="adminpassword" name="adminpassword" required />
-        </div>
-    </div>
-
     <p>Explanation of database db-options</p>
     <div>
         <label for="db-option">Choose database:</label>
@@ -79,10 +58,10 @@
     <div>
         <label for="location">Choose location to store configuration:</label>
         <select id="location" name="location" [(ngModel)]="dbcfg_file_location">
-          <option *ngFor="let location of dbcfg_file_searchpath" [value]="location">
-            {{ location }}
-          </option>
-          <option value="custom">Custom... (specify as filename)</option>
+            <option *ngFor="let location of dbcfg_file_searchpath" [value]="location"> 
+                {{ location }}
+            </option>
+            <option value="custom">Custom... (specify as filename)</option>
         </select>
     </div>
 
