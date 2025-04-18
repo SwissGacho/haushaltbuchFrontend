@@ -24,6 +24,8 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
         super();
     }
     
+    OBSERVE_HANDSHAKE = false;
+    
     connected = false;
     protected token: string  | null = null;
 
@@ -31,7 +33,7 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
         loginSubjectOrObserveHandshake?: rxjs.Subject<LoginCredentials> | boolean,
         isPrimary?: boolean
     ) {
-        this.connectionService.getNewConnection(this, loginSubjectOrObserveHandshake, isPrimary);
+        this.connectionService.getNewConnection(this, loginSubjectOrObserveHandshake ?? this.OBSERVE_HANDSHAKE, isPrimary);
         this.connected = true; // always true if no exception was thrown
     }
 
@@ -60,7 +62,7 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
         if (this.connected) {
             this.connectionService.removeConnection(this.componentID);
             this.connected = false;
-         }
+        }
     }
 
     // // Abstract method for components to implement login handling.

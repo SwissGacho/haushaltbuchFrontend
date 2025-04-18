@@ -17,7 +17,11 @@ export enum MessageType {
     Store = 'Store',
     FetchSetup = "FetchSetup",
     ObjectSetup = "ObjectSetup",
-    StoreSetup = 'StoreSetup'
+    StoreSetup = 'StoreSetup',
+    FetchNavigationHeaders = 'FetchNavigationHeaders',
+    NavigationHeaders = 'NavigationHeaders',
+    FetchList = 'FetchList',
+    ObjectList = 'ObjectList',
   }
 
   

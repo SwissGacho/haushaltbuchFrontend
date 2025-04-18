@@ -31,6 +31,15 @@ export class ObjectMessage extends IncomingMessage {
   }
 }
 
+export class NavigationHeaders extends IncomingMessage {
+  headers: string[];
+
+  constructor(data: Message) {
+    super(data);
+    this.headers = data.payload?.headers || [];
+  }
+}
+
 export class StoreMessage extends OutgoingMessage {
   object: string;
   index: number | string;
@@ -48,4 +57,26 @@ export class StoreMessage extends OutgoingMessage {
         this.index = index;
         this.payload = payload;
     }
+}
+
+export class FetchNavigationHeaders extends FetchMessage {
+  constructor(token?: string) {
+    super('list', '', token, MessageType.FetchNavigationHeaders);
+  }
+}
+
+export class FetchList extends FetchMessage {
+  constructor(objectType: string, parent?: string, token?: string) {
+    super(objectType, parent || '', token, MessageType.FetchList);
+  }
+}
+
+export class ObjectList extends IncomingMessage {
+  objects: string[];
+
+  constructor(data: Message) {
+    super(data);
+    console.log('ObjectList', data);
+    this.objects = data.payload?.objects || [];
+  }
 }
