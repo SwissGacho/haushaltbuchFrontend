@@ -34,6 +34,9 @@ export class ListComponent extends ConnectedComponent implements OnInit {
             console.log('Received list', message);
             this.headers = (message as NavigationHeaders).headers;
         }
+        else if (message.type === MessageType.Hello) {
+            console.log('Received hello', message);
+        }
         else {
             // We received an unexpected or unknown message
             console.error('Unexpected message', message);
