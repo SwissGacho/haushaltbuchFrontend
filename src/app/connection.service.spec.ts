@@ -8,6 +8,7 @@ import { IncomingMessage, OutgoingMessage, Message, MessageType } from './messag
 import { LoginMessage, LoginCredentials, LogMessage } from "./messages/admin.messages";
 import { ByeMessage, WelcomeMessage } from "./messages/admin.messages";
 import { HelloMessage } from "./messages/admin.messages";
+import { MessageFactory } from './messages/deserialize_message';
 
 class MockOutMessage extends OutgoingMessage {
   constructor() {
@@ -73,7 +74,7 @@ describe('ConnectionService', () => {
     observeHandshake?: boolean,
     primary?: boolean
   ) {
-    const spyOnDeserialize = spyOn(IncomingMessage,'deserialize');
+    const spyOnDeserialize = spyOn(MessageFactory,'deserialize');
     const spyOnWebSocket = 
       spyOn(connectionService, 'webSocket')
       .and.returnValue(mockWebSocketSubject as unknown as rxws.WebSocketSubject<Message>);

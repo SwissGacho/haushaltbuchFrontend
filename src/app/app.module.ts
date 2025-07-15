@@ -10,6 +10,8 @@ import { LoginComponent } from './login-component/login.component';
 import { SetupConfigurationComponent } from './configuration/setup-configuration.component';
 import { EchoComponent } from './echo/echo.component';
 import { ConfigurationComponent } from './configuration/configuration.component';
+import { ListComponent } from './list/list.component';
+import { HeaderSublistComponent } from './list/header-sublist/header-sublist.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +21,9 @@ import { ConfigurationComponent } from './configuration/configuration.component'
     LoginComponent,
     SetupConfigurationComponent,
     EchoComponent,
-    ConfigurationComponent
+    ConfigurationComponent,
+    ListComponent,
+    HeaderSublistComponent
   ],
   imports: [
     BrowserModule,

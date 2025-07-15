@@ -5,7 +5,7 @@ import * as rxjs from 'rxjs';
 import * as rxws from 'rxjs/webSocket';
 import { HelloMessage, WelcomeMessage, ByeMessage, LogMessage, LogLevel, LoginMessage, LoginCredentials } from "./messages/admin.messages";
 import { Message, IncomingMessage, MessageType } from './messages/Message';
-import { deserialize } from './messages/deserialize_message'
+import { MessageFactory } from './messages/deserialize_message'
 import { ConnectedComponent } from './connected-component/connected.component';
 
   export class RXJS {
@@ -96,7 +96,7 @@ export class ConnectionService {
         console.log('Subscriber: ', subscriber); 
         console.log('LoginSubjectOrObserveHandshake: ',loginSubjectOrObserveHandshake);
         console.log('is primary: ', isPrimary);
-        let connection = this.webSocket({url: this.BACKEND_ADDRESS, deserializer: deserialize});
+        let connection = this.webSocket({url: this.BACKEND_ADDRESS, deserializer: MessageFactory.deserialize});
         let loginSubject: LoginSubject;
         loginSubject = (loginSubjectOrObserveHandshake instanceof rxjs.Subject)
             ? loginSubjectOrObserveHandshake

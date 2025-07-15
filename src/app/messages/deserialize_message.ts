@@ -1,10 +1,13 @@
 import { Message, IncomingMessage, MessageType } from './Message'
 import { HelloMessage,WelcomeMessage,ByeMessage } from './admin.messages'
-import { ObjectMessage } from './data.messages'
+import { NavigationHeaders, ObjectList, ObjectMessage } from './data.messages'
 import { ObjectSetupMessage } from './setup.messages'
 
-export function deserialize(event: MessageEvent): Message {
+export class MessageFactory {
+
+  static deserialize(event: MessageEvent): Message {
     let data = JSON.parse(event.data)
+    console.log('Deserializing message', data)
     switch (data.type) {
       case MessageType.Object:
         return new ObjectMessage(data);
@@ -16,8 +19,13 @@ export function deserialize(event: MessageEvent): Message {
         return new WelcomeMessage(data);
       case MessageType.Bye:
         return new ByeMessage(data);
+      case MessageType.NavigationHeaders:
+        return new NavigationHeaders(data);
+      case MessageType.ObjectList:
+        return new ObjectList(data);
       default:
         return new IncomingMessage(data);
     }
   }
+}
   
