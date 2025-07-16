@@ -16,9 +16,10 @@ import { ConnectionService } from '../connection.service';
  * Thank you ChatGPT for this actually quite accurate docustring!
  */
 @Component({
-  selector: 'app-direct-message-sender',
-  templateUrl: './direct-message-sender.component.html',
-  styleUrls: ['./direct-message-sender.component.css']
+    selector: 'app-direct-message-sender',
+    templateUrl: './direct-message-sender.component.html',
+    styleUrls: ['./direct-message-sender.component.css'],
+    standalone: false
 })
 export class DirectMessageSenderComponent extends ConnectedComponent implements OnInit {
 
