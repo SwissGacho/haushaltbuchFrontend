@@ -56,18 +56,18 @@ describe('AppComponent', () => {
 
   it('should create connection on init', () => {
     const conSrv = fixture.debugElement.injector.get(ConnectionService);
-    const spyOnGetNewConn = spyOn(conSrv, 'getNewConnection');
-    const spyOnRemoveConn = spyOn(conSrv, 'removeConnection');
-    expect(appComponent.connected).toBeFalse();
+    const spyOnGetNewConn = jest.spyOn(conSrv, 'getNewConnection');
+    const spyOnRemoveConn = jest.spyOn(conSrv, 'removeConnection');
+    expect(appComponent.connected).toBe(false);
     appComponent.ngOnInit();
     expect(spyOnGetNewConn).toHaveBeenCalledWith(appComponent, true, true);
-    expect(appComponent.connected).toBeTrue();
+    expect(appComponent.connected).toBe(true);
     expect(spyOnRemoveConn).not.toHaveBeenCalled();
   })
 
   it('should remove connection on destroy', () => {
     const conSrv = fixture.debugElement.injector.get(ConnectionService);
-    const spyOnRemoveConn = spyOn(conSrv, 'removeConnection');
+    const spyOnRemoveConn = jest.spyOn(conSrv, 'removeConnection');
     appComponent.ngOnInit();
     expect(spyOnRemoveConn).not.toHaveBeenCalled();
     appComponent.ngOnDestroy();
