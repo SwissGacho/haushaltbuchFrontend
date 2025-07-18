@@ -10,7 +10,8 @@ import { LoginCredentials } from "../messages/admin.messages";
 @Component({
     selector: 'app-ConnectedComponent',
     templateUrl: './connected.component.html',
-    styleUrls: ['./connected.component.css']
+    styleUrls: ['./connected.component.css'],
+    standalone: false
 })
 
 /// This class is the base class for all components that need to send and receive messages to and from the backend.

@@ -7,9 +7,10 @@ import { IncomingMessage } from '../messages/Message';
 import { EchoMessage } from '../messages/admin.messages';
 
 @Component({
-  selector: 'app-echo',
-  templateUrl: './echo.component.html',
-  styleUrls: ['./echo.component.css']
+    selector: 'app-echo',
+    templateUrl: './echo.component.html',
+    styleUrls: ['./echo.component.css'],
+    standalone: false
 })
 export class EchoComponent extends ConnectedComponent implements OnInit {
 
