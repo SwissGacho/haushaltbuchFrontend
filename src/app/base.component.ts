@@ -3,7 +3,8 @@ import { Component } from '@angular/core';
 let nextComponentId = 1;
 
 @Component({
-  template: ''
+    template: '',
+    standalone: false
 })
 export class BaseComponent {
     componentName: string = 'component';

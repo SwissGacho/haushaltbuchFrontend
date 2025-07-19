@@ -1,9 +1,10 @@
 <h3>Direct Message Sender ({{componentID}})</h3>
 <div>
-    <textarea  [(ngModel)]="messageOut" rows="10" cols="50" type="text" placeholder="Nachricht (sollte JSON sein) hier schreiben"></textarea>
-    <button (click)="receiveInput()">Nachricht abschicken</button>
-    <div *ngIf="response">
-        <p>Antwort: {{ response }}</p>
-      </div>
+  <textarea  [(ngModel)]="messageOut" rows="10" cols="50" type="text" placeholder="Nachricht (sollte JSON sein) hier schreiben"></textarea>
+  <button (click)="receiveInput()">Nachricht abschicken</button>
+  @if (response) {
+    <div>
+      <p>Antwort: {{ response }}</p>
+    </div>
+  }
 </div>
-  

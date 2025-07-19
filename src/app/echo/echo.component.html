@@ -1,21 +1,25 @@
 <h3>EchoMessage Sender ({{componentID}}) </h3>
 <div>
-    <label for="connectionSelect">Select component to receive echo:</label>
-    <select id="connectionSelect" [(ngModel)]="selectedConnectionKey">
-        <option value="">myself</option>
-        <option *ngFor="let key of connectionKeys" [value]="key">{{key}}</option>
-        <option value="*">all</option>
-    </select>
+  <label for="connectionSelect">Select component to receive echo:</label>
+  <select id="connectionSelect" [(ngModel)]="selectedConnectionKey">
+    <option value="">myself</option>
+    @for (key of connectionKeys; track key) {
+      <option [value]="key">{{key}}</option>
+    }
+    <option value="*">all</option>
+  </select>
 </div>
 <div>
-    <label for="payload">Text to echo:</label>
+  <label for="payload">Text to echo:</label>
 </div>
 <div>
-    <!-- <input type="text" id="payload" [(ngModel)]="payload" /> -->
-    <textarea  [(ngModel)]="payload" rows="10" cols="50" type="text" ></textarea>
+  <!-- <input type="text" id="payload" [(ngModel)]="payload" /> -->
+  <textarea  [(ngModel)]="payload" rows="10" cols="50" type="text" ></textarea>
 </div>
 <button (click)="refreshConnectionList()">Refresh</button>
 <button (click)="submitForm()">Absenden</button>
-<div *ngIf="incoming">
+@if (incoming) {
+  <div>
     <p>Incoming: {{ incoming }}</p>
-</div>
+  </div>
+}

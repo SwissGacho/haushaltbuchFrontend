@@ -5,9 +5,10 @@ import { FetchList, ObjectList } from 'src/app/messages/data.messages';
 import { IncomingMessage, MessageType } from 'src/app/messages/Message';
 
 @Component({
-  selector: 'app-header-sublist',
-  templateUrl: './header-sublist.component.html',
-  styleUrls: ['./header-sublist.component.css']
+    selector: 'app-header-sublist',
+    templateUrl: './header-sublist.component.html',
+    styleUrls: ['./header-sublist.component.css'],
+    standalone: false
 })
 export class HeaderSublistComponent extends ConnectedComponent implements OnInit {
 

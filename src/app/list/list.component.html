@@ -1,5 +1,7 @@
-<div *ngFor="let header of headers">
-  <div class="header">{{ header }}
-    <app-header-sublist [header]="header"></app-header-sublist>
+@for (header of headers; track header) {
+  <div>
+    <div class="header">{{ header }}
+      <app-header-sublist [header]="header"></app-header-sublist>
+    </div>
   </div>
-</div>
+}

@@ -8,9 +8,10 @@ import { IncomingMessage, MessageType } from '../messages/Message';
 import { LoginCredentials } from "../messages/admin.messages";
 
 @Component({
-  selector: 'app-login-component',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+    selector: 'app-login-component',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.css'],
+    standalone: false
 })
 export class LoginComponent extends ConnectedComponent implements OnInit {
 

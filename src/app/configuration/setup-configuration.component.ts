@@ -8,9 +8,10 @@ import { IncomingMessage, MessageType } from '../messages/Message'
 import { FetchSetupMessage, ObjectSetupMessage, StoreSetupMessage } from '../messages/setup.messages';
 
 @Component({
-  selector: 'app-setup-configuration',
-  templateUrl: './setup-configuration.component.html',
-  styleUrls: ['./setup-configuration.component.css']
+    selector: 'app-setup-configuration',
+    templateUrl: './setup-configuration.component.html',
+    styleUrls: ['./setup-configuration.component.css'],
+    standalone: false
 })
 export class SetupConfigurationComponent extends ConnectedComponent implements OnInit {
 

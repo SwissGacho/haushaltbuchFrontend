@@ -1,5 +1,7 @@
 <ul>
-<div *ngFor="let object of objects">
-    <li>{{ object }}</li>
-</div>
+  @for (object of objects; track object) {
+    <div>
+      <li>{{ object }}</li>
+    </div>
+  }
 </ul>
