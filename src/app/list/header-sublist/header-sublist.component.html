@@ -1,7 +1,7 @@
 <ul>
   @for (object of objects; track object) {
     <div>
-      <li>{{ object }}</li>
+      <li (click)="onObjectClick(object)" style="cursor: pointer;">{{ object }}</li>
     </div>
   }
 </ul>

@@ -12,6 +12,7 @@ import { EchoComponent } from './echo/echo.component';
 import { ConfigurationComponent } from './configuration/configuration.component';
 import { ListComponent } from './list/list.component';
 import { HeaderSublistComponent } from './list/header-sublist/header-sublist.component';
+import { DetailComponent } from './detail/detail.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { HeaderSublistComponent } from './list/header-sublist/header-sublist.com
     EchoComponent,
     ConfigurationComponent,
     ListComponent,
-    HeaderSublistComponent
+    HeaderSublistComponent,
+    DetailComponent
   ],
   imports: [
     BrowserModule,

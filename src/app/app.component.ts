@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { ConnectionService } from './connection.service';
 import { ConnectedComponent } from './connected-component/connected.component';
 import { IncomingMessage, MessageType } from './messages/Message';
+import { BoIdentifier } from './business-object/bo.identifier';
 
 @Component({
     selector: 'app-root',
@@ -17,7 +18,7 @@ export class AppComponent extends ConnectedComponent implements OnInit {
   activateLoginComponent = false;
   activateSetupConfigComponent = false;
 
-  constructor(private specificService:ConnectionService) {
+    constructor(private specificService:ConnectionService) {
     super(specificService);
     this.setComponentID('AppComponent');
   }
