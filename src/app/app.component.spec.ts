@@ -3,7 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import * as rxjs from 'rxjs';
 import { AppComponent } from './app.component';
 import { Message, MessageType } from './messages/Message';
-import { WelcomeMessage, ByeMessage } from "./messages/admin.messages";
+import { WelcomeMessage, ByeMessage, HelloMessage } from "./messages/admin.messages";
 import { ConnectionService } from './connection.service';
 
 class MockConnectionService {
@@ -74,11 +74,24 @@ describe('AppComponent', () => {
     expect(spyOnRemoveConn).toHaveBeenCalled();
   })
 
-  it('should activate Login until receiving Welcome message', () => {
+  it('should activate Login when receiving Hello message', () => {
+    const mockHelloMessage = new HelloMessage(
+      {type: MessageType.Hello, token: 'mockToken', ses_token: 'mockSession'});
+    expect(appComponent.activateLoginComponent).toBe(false);
+    appComponent.handleMessages(mockHelloMessage);
+    expect(appComponent.activateLoginComponent).toBe(true);
+  });
+
+  it('should deactivate Login when receiving Welcome message', () => {
+    const mockHelloMessage = new HelloMessage(
+      {type: MessageType.Hello, token: 'mockToken', ses_token: 'mockSession'});
     const mockWelcomeMessage = new WelcomeMessage(
       {type: MessageType.Welcome, token: 'mockToken', ses_token: 'mockSession'});
-    expect(appComponent.activateLoginComponent).withContext('before Welcome').toBeTrue();
+    expect(appComponent.activateLoginComponent).toBe(false);
+    appComponent.handleMessages(mockHelloMessage);
+    expect(appComponent.activateLoginComponent).toBe(true);
     appComponent.handleMessages(mockWelcomeMessage);
-    expect(appComponent.activateLoginComponent).withContext('after Welcome').toBeFalse();
+    expect(appComponent.activateLoginComponent).toBe(false);
   });
+
 });

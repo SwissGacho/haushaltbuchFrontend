@@ -61,8 +61,14 @@ describe('ConnectionService', () => {
     mockSubscriber = new MockConnectedComponent(connectionService);
     mockSubject = new MockSubject();
     mockTake = () => rxjs.EMPTY;
+    mockTakeCred = () => rxjs.EMPTY;
     mockSkip = () => rxjs.EMPTY;
     ConnectionService.connections = {};
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should be created', () => {
@@ -77,7 +83,7 @@ describe('ConnectionService', () => {
     const spyOnDeserialize = jest.spyOn(MessageFactory,'deserialize');
     const spyOnWebSocket = 
       jest.spyOn(connectionService, 'webSocket').mockReturnValue(mockWebSocketSubject as unknown as rxws.WebSocketSubject<Message>);
-    const spyOnAddConnection = jest.spyOn(ConnectionService, 'addConnection')
+    const spyOnAddConnection = jest.spyOn(ConnectionService, 'addConnection').mockReturnValue()
     const spyOnPipe = jest.spyOn(mockWebSocketSubject, 'pipe');
     const spyOnSubscribe = jest.spyOn(mockWebSocketSubject,'subscribe');
     const spyOnTake = jest.spyOn(RXJS, 'take').mockReturnValue(mockTake);
@@ -171,19 +177,19 @@ describe('ConnectionService', () => {
       isPrimary: primary,
       rxjsTake: mockTakeCred
     };
-    const spyOnSetToken = jest.spyOn(mockSubscriber, 'setToken');
+    const spyOnSetToken = jest.spyOn(mockSubscriber, 'setToken').mockReturnValue();
     const spyOnPipe = jest.spyOn(mockSubject, 'pipe');
     const spyOnTake = jest.spyOn(RXJS, 'take').mockReturnValue(mockTake);
     const spyOnSubscribe = jest.spyOn(mockSubject,'subscribe');
-    const spyOnSendMessage = jest.spyOn(connectionService, 'sendMessage');
-    const spyOnNext = jest.spyOn(ConnectionService.loginBySessionTokenSubject, 'next');
-    const spyOnTakeOverConsole = jest.spyOn(Logger, 'takeOverConsole');
+    const spyOnSendMessage = jest.spyOn(connectionService, 'sendMessage').mockReturnValue();
+    const spyOnNext = jest.spyOn(ConnectionService.loginBySessionTokenSubject, 'next').mockReturnValue();
+    const spyOnTakeOverConsole = jest.spyOn(Logger, 'takeOverConsole').mockReturnValue();
 
     if (error) {
       console.log('expect to throw',error)
       expect( function() {
         connectionService.handleHandshakeMessages(msg, mockContext);
-      }).toThrowError(error);
+      }).toThrow(error);
       return;
     } else {
       connectionService.handleHandshakeMessages(msg, mockContext);
@@ -289,16 +295,16 @@ describe('ConnectionService', () => {
 
     expect(spyOnNext.mock.calls).toEqual([[mockMessage]]);
   });
-
+ 
   it('should add a connection to connections list', () => {
-    expect(ConnectionService.connections).toHaveLength(0);
+    expect(Object.entries(ConnectionService.connections)).toHaveLength(0);
     const mockId1 = 'mockComponent_1';
     const mockSubject1 = new MockWebSocketSubject()  as unknown as rxws.WebSocketSubject<any>;
     const mockSubscriber1 = new MockConnectedComponent(connectionService);
     mockSubscriber1.componentID = mockId1;
 
     ConnectionService.addConnection(mockSubject1, mockSubscriber1);
-    expect(ConnectionService.connections).toHaveLength(1);
+    expect(Object.entries(ConnectionService.connections)).toHaveLength(1);
     expect(ConnectionService.connections[mockId1]).toBeTruthy();
     expect(ConnectionService.connections).toEqual({mockComponent_1:
       {subject: mockSubject1, subscriber: mockSubscriber1}
@@ -310,7 +316,7 @@ describe('ConnectionService', () => {
     mockSubscriber2.componentID = mockId2;
 
     ConnectionService.addConnection(mockSubject2, mockSubscriber2);
-    expect(ConnectionService.connections).toHaveLength(2);
+    expect(Object.entries(ConnectionService.connections)).toHaveLength(2);
     expect(ConnectionService.connections[mockId2]).toBeTruthy();
     expect(ConnectionService.connections).toEqual({
       mockComponent_1: {subject: mockSubject1, subscriber: mockSubscriber1},
@@ -334,14 +340,14 @@ describe('ConnectionService', () => {
     const spyOnComplete1 = jest.spyOn(mockSubject1, 'complete');
     const spyOnComplete2 = jest.spyOn(mockSubject2, 'complete');
 
-    expect(ConnectionService.connections).toHaveLength(2);
+    expect(Object.entries(ConnectionService.connections)).toHaveLength(2);
     expect(ConnectionService.connections).toEqual({
       mockComponent_1: {subject: mockSubject1, subscriber: mockSubscriber1},
       mockComponent_2: {subject: mockSubject2, subscriber: mockSubscriber2}
     });
 
     connectionService.removeConnection(mockId1);
-    expect(ConnectionService.connections).toHaveLength(1);
+    expect(Object.entries(ConnectionService.connections)).toHaveLength(1);
     expect(spyOnComplete1.mock.calls).toEqual([[]]);
     expect(spyOnComplete2).not.toHaveBeenCalled();
     expect(ConnectionService.connections).toEqual({
