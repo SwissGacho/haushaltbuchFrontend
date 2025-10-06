@@ -32,7 +32,7 @@ export interface Message {
   reason?: string;
   ses_token?: string;
   object?: string;
-  index?: number | string;
+  index?: number | string | null;
   payload?: any;
 }
 
