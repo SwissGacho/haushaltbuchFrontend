@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { BoIdentifier } from 'src/app/business-object/bo.identifier';
 import { ConnectedComponent } from 'src/app/connected-component/connected.component';
 import { ConnectionService } from 'src/app/connection.service';
@@ -32,7 +32,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
       }
       else if (message.type === MessageType.ObjectList) {
           let cast = message as ObjectList;
-          console.log('Received list', cast);
+          console.log(`Received object list for header ${this.header}`, cast);
           this.objects = cast.objects;
       }
       else {
@@ -46,7 +46,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
           console.error('No token available');
           return;
       }
-      console.log('Fetching list');
+      console.log(`Fetching list for header ${this.header}`);
       let message = new FetchList(this.header, undefined, this.token);
       this.sendMessage(message);
   }
