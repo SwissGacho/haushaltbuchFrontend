@@ -6,23 +6,23 @@ import { ObjectMessage } from "./data.messages"
 export enum MessageType {
   None = 'None',
   Log = "Log",
-    Hello = "Hello",
-    Login = "Login",
-    Welcome = "Welcome",
-    Setup = "Setup",
-    Bye = "Bye",
-    Echo = "Echo",
-    Fetch = "Fetch",
-    Object = "Object",
-    Store = 'Store',
-    FetchSetup = "FetchSetup",
-    ObjectSetup = "ObjectSetup",
-    StoreSetup = 'StoreSetup',
-    FetchNavigationHeaders = 'FetchNavigationHeaders',
-    NavigationHeaders = 'NavigationHeaders',
-    FetchList = 'FetchList',
-    ObjectList = 'ObjectList',
-  }
+  Hello = "Hello",
+  Login = "Login",
+  Welcome = "Welcome",
+  Setup = "Setup",
+  Bye = "Bye",
+  Echo = "Echo",
+  Fetch = "Fetch",
+  Object = "Object",
+  Store = 'Store',
+  FetchSetup = "FetchSetup",
+  ObjectSetup = "ObjectSetup",
+  StoreSetup = 'StoreSetup',
+  FetchNavigationHeaders = 'FetchNavigationHeaders',
+  NavigationHeaders = 'NavigationHeaders',
+  FetchList = 'FetchList',
+  ObjectList = 'ObjectList',
+}
 
   
 export interface Message {
@@ -32,7 +32,7 @@ export interface Message {
   reason?: string;
   ses_token?: string;
   object?: string;
-  index?: number | string;
+  index?: number | string | null;
   payload?: any;
 }
 

@@ -1,0 +1,17 @@
+<div *ngIf="selectedObject">
+  <p>Selected Object: {{ selectedObject.type }} - {{ selectedObject.id }}</p>
+</div>
+<div *ngIf="!selectedObject">
+  <p>No object selected</p>
+</div>
+<!-- Else display selected object-->
+<div *ngIf="objectInfo">
+  <h3>Object Information</h3>
+  <pre>{{ objectInfo | json }}</pre>
+  <!-- show all attributes of the objects in individual divs, with the ability to edit them
+  On losing focus, send an update message to the backend with the updated object information. 
+  -->
+  <div *ngFor="let key of objectKeys">
+    <strong>{{ key }}:</strong> <input [(ngModel)]="objectInfo[key]" (blur)="updateObject(key)" />
+  </div>
+</div>

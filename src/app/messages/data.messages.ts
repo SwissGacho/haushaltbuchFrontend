@@ -42,12 +42,12 @@ export class NavigationHeaders extends IncomingMessage {
 
 export class StoreMessage extends OutgoingMessage {
   object: string;
-  index: number | string;
+  index: number | string | null;
   payload: any;
 
     constructor(
       object: string,
-      index: number | string,
+      index: number | string | null,
       payload: any,
       token?: string,
       message_type?: MessageType
