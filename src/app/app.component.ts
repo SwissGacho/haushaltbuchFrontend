@@ -17,7 +17,7 @@ export class AppComponent extends ConnectedComponent implements OnInit {
   activateLoginComponent = false;
   activateSetupConfigComponent = false;
 
-    constructor(private specificService:ConnectionService) {
+  constructor(private specificService:ConnectionService) {
     super(specificService);
     this.setComponentID('AppComponent');
   }
