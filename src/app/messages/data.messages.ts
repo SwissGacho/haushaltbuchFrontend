@@ -80,3 +80,19 @@ export class ObjectList extends IncomingMessage {
     this.objects = data.payload?.objects || [];
   }
 }
+
+export class FetchSchemaMessage extends FetchMessage {
+  constructor(objectType: string, token?: string) {
+    super(objectType, '', token, MessageType.FetchSchema);
+  }
+}
+
+export class ObjectSchemaMessage extends IncomingMessage {
+  schema: any;
+
+  constructor(data: Message) {
+    super(data);
+    console.log('ObjectSchemaMessage', data);
+    this.schema = data.payload || {};
+  }
+}
