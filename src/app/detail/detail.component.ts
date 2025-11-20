@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
 import { IncomingMessage, MessageType } from '../messages/Message';
-import { FetchMessage, ObjectMessage, StoreMessage } from '../messages/data.messages';
+import { FetchMessage, FetchSchemaMessage, ObjectMessage, ObjectSchemaMessage, StoreMessage } from '../messages/data.messages';
 import { SelectedObjectService } from '../selected-object.service';
 import { BoIdentifier } from '../business-object/bo.identifier';
 import { Subscription } from 'rxjs';
@@ -25,8 +25,12 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
 
   override OBSERVE_HANDSHAKE = true;
   objectInfo: any = null;
+  objectInfoCache: any = null;
   objectInfoClean: any = null;
   objectKeys: string[] = [];
+  objectSchema: any = null;
+  objectUpdating: boolean = false;
+  schemaUpdating: boolean = false;
 
   override handleMessages(message: IncomingMessage): void {
       console.groupCollapsed(this.componentID, "received", message.type, "message");
@@ -43,6 +47,12 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         let cast = message as ObjectMessage;
         this.updateObjectInfo(cast.payload);
       }
+      else if (message.type === MessageType.ObjectSchema) {
+        console.log(`${this.componentID} handling object schema message`, message);
+        let cast = message as ObjectSchemaMessage;
+        console.log('Received schema', cast.schema);
+        this.updateSchemaInfo(cast.schema);
+      }
       else {
           // We received an unexpected or unknown message
             console.error(`${this.componentID} handling Unexpected message of type ${message.type}`, message);
@@ -58,20 +68,50 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     );
   }
 
+  fetchSchema() {
+    if(this.token === null) {
+      console.error('No token available');
+      return;
+    }
+    console.log('Fetching schema');
+    this.schemaUpdating = true;
+    let message = new FetchSchemaMessage(this.selectedObject!.type, this.token);
+    this.sendMessage(message);
+  }
+
   fetchObject() {
     if(this.token === null) {
       console.error('No token available');
       return;
     }
     console.log('Fetching object');
+    this.objectUpdating = true;
     let message = new FetchMessage(this.selectedObject!.type, this.selectedObject!.id, this.token);
     this.sendMessage(message);
   }
 
+  updateSchemaInfo(schema: any) {
+    this.objectSchema = schema;
+    this.objectKeys = Object.keys(this.objectSchema || {});
+    this.schemaUpdating = false;
+    console.info('Schema updated', this.objectSchema);
+    if (!this.objectUpdating) {
+      this.updateObjectFrontend()
+    }
+  }
+
   updateObjectInfo(objectInfo: any) {
-    this.objectInfo = objectInfo;
-    this.objectInfoClean = { ...objectInfo };
-    this.objectKeys = Object.keys(objectInfo);
+    this.objectInfoCache = objectInfo;
+    this.objectUpdating = false;
+    if (!this.schemaUpdating) {
+      this.updateObjectFrontend()
+    }
+  }
+
+  updateObjectFrontend() {
+    this.objectInfo = this.objectInfoCache;
+    this.objectInfoClean = { ...this.objectInfoCache };
+    this.objectInfoCache = null;
   }
 
   updateObject(key: string) {
@@ -91,6 +131,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
   private onSelectedObjectChange(object: BoIdentifier | null) {
     this.selectedObject = object;
     this.fetchObject();
+    this.fetchSchema();
     // TODO: Unsubscribe from previous object
   }
 

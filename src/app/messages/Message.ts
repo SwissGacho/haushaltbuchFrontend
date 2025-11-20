@@ -22,6 +22,8 @@ export enum MessageType {
   NavigationHeaders = 'NavigationHeaders',
   FetchList = 'FetchList',
   ObjectList = 'ObjectList',
+  FetchSchema = 'FetchSchema',
+  ObjectSchema = 'ObjectSchema',
 }
 
   
