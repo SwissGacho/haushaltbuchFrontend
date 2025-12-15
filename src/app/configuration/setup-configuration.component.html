@@ -64,14 +64,21 @@
 
           <div>
             <label for="ssl_cert">SSL Certificate (path):</label>
-            <input id="ssl_cert" [(ngModel)]="configuration.db_cfg.ssl.ssl_cert"
-                  name="ssl_cert" placeholder="C:\path\to\cert.pem"
+            <input id="ssl_cert"
+                  [(ngModel)]="configuration.db_cfg.ssl.ssl_cert"
+                  (ngModelChange)="onSslCertChange($event)"
+                  name="ssl_cert"
+                  placeholder="C:\path\to\cert.pem"
                   required />
           </div>
+
           <div>
             <label for="ssl_key">SSL Key (path):</label>
-            <input id="ssl_key" [(ngModel)]="configuration.db_cfg.ssl.ssl_key"
-                  name="ssl_key" placeholder="C:\path\to\key.pem"
+            <input id="ssl_key"
+                  [(ngModel)]="configuration.db_cfg.ssl.ssl_key"
+                  (ngModelChange)="onSslKeyChange($event)"
+                  name="ssl_key"
+                  placeholder="C:\path\to\key.pem"
                   required />
           </div>
 
