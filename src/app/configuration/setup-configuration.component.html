@@ -49,6 +49,11 @@
             <input id="host" [(ngModel)]="configuration.db_cfg.host" name="host" required />
           </div>
           <div>
+            <label for="port">Port:</label>
+            <input id="port" type="number" [(ngModel)]="configuration.db_cfg.port" name="port"
+                  min="1" max="65535" required />
+          </div>
+          <div>
             <label for="db">DB:</label>
             <input id="db" [(ngModel)]="configuration.db_cfg.dbname" name="db" required />
           </div>
@@ -56,9 +61,24 @@
             <label for="dbuser">User:</label>
             <input id="dbuser" [(ngModel)]="configuration.db_cfg.dbuser" name="dbuser" required />
           </div>
+
           <div>
-            <label for="dbpassword">Password:</label>
-            <input id="dbpassword" [(ngModel)]="configuration.db_cfg.password" name="dbpassword" required />
+            <label for="ssl_cert">SSL Certificate (path):</label>
+            <input id="ssl_cert" [(ngModel)]="configuration.db_cfg.ssl.ssl_cert"
+                  name="ssl_cert" placeholder="C:\path\to\cert.pem"
+                  required />
+          </div>
+          <div>
+            <label for="ssl_key">SSL Key (path):</label>
+            <input id="ssl_key" [(ngModel)]="configuration.db_cfg.ssl.ssl_key"
+                  name="ssl_key" placeholder="C:\path\to\key.pem"
+                  required />
+          </div>
+
+          <div>
+            <small>
+              Provide full filesystem paths to the SSL certificate and key files.
+            </small>
           </div>
         </div>
       }
