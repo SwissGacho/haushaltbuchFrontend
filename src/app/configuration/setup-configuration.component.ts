@@ -25,9 +25,11 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
     app: { },
     db_cfg: {
       db: DBs.sqlite,
-      file: 'money_pilot.sqlite.db'
+      file: 'money_pilot.sqlite.db',
+      ssl: {}
     }
   };
+
   get dbOption(): DBs { return this.configuration.db_cfg.db; }
   set dbOption(v: DBs) {
     this.configuration.db_cfg.db = v;
@@ -36,28 +38,128 @@ export class SetupConfigurationComponent extends ConnectedComponent implements O
         this.db_filename = 'money_pilot.sqlite.db';
       }
       delete this.configuration.db_cfg.host;
+      delete this.configuration.db_cfg.port;
       delete this.configuration.db_cfg.dbname;
       delete this.configuration.db_cfg.dbuser;
-      delete this.configuration.db_cfg.password;
+      // keep the ssl object but clear its contents when switching back to sqlite
+      this.configuration.db_cfg.ssl = {};
     }
-    if (v === DBs.mariadb) { delete this.configuration.db_cfg.file; }
+    if (v === DBs.mariadb) {
+      // remove file entry and ensure ssl object exists
+      delete this.configuration.db_cfg.file;
+      // ensure ssl container exists so template bindings have an object
+      if (!this.configuration.db_cfg.ssl || typeof this.configuration.db_cfg.ssl !== 'object') {
+        this.configuration.db_cfg.ssl = { ssl_cert: '', ssl_key: '' };
+      } else {
+        // ensure properties exist
+        if (typeof this.configuration.db_cfg.ssl.ssl_cert === 'undefined') this.configuration.db_cfg.ssl.ssl_cert = '';
+        if (typeof this.configuration.db_cfg.ssl.ssl_key === 'undefined') this.configuration.db_cfg.ssl.ssl_key = '';
+      }
+      // ensure host/db/dbuser fields exist (optional defaults)
+      if (!this.configuration.db_cfg.host) this.configuration.db_cfg.host = '';
+      if (!this.configuration.db_cfg.port) this.configuration.db_cfg.port = 3306;
+      if (!this.configuration.db_cfg.dbname) this.configuration.db_cfg.dbname = '';
+      if (!this.configuration.db_cfg.dbuser) this.configuration.db_cfg.dbuser = '';
+    }
   }
   db_locations: string[] = [''];
   db_location: string = '';
   db_filename: string = '';
-  adminuser: string = '';
-  adminpassword: string = '';
 
   dbuser: string = '';
-  dbpassword: string = '';
 
   dbcfg_file_searchpath: string[] = [''];
   dbcfg_file_searchpath_as_string: string = '';
   dbcfg_file_default: string = 'configuration.json';
   dbcfg_file_location: string = '';
   dbcfg_file: string = this.dbcfg_file_default;
-  filepath_delimiter: string = '/'
+  filepath_delimiter: string = '/';
   result: any;
+
+  private lastAutoGuessedKey: string | null = null;
+
+  /**
+   * Called when user edits the SSL certificate path input.
+   * If ssl_key is empty or was previously auto-guessed, attempt to auto-guess.
+   */
+  onSslCertChange(certPath: string): void {
+    if (!this.configuration.db_cfg.ssl || typeof this.configuration.db_cfg.ssl !== 'object') {
+      this.configuration.db_cfg.ssl = { ssl_cert: '', ssl_key: '' };
+    }
+    this.configuration.db_cfg.ssl.ssl_cert = certPath || '';
+
+    const currentKey = this.configuration.db_cfg.ssl.ssl_key;
+
+    // compute a guess regardless — we need it for comparison/update
+    const guessed = this.guessKeyPath(certPath || '');
+
+    // Auto-update key only if it's empty OR it equals the previously auto-guessed value.
+    if (!currentKey || currentKey === this.lastAutoGuessedKey) {
+      this.configuration.db_cfg.ssl.ssl_key = guessed;
+      this.lastAutoGuessedKey = guessed || null;
+    } else {
+      // user provided a manual key -> stop auto-overwriting
+      this.lastAutoGuessedKey = null;
+    }
+  }
+
+  /**
+   * Called when the user edits the SSL key input manually.
+   * If the user changed the key to something that is not our last auto-guess,
+   * we clear the 'lastAutoGuessedKey' marker so future cert changes won't overwrite.
+   */
+  onSslKeyChange(keyPath: string): void {
+    if (!this.configuration.db_cfg.ssl || typeof this.configuration.db_cfg.ssl !== 'object') {
+      this.configuration.db_cfg.ssl = { ssl_cert: '', ssl_key: '' };
+    }
+    this.configuration.db_cfg.ssl.ssl_key = keyPath || '';
+
+    // If the key no longer matches the previously auto-guessed value, forget the auto-guess.
+    if (this.configuration.db_cfg.ssl.ssl_key !== this.lastAutoGuessedKey) {
+      this.lastAutoGuessedKey = null;
+    }
+  }
+
+  /**
+   * Heuristic to guess the key file path from a cert file path.
+   * - Replace '.cert.' with '.key.' (common pattern in your examples)
+   * - Replace trailing 'cert.pem' with 'key.pem'
+   * - Replace 'cert' with 'key' in filename part
+   * - Otherwise append '.key' before extension or add '.key' suffix
+   */
+  private guessKeyPath(certPath: string): string {
+    if (!certPath) return '';
+
+    // Common pattern: file.cert.pem -> file.key.pem
+    if (certPath.includes('.cert.')) {
+      return certPath.replace('.cert.', '.key.');
+    }
+
+    const lower = certPath.toLowerCase();
+    if (lower.endsWith('cert.pem')) {
+      return certPath.slice(0, -'cert.pem'.length) + 'key.pem';
+    }
+
+    // Split off last path segment
+    const sepIndex = Math.max(certPath.lastIndexOf('/'), certPath.lastIndexOf('\\'));
+    const dir = sepIndex >= 0 ? certPath.slice(0, sepIndex + 1) : '';
+    const file = sepIndex >= 0 ? certPath.slice(sepIndex + 1) : certPath;
+
+    // Replace 'cert' with 'key' in filename if present
+    const replaced = file.replace(/cert/ig, 'key');
+    if (replaced !== file) {
+      return dir + replaced;
+    }
+
+    // If file has extension, insert '.key' before it: name.pem -> name.key.pem
+    const dotIndex = file.lastIndexOf('.');
+    if (dotIndex !== -1) {
+      return dir + file.slice(0, dotIndex) + '.key' + file.slice(dotIndex);
+    }
+
+    // Fallback: append '.key'
+    return certPath + '.key.pem';
+  }
 
   override handleMessages(message: IncomingMessage): void {
     if (message.type === MessageType.Hello) {
