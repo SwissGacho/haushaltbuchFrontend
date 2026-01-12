@@ -1,5 +1,6 @@
 # --- STAGE 1: Build ---
-FROM node:20-alpine AS build
+# Use a Debian-slim base to improve compatibility with QEMU emulation
+FROM node:20-bullseye-slim AS build
 WORKDIR /app
 
 # Abhängigkeiten kopieren und installieren
@@ -11,7 +12,8 @@ COPY . .
 RUN npm run build -- --configuration production
 
 # --- STAGE 2: Serve ---
-FROM nginx:stable-alpine
+# Use Debian-based nginx image for compatibility
+FROM nginx:stable
 
 # Kopiere eine spezielle NGINX-Konfiguration für Angular (siehe unten)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
