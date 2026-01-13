@@ -20,7 +20,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Kopiere die gebauten Dateien aus Stage 1
 # Ersetze 'PROJEKTNAME' durch den Namen aus deiner angular.json
-COPY --from=build /app/dist/haushaltbuchFrontend /usr/share/nginx/html
+COPY --from=build /app/dist/haushaltbuchFrontend/browser /usr/share/nginx/html
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
