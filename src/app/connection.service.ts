@@ -61,6 +61,7 @@ export class ConnectionService {
     // Development uses local websocket backend. For production derive the
     // websocket URL from the URL the frontend was served from so the
     // Nginx reverse proxy (https) is used automatically.
+    ENVIRONMENT = environment;
     BACKEND_ADDRESS = environment.production
         ? ((): string => {
             const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -106,6 +107,8 @@ export class ConnectionService {
         console.log('Subscriber: ', subscriber); 
         console.log('LoginSubjectOrObserveHandshake: ',loginSubjectOrObserveHandshake);
         console.log('is primary: ', isPrimary);
+        console.log('Backend address: ', this.BACKEND_ADDRESS);
+        console.log('Environment: ', this.ENVIRONMENT);
         let connection = this.webSocket({url: this.BACKEND_ADDRESS, deserializer: MessageFactory.deserialize});
         let loginSubject: LoginSubject;
         loginSubject = (loginSubjectOrObserveHandshake instanceof rxjs.Subject)
