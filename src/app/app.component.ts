@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { ConnectionService } from './connection.service';
 import { ConnectedComponent } from './connected-component/connected.component';
 import { IncomingMessage, MessageType } from './messages/Message';
+import { environment } from '../environments/environment';
 
 @Component({
     selector: 'app-root',
@@ -20,7 +21,10 @@ export class AppComponent extends ConnectedComponent implements OnInit {
   constructor(private specificService:ConnectionService) {
     super(specificService);
     this.setComponentID('AppComponent');
-    console.log(this.componentID, 'constructed');
+    console.groupCollapsed(this.componentID, 'constructed');
+    console.log('Environment:', environment.production ? 'Production' : 'Development');
+    console.log('App Version:', environment.appVersion);
+    console.groupEnd();
   }
 
   override handleMessages(message: IncomingMessage): void {
