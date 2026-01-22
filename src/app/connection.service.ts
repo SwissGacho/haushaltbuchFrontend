@@ -108,7 +108,6 @@ export class ConnectionService {
         console.log('LoginSubjectOrObserveHandshake: ',loginSubjectOrObserveHandshake);
         console.log('is primary: ', isPrimary);
         console.log('Backend address: ', this.BACKEND_ADDRESS);
-        console.log('Environment: ', this.ENVIRONMENT);
         let connection = this.webSocket({url: this.BACKEND_ADDRESS, deserializer: MessageFactory.deserialize});
         let loginSubject: LoginSubject;
         loginSubject = (loginSubjectOrObserveHandshake instanceof rxjs.Subject)
