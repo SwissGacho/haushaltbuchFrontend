@@ -20,6 +20,7 @@ export class AppComponent extends ConnectedComponent implements OnInit {
   constructor(private specificService:ConnectionService) {
     super(specificService);
     this.setComponentID('AppComponent');
+    console.log(this.componentID, 'constructed');
   }
 
   override handleMessages(message: IncomingMessage): void {
