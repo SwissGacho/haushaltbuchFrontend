@@ -1,6 +1,6 @@
 # --- STAGE 1: Build ---
 # Use a Debian-slim base to improve compatibility with QEMU emulation
-FROM node:20-bullseye-slim AS stage1
+FROM node:24-bookworm-slim AS stage1
 WORKDIR /app
 
 # Abhängigkeiten kopieren und installieren
