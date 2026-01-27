@@ -4,7 +4,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BaseComponent } from '../base.component';
 import { ConnectionService } from '../connection.service';
-import { Message } from '../messages/Message';
+import { Message, IncomingBaseMessage } from '../messages/Message';
 import { LoginCredentials } from "../messages/admin.messages";
 
 @Component({
@@ -74,7 +74,7 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
 
     // Abstract method for components to implement their message handling.
     // Messages after the handshaking
-    handleMessages(message: Message): void {
+    handleMessages(message: IncomingBaseMessage): void {
         throw new Error('Subclasses must implement the handleMessages method.');
     }
 

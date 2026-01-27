@@ -8,12 +8,16 @@ export class HelloMessage extends IncomingMessage implements HelloMessageType {
 
 export class WelcomeMessage extends IncomingMessage implements WelcomeMessageType {
   override type = MessageType.Welcome as const;
-  version_info?: { version?: string; [key: string]: any };
+  ses_token?: string;
+  version_info?: { version?: string };
   
   constructor(data: Message) {
     super(data);
     if ('version_info' in data && data.version_info) {
       this.version_info = data.version_info;
+    }
+    if ('ses_token' in data && data.ses_token) {
+      this.ses_token = data.ses_token;
     }
   }
 }

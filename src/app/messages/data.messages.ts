@@ -11,7 +11,7 @@ export class FetchMessage extends OutgoingMessage implements FetchMessageType {
       object: string,
       index: number | string,
       token?: string,
-      message_type?: MessageType
+      message_type?: MessageType.Fetch | MessageType.FetchSetup | MessageType.FetchNavigationHeaders | MessageType.FetchList
     ) {
         super(message_type || MessageType.Fetch, token);
         this.type = message_type || MessageType.Fetch;
@@ -55,7 +55,7 @@ export class StoreMessage extends OutgoingMessage implements StoreMessageType {
       index: number | string | null,
       payload: any,
       token?: string,
-      message_type?: MessageType
+      message_type?: MessageType.Store | MessageType.StoreSetup
     ) {
         super(message_type || MessageType.Store, token);
         this.type = message_type || MessageType.Store;

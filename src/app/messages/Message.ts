@@ -30,7 +30,7 @@ export interface BaseMessage {
 }
 
 export interface IncomingBaseMessage extends BaseMessage {
-  token?: string;
+  token: string | null;
   status?: string;
 }
 
@@ -46,7 +46,8 @@ export interface HelloMessageType extends IncomingBaseMessage {
 
 export interface WelcomeMessageType extends IncomingBaseMessage {
   type: MessageType.Welcome;
-  version_info?: { version?: string; [key: string]: any };
+  ses_token?: string;
+  version_info?: { version?: string };
 }
 
 export interface ByeMessageType extends IncomingBaseMessage {
@@ -143,11 +144,11 @@ export class OutgoingMessage implements OutgoingBaseMessage {
 
 export class IncomingMessage implements IncomingBaseMessage {
     type: MessageType;
-    token?: string;
+    token: string | null;
     status?: string;
     constructor(data: Message) {
       this.type = data.type;
-      this.token = data.token;
+      this.token = ('token' in data ? data.token : null) || null;
       this.status = data.status;
     }
 }
