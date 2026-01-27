@@ -17,6 +17,8 @@ export class AppComponent extends ConnectedComponent implements OnInit {
   activateAnyComponent = true;
   activateLoginComponent = false;
   activateSetupConfigComponent = false;
+  frontendVersion = environment.appVersion;
+  backendVersion?: string;
 
   constructor(private specificService:ConnectionService) {
     super(specificService);
@@ -45,7 +47,11 @@ export class AppComponent extends ConnectedComponent implements OnInit {
     if (message.type == MessageType.Welcome) {
       // we are logged in, destroy LoginComponent
       this.activateLoginComponent = false;
+      if ('version_info' in message && message.version_info?.version) {
+        this.backendVersion = message.version_info?.version;
+      }
     }
+    console.log('App logged in:', this)
   }
 
   // Creates the connection to the backend when the component is initialized.
