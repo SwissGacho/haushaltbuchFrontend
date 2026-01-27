@@ -1,18 +1,32 @@
 // console.log('init messages.admin');
 
-import { MessageType, Message, IncomingMessage, OutgoingMessage } from "../messages/Message";
+import { MessageType, Message, IncomingMessage, OutgoingMessage, HelloMessageType, WelcomeMessageType, ByeMessageType, LogMessageType, LoginMessageType, EchoMessageType } from "../messages/Message";
 
-export class HelloMessage extends IncomingMessage {
+export class HelloMessage extends IncomingMessage implements HelloMessageType {
+  override type = MessageType.Hello as const;
 }
 
-export class WelcomeMessage extends IncomingMessage {
-}
-
-export class ByeMessage extends IncomingMessage {
-  reason: string;
+export class WelcomeMessage extends IncomingMessage implements WelcomeMessageType {
+  override type = MessageType.Welcome as const;
+  version_info?: { version?: string; [key: string]: any };
+  
   constructor(data: Message) {
     super(data);
-    this.reason = data.reason || '';
+    if ('version_info' in data && data.version_info) {
+      this.version_info = data.version_info;
+    }
+  }
+}
+
+export class ByeMessage extends IncomingMessage implements ByeMessageType {
+  override type = MessageType.Bye as const;
+  reason?: string;
+  
+  constructor(data: Message) {
+    super(data);
+    if ('reason' in data && data.reason) {
+      this.reason = data.reason;
+    }
   }
 }
 
@@ -23,10 +37,13 @@ export enum LogLevel {
   Error = "error",
   Critical = "critical"
 }
-export class LogMessage extends OutgoingMessage {
+
+export class LogMessage extends OutgoingMessage implements LogMessageType {
+  override type = MessageType.Log as const;
   log_level: LogLevel;
   message: string;
   caller?: string;
+  
   constructor(level: LogLevel, msg: string, caller?: string, token?: string) {
     super(MessageType.Log, token);
     this.log_level = level;
@@ -36,7 +53,8 @@ export class LogMessage extends OutgoingMessage {
 }
 
 export type LoginCredentials = { user?: string; ses_token?: string; };
-export class LoginMessage extends OutgoingMessage {
+export class LoginMessage extends OutgoingMessage implements LoginMessageType {
+  override type = MessageType.Login as const;
   user?: string;
   ses_token?: string;
   prev_token?: string;
@@ -59,13 +77,14 @@ export class LoginMessage extends OutgoingMessage {
   }
 }
 
-export class EchoMessage extends OutgoingMessage {
-  component: string = '';
-  payload: string;
+export class EchoMessage extends OutgoingMessage implements EchoMessageType {
+  override type = MessageType.Echo as const;
+  component?: string;
+  payload?: string;
 
   constructor(component: string, payload: string) {
     super(MessageType.Echo);
-    if (component) { this.component = component; }
+    this.component = component;
     this.payload = payload;
   }
 }
