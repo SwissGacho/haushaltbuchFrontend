@@ -107,14 +107,17 @@ export class ConnectionService {
         console.log('LoginSubjectOrObserveHandshake: ',loginSubjectOrObserveHandshake);
         console.log('is primary: ', isPrimary);
         console.log('Backend address: ', this.BACKEND_ADDRESS);
-        let connection = this.webSocket({url: this.BACKEND_ADDRESS, deserializer: MessageFactory.deserialize as any});
+        let connection = this.webSocket({
+            url: this.BACKEND_ADDRESS, 
+            deserializer: (event) => MessageFactory.deserialize(event) as Message
+        });
         let loginSubject: LoginSubject;
         loginSubject = (loginSubjectOrObserveHandshake instanceof rxjs.Subject)
             ? loginSubjectOrObserveHandshake
             : ConnectionService.loginBySessionTokenSubject;
         ConnectionService.addConnection(connection, subscriber);
         connection.pipe(RXJS.skip(loginSubjectOrObserveHandshake ? 0 : 2)).subscribe({
-            next: (message: any) => subscriber.handleMessages(message as IncomingBaseMessage),
+            next: (message: Message) => subscriber.handleMessages(message as IncomingBaseMessage),
             complete: () => subscriber.handleComplete(),
             error: (error: any) => subscriber.handleError(error)
         });

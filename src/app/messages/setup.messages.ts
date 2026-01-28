@@ -1,7 +1,7 @@
 // console.log('init messages.data');
 
 import { FetchMessage, ObjectMessage, StoreMessage } from "../messages/data.messages";
-import { Message, MessageType, ObjectSetupMessageType, StoreMessageType } from "../messages/Message"
+import { Message, MessageType } from "../messages/Message"
 
 export class FetchSetupMessage extends FetchMessage {
   override type = MessageType.FetchSetup as const;
