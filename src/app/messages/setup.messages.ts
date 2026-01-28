@@ -4,22 +4,25 @@ import { FetchMessage, ObjectMessage, StoreMessage } from "../messages/data.mess
 import { Message, MessageType, ObjectSetupMessageType, StoreMessageType } from "../messages/Message"
 
 export class FetchSetupMessage extends FetchMessage {
+  override type = MessageType.FetchSetup as const;
 
     constructor(object: string, index: number | string, token?: string) {
-        super(object, index, token, MessageType.FetchSetup);
+        super(object, index, token);
     }
 }
 
 export class ObjectSetupMessage extends ObjectMessage {
+  override type = MessageType.ObjectSetup as const;
+
   constructor(data: Message) { 
     super(data);
-    (this as any).type = MessageType.ObjectSetup;
   }
 }
 
 export class StoreSetupMessage extends StoreMessage {
-  constructor(object: string, index: number | string, payload: any, token?: string) {
-    super(object, index, payload, token, MessageType.StoreSetup);
-    (this as any).type = MessageType.StoreSetup;
-  }
+  override type = MessageType.StoreSetup as const;
+
+    constructor(object: string, index: number | string, payload: any, token?: string) {
+        super(object, index, payload, token);
+    }
 }

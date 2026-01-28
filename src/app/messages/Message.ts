@@ -24,6 +24,11 @@ export enum MessageType {
   ObjectList = 'ObjectList',
 }
 
+// Type unions for polymorphic message classes
+export type FetchLikeType = MessageType.Fetch | MessageType.FetchSetup | MessageType.FetchNavigationHeaders | MessageType.FetchList;
+export type StoreLikeType = MessageType.Store | MessageType.StoreSetup;
+export type ObjectLikeType = MessageType.Object | MessageType.ObjectSetup;
+
 // Base interfaces for incoming and outgoing messages
 export interface BaseMessage {
   type: MessageType;
@@ -56,7 +61,7 @@ export interface ByeMessageType extends IncomingBaseMessage {
 }
 
 export interface ObjectMessageType extends IncomingBaseMessage {
-  type: MessageType.Object;
+  type: ObjectLikeType;
   object: string;
   index: number | string | null;
   payload?: any;
@@ -103,13 +108,13 @@ export interface EchoMessageType extends OutgoingBaseMessage {
 }
 
 export interface FetchMessageType extends OutgoingBaseMessage {
-  type: MessageType.Fetch | MessageType.FetchSetup | MessageType.FetchNavigationHeaders | MessageType.FetchList;
+  type: FetchLikeType;
   object: string;
   index: number | string;
 }
 
 export interface StoreMessageType extends OutgoingBaseMessage {
-  type: MessageType.Store | MessageType.StoreSetup;
+  type: StoreLikeType;
   object: string;
   index: number | string | null;
   payload?: any;
@@ -132,22 +137,20 @@ export type Message =
 
 // Base classes for runtime usage
 export class OutgoingMessage implements OutgoingBaseMessage {
-  type: MessageType;
+  type!: MessageType;
   token?: string;
   status?: string;
-  constructor(type: MessageType, token?: string, status?: string) {
-    this.type = type;
+  constructor(token?: string, status?: string) {
     this.token = token;
     if (status) { this.status = status; }
   }
 }
 
 export class IncomingMessage implements IncomingBaseMessage {
-    type: MessageType;
+    type!: MessageType;
     token: string | null;
     status?: string;
     constructor(data: Message) {
-      this.type = data.type;
       this.token = ('token' in data ? data.token : null) || null;
       this.status = data.status;
     }

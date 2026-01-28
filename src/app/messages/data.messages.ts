@@ -1,27 +1,25 @@
 // console.log('init messages.data');
 
-import { MessageType, Message, IncomingMessage, OutgoingMessage, ObjectMessageType, ObjectSetupMessageType, NavigationHeadersType, ObjectListType, FetchMessageType, StoreMessageType } from "../messages/Message";
+import { MessageType, Message, IncomingMessage, OutgoingMessage, ObjectMessageType, ObjectSetupMessageType, NavigationHeadersType, ObjectListType, FetchMessageType, StoreMessageType, FetchLikeType, StoreLikeType, ObjectLikeType } from "../messages/Message";
 
 export class FetchMessage extends OutgoingMessage implements FetchMessageType {
-  override type: MessageType.Fetch | MessageType.FetchSetup | MessageType.FetchNavigationHeaders | MessageType.FetchList;
+  override type: FetchLikeType = MessageType.Fetch as const;
   object: string;
   index: number | string;
 
     constructor(
       object: string,
       index: number | string,
-      token?: string,
-      message_type?: MessageType.Fetch | MessageType.FetchSetup | MessageType.FetchNavigationHeaders | MessageType.FetchList
+      token?: string
     ) {
-        super(message_type || MessageType.Fetch, token);
-        this.type = message_type || MessageType.Fetch;
+        super(token);
         this.object = object;
         this.index = index;
     }
 }
 
 export class ObjectMessage extends IncomingMessage implements ObjectMessageType {
-  override type = MessageType.Object as const;
+  override type: ObjectLikeType = MessageType.Object as const;
   object: string;
   index: number | string | null;
   payload?: any;
@@ -45,7 +43,7 @@ export class NavigationHeaders extends IncomingMessage implements NavigationHead
 }
 
 export class StoreMessage extends OutgoingMessage implements StoreMessageType {
-  override type: MessageType.Store | MessageType.StoreSetup;
+  override type: StoreLikeType = MessageType.Store as const;
   object: string;
   index: number | string | null;
   payload?: any;
@@ -54,11 +52,9 @@ export class StoreMessage extends OutgoingMessage implements StoreMessageType {
       object: string,
       index: number | string | null,
       payload: any,
-      token?: string,
-      message_type?: MessageType.Store | MessageType.StoreSetup
+      token?: string
     ) {
-        super(message_type || MessageType.Store, token);
-        this.type = message_type || MessageType.Store;
+        super(token);
         this.object = object;
         this.index = index;
         this.payload = payload;
@@ -66,14 +62,18 @@ export class StoreMessage extends OutgoingMessage implements StoreMessageType {
 }
 
 export class FetchNavigationHeaders extends FetchMessage {
+  override type = MessageType.FetchNavigationHeaders as const;
+
   constructor(token?: string) {
-    super('list', '', token, MessageType.FetchNavigationHeaders);
+    super('list', '', token);
   }
 }
 
 export class FetchList extends FetchMessage {
+  override type = MessageType.FetchList as const;
+
   constructor(objectType: string, parent?: string, token?: string) {
-    super(objectType, parent || '', token, MessageType.FetchList);
+    super(objectType, parent || '', token);
   }
 }
 

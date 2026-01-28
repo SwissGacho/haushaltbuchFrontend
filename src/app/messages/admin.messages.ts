@@ -49,7 +49,7 @@ export class LogMessage extends OutgoingMessage implements LogMessageType {
   caller?: string;
   
   constructor(level: LogLevel, msg: string, caller?: string, token?: string) {
-    super(MessageType.Log, token);
+    super(token);
     this.log_level = level;
     this.message = msg;
     if (caller) { this.caller = caller; }
@@ -72,7 +72,7 @@ export class LoginMessage extends OutgoingMessage implements LoginMessageType {
     component?: string,
     status?: string
   ) {
-    super(MessageType.Login, token, status);
+    super(token, status);
     const { user, ses_token } = credentials;
     if (user) { this.user = user; }
     if (ses_token) { this.ses_token = ses_token; }
@@ -87,7 +87,7 @@ export class EchoMessage extends OutgoingMessage implements EchoMessageType {
   payload?: string;
 
   constructor(component: string, payload: string) {
-    super(MessageType.Echo);
+    super();
     this.component = component;
     this.payload = payload;
   }
