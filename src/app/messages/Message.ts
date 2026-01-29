@@ -118,6 +118,7 @@ export interface StoreMessageType extends OutgoingBaseMessage {
   object: string;
   index: number | string | null;
   payload?: any;
+  version_info?: any;
 }
 
 // Combined discriminated union for all message types
