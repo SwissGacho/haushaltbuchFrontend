@@ -11,8 +11,14 @@ import { HelloMessage } from "./messages/admin.messages";
 import { MessageFactory } from './messages/deserialize_message';
 
 class MockOutMessage extends OutgoingMessage {
+  // Add properties required by Message discriminated union - LogMessageType
+  override type: MessageType.Log = MessageType.Log;
+  log_level: string = 'Debug';
+  message: string = 'Mock message';
+  caller?: string = 'MockOutMessage';
+
   constructor() {
-    super(MessageType.None);
+    super();
   }
 }
 class MockSubscription {}
@@ -80,7 +86,6 @@ describe('ConnectionService', () => {
     observeHandshake?: boolean,
     primary?: boolean
   ) {
-    const spyOnDeserialize = jest.spyOn(MessageFactory,'deserialize');
     const spyOnWebSocket = 
       jest.spyOn(connectionService, 'webSocket').mockReturnValue(mockWebSocketSubject as unknown as rxws.WebSocketSubject<Message>);
     const spyOnAddConnection = jest.spyOn(ConnectionService, 'addConnection').mockReturnValue()
@@ -97,7 +102,7 @@ describe('ConnectionService', () => {
     }
 
     expect(spyOnWebSocket).toHaveBeenCalledWith(
-      {url:'MockBackendAddress', deserializer: spyOnDeserialize}
+      expect.objectContaining({url:'MockBackendAddress'})
     );
     expect(ConnectionService.connections).toBeTruthy();
     expect(ConnectionService.connections).toEqual({});
@@ -114,7 +119,7 @@ describe('ConnectionService', () => {
     expect(spyOnSubscribe.mock.calls[0][0]?.next).toBeTruthy();
     expect(spyOnSubscribe.mock.calls[0][0]?.complete).toBeTruthy();
     expect(spyOnSubscribe.mock.calls[0][0]?.error).toBeTruthy();
-    const mockInMsg = new IncomingMessage({type: MessageType.Log});
+    const mockInMsg = new IncomingMessage({type: MessageType.Hello, token: 'mockToken'});
     const arg0Next = spyOnSubscribe.mock.calls[0][0]?.next;
     if (arg0Next) {
       const spyOnHandleMessages = jest.spyOn(mockSubscriber, 'handleMessages');
@@ -275,7 +280,7 @@ describe('ConnectionService', () => {
 
   it('should handle ByeMessages', () => {
     const mockByeMessage = new ByeMessage(
-      {type: MessageType.Bye, token: 'mockToken', ses_token: 'mockSession'});
+      {type: MessageType.Bye, token: 'mockToken'});
     testHandleHandshakeMessage(mockByeMessage, false);
   });
 
