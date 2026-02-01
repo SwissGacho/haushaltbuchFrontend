@@ -6,6 +6,13 @@ export class HelloMessage extends IncomingMessage {
 }
 
 export class WelcomeMessage extends IncomingMessage {
+  override version_info?: { version?: string; [key: string]: any; };
+  constructor(data: Message) {
+    super(data);
+    if (data.version_info) {
+      this.version_info = data.version_info;
+    }
+  }
 }
 
 export class ByeMessage extends IncomingMessage {

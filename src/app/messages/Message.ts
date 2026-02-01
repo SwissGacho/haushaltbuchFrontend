@@ -34,6 +34,7 @@ export interface Message {
   object?: string;
   index?: number | string | null;
   payload?: any;
+  version_info?: any;
 }
 
 export class OutgoingMessage implements Message {
@@ -52,6 +53,7 @@ export class IncomingMessage implements Message {
     token: string;
     status?: string;
     ses_token?: string;
+    version_info?: any;
     constructor(data: Message) {
       this.type = data.type;
       this.token = data.token || '';
