@@ -3,7 +3,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ConnectionService } from './connection.service';
 import { ConnectedComponent } from './connected-component/connected.component';
-import { IncomingMessage, MessageType } from './messages/Message';
+import { IncomingMessage, MessageType, WelcomeMessageType } from './messages/Message';
 import { environment } from '../environments/environment';
 
 @Component({
@@ -47,8 +47,11 @@ export class AppComponent extends ConnectedComponent implements OnInit {
     if (message.type == MessageType.Welcome) {
       // we are logged in, destroy LoginComponent
       this.activateLoginComponent = false;
-      if ('version_info' in message && message.version_info?.version) {
-        this.backendVersion = message.version_info?.version;
+      if ('version_info' in message) {
+        const versionInfo = (message as WelcomeMessageType).version_info;
+        if (versionInfo && typeof versionInfo === 'object' && 'version' in versionInfo) {
+          this.backendVersion = versionInfo.version;
+        }
       }
     }
     console.log('App logged in:', this)

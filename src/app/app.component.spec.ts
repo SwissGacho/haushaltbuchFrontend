@@ -76,7 +76,7 @@ describe('AppComponent', () => {
 
   it('should activate Login when receiving Hello message', () => {
     const mockHelloMessage = new HelloMessage(
-      {type: MessageType.Hello, token: 'mockToken', ses_token: 'mockSession'});
+      {type: MessageType.Hello, token: 'mockToken'});
     expect(appComponent.activateLoginComponent).toBe(false);
     appComponent.handleMessages(mockHelloMessage);
     expect(appComponent.activateLoginComponent).toBe(true);
@@ -84,7 +84,7 @@ describe('AppComponent', () => {
 
   it('should deactivate Login when receiving Welcome message', () => {
     const mockHelloMessage = new HelloMessage(
-      {type: MessageType.Hello, token: 'mockToken', ses_token: 'mockSession'});
+      {type: MessageType.Hello, token: 'mockToken'});
     const mockWelcomeMessage = new WelcomeMessage(
       {type: MessageType.Welcome, token: 'mockToken', ses_token: 'mockSession'});
     expect(appComponent.activateLoginComponent).toBe(false);
