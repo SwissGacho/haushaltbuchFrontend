@@ -5,7 +5,7 @@ import * as rxjs from 'rxjs';
 import * as rxws from 'rxjs/webSocket';
 import { environment } from '../environments/environment';
 import { HelloMessage, WelcomeMessage, ByeMessage, LogMessage, LogLevel, LoginMessage, LoginCredentials } from "./messages/admin.messages";
-import { Message, IncomingMessage, MessageType, IncomingBaseMessage } from './messages/Message';
+import { Message, IncomingBaseMessage } from './messages/Message';
 import { MessageFactory } from './messages/deserialize_message'
 import { ConnectedComponent } from './connected-component/connected.component';
 

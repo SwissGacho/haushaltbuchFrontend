@@ -1,6 +1,6 @@
 // console.log('init messages.data');
 
-import { MessageType, Message, IncomingMessage, OutgoingMessage, ObjectMessageType, ObjectSetupMessageType, NavigationHeadersType, ObjectListType, FetchMessageType, StoreMessageType, FetchLikeType, StoreLikeType, ObjectLikeType } from "../messages/Message";
+import { MessageType, Message, IncomingMessage, OutgoingMessage, ObjectMessageType, NavigationHeadersType, ObjectListType, FetchMessageType, StoreMessageType, FetchLikeType, StoreLikeType, ObjectLikeType } from "../messages/Message";
 
 export class FetchMessage extends OutgoingMessage implements FetchMessageType {
   override type: FetchLikeType = MessageType.Fetch as const;
@@ -27,7 +27,7 @@ export class ObjectMessage extends IncomingMessage implements ObjectMessageType 
   constructor(data: Message) {
     super(data);
     this.object = ('object' in data && data.object) ? data.object : '';
-    this.index = ('index' in data && data.index) ? data.index : null;
+    this.index = ('index' in data) ? data.index ?? null : null;
     this.payload = ('payload' in data) ? data.payload : undefined;
   }
 }
