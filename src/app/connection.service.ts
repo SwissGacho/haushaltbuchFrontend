@@ -5,7 +5,7 @@ import * as rxjs from 'rxjs';
 import * as rxws from 'rxjs/webSocket';
 import { environment } from '../environments/environment';
 import { HelloMessage, WelcomeMessage, ByeMessage, LogMessage, LogLevel, LoginMessage, LoginCredentials } from "./messages/admin.messages";
-import { Message, IncomingMessage, MessageType } from './messages/Message';
+import { Message, IncomingBaseMessage } from './messages/Message';
 import { MessageFactory } from './messages/deserialize_message'
 import { ConnectedComponent } from './connected-component/connected.component';
 
@@ -107,14 +107,17 @@ export class ConnectionService {
         console.log('LoginSubjectOrObserveHandshake: ',loginSubjectOrObserveHandshake);
         console.log('is primary: ', isPrimary);
         console.log('Backend address: ', this.BACKEND_ADDRESS);
-        let connection = this.webSocket({url: this.BACKEND_ADDRESS, deserializer: MessageFactory.deserialize});
+        let connection = this.webSocket({
+            url: this.BACKEND_ADDRESS, 
+            deserializer: (event) => MessageFactory.deserialize(event) as Message
+        });
         let loginSubject: LoginSubject;
         loginSubject = (loginSubjectOrObserveHandshake instanceof rxjs.Subject)
             ? loginSubjectOrObserveHandshake
             : ConnectionService.loginBySessionTokenSubject;
         ConnectionService.addConnection(connection, subscriber);
         connection.pipe(RXJS.skip(loginSubjectOrObserveHandshake ? 0 : 2)).subscribe({
-            next: (message: Message) => subscriber.handleMessages(message),
+            next: (message: Message) => subscriber.handleMessages(message as IncomingBaseMessage),
             complete: () => subscriber.handleComplete(),
             error: (error: any) => subscriber.handleError(error)
         });
@@ -153,14 +156,14 @@ export class ConnectionService {
         console.log( message); console.log('that:', that);
         console.groupEnd();
         if (message instanceof HelloMessage) {
-            if (that) {
+            if (that && message.token) {
                 console.log(that.subscriber.componentID, 'awaits credentials')
                 that.subscriber.setToken(message.token);
                 that.loginSubject.pipe(RXJS.take(1)).subscribe({
                     next: (credentials: LoginCredentials) => {
                         console.log(that.subscriber.componentID, 'got credentials:', credentials);
                         that.service.sendMessage(
-                            new LoginMessage(credentials, message.token, that.isPrimary, that.subscriber.componentID),
+                            new LoginMessage(credentials, message.token!, that.isPrimary, that.subscriber.componentID),
                             that.subscriber.componentID
                         );
                     }
