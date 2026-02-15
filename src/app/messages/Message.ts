@@ -76,6 +76,12 @@ export interface ObjectSetupMessageType extends IncomingBaseMessage {
   payload?: any;
 }
 
+export interface ObjectSchemaMessageType extends IncomingBaseMessage {
+  type: MessageType.ObjectSchema;
+  object: string;
+  schema: { [key: string]: any };
+}
+
 export interface NavigationHeadersType extends IncomingBaseMessage {
   type: MessageType.NavigationHeaders;
   payload?: { headers?: string[] };
@@ -115,6 +121,11 @@ export interface FetchMessageType extends OutgoingBaseMessage {
   index: number | string;
 }
 
+export interface FetchSchemaMessageType extends OutgoingBaseMessage {
+  type: MessageType.FetchSchema;
+  object: string;
+}
+
 export interface StoreMessageType extends OutgoingBaseMessage {
   type: StoreLikeType;
   object: string;
@@ -135,7 +146,9 @@ export type Message =
   | LoginMessageType
   | EchoMessageType
   | FetchMessageType
-  | StoreMessageType;
+  | StoreMessageType
+  | FetchSchemaMessageType
+  | ObjectSchemaMessageType;
 
 // Base classes for runtime usage
 export class OutgoingMessage implements OutgoingBaseMessage {

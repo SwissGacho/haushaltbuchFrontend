@@ -1,6 +1,6 @@
 // console.log('init messages.data');
 
-import { MessageType, Message, IncomingMessage, OutgoingMessage, ObjectMessageType, NavigationHeadersType, ObjectListType, FetchMessageType, StoreMessageType, FetchLikeType, StoreLikeType, ObjectLikeType } from "../messages/Message";
+import { MessageType, Message, IncomingMessage, OutgoingMessage, ObjectMessageType, NavigationHeadersType, ObjectListType, FetchMessageType, StoreMessageType, FetchLikeType, StoreLikeType, ObjectLikeType, FetchSchemaMessageType, ObjectSchemaMessageType } from "../messages/Message";
 
 export class FetchMessage extends OutgoingMessage implements FetchMessageType {
   override type: FetchLikeType = MessageType.Fetch as const;
@@ -88,13 +88,17 @@ export class ObjectList extends IncomingMessage implements ObjectListType {
   }
 }
 
-export class FetchSchemaMessage extends FetchMessage {
+export class FetchSchemaMessage extends OutgoingMessage implements FetchSchemaMessageType {
+  override type = MessageType.FetchSchema as const;
+  object: string;
   constructor(objectType: string, token?: string) {
-    super(objectType, '', token, MessageType.FetchSchema);
+    super(token);
+    this.object = objectType;
   }
 }
 
-export class ObjectSchemaMessage extends IncomingMessage {
+export class ObjectSchemaMessage extends IncomingMessage implements ObjectSchemaMessageType {
+  override type = MessageType.ObjectSchema as const;
   schema: any;
   object: string;
 
@@ -102,7 +106,7 @@ export class ObjectSchemaMessage extends IncomingMessage {
   constructor(data: Message) {
     super(data);
     console.log('ObjectSchemaMessage', data);
-    this.schema = data.payload || {};
-    this.object = data.object || '';
+    this.schema = ('payload' in data && data.payload) ? data.payload : {};
+    this.object = ('object' in data) ? data.object : '';
   }
 }
