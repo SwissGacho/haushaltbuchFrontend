@@ -8,7 +8,7 @@ describe('CreateObjectButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateObjectButtonComponent]
+      declarations: [CreateObjectButtonComponent]
     })
     .compileComponents();
 
