@@ -11,7 +11,32 @@
   <!-- show all attributes of the objects in individual divs, with the ability to edit them
   On losing focus, send an update message to the backend with the updated object information. 
   -->
-  <div *ngFor="let key of objectKeys">
-    <strong>{{ key }}:</strong> <input [(ngModel)]="objectInfo[key]" (blur)="updateObject(key)" />
+  <div *ngFor="let key of objectFields">
+    <strong>{{ key }}:</strong>
+    <span *ngIf="objectSchema[key].type === 'str'">
+      <input style ="color: red"
+        [(ngModel)]="objectInfo[key]"
+        (blur)="updateObject(key)"
+      />
+    </span>
+    <span *ngIf="objectSchema[key].type === 'datetime'">
+      <input type="datetime-local"
+        [(ngModel)]="objectInfo[key]"
+        (blur)="updateObject(key)"
+      />
+    </span>
+    <span *ngIf="objectSchema[key].type === 'date'">
+      <input type="date"
+        [(ngModel)]="objectInfo[key]"
+        (blur)="updateObject(key)"
+      />
+    </span>
+    <!-- simple input by default-->
+    <span *ngIf="objectSchema[key].type !== 'str' && objectSchema[key].type !== 'datetime'">
+      <input
+        [(ngModel)]="objectInfo[key]"
+        (blur)="updateObject(key)"
+      />
+    </span>
   </div>
 </div>

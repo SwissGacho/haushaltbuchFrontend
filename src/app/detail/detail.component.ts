@@ -27,7 +27,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
   objectInfo: any = null;
   objectInfoCache: any = null;
   objectInfoClean: any = null;
-  objectKeys: string[] = [];
+  objectFields: string[] = [];
   objectSchema: any = null;
   objectUpdating: boolean = false;
   schemaUpdating: boolean = false;
@@ -92,7 +92,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
 
   updateSchemaInfo(schema: any) {
     this.objectSchema = schema;
-    this.objectKeys = Object.keys(this.objectSchema || {});
+    this.objectFields = Object.keys(this.objectSchema || {});
     this.schemaUpdating = false;
     console.info('Schema updated', this.objectSchema);
     if (!this.objectUpdating) {
@@ -131,7 +131,9 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
   private onSelectedObjectChange(object: BoIdentifier | null) {
     this.selectedObject = object;
     this.fetchObject();
-    this.fetchSchema();
+    if (object?.type != this.objectSchema?.type) {
+      this.fetchSchema();
+    }
     // TODO: Unsubscribe from previous object
   }
 

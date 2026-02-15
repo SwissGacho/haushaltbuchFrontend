@@ -89,10 +89,13 @@ export class FetchSchemaMessage extends FetchMessage {
 
 export class ObjectSchemaMessage extends IncomingMessage {
   schema: any;
+  object: string;
+
 
   constructor(data: Message) {
     super(data);
     console.log('ObjectSchemaMessage', data);
     this.schema = data.payload || {};
+    this.object = data.object || '';
   }
 }
