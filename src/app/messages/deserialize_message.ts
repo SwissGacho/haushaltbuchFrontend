@@ -1,11 +1,11 @@
-import { Message, IncomingMessage, MessageType } from './Message'
+import { IncomingMessage, IncomingBaseMessage, MessageType } from './Message'
 import { HelloMessage,WelcomeMessage,ByeMessage } from './admin.messages'
 import { NavigationHeaders, ObjectList, ObjectMessage, ObjectSchemaMessage } from './data.messages'
 import { ObjectSetupMessage } from './setup.messages'
 
 export class MessageFactory {
 
-  static deserialize(event: MessageEvent): Message {
+  static deserialize(event: MessageEvent): IncomingBaseMessage {
     let data = JSON.parse(event.data)
     console.log('Deserializing message', data)
     switch (data.type) {
@@ -30,4 +30,3 @@ export class MessageFactory {
     }
   }
 }
-  

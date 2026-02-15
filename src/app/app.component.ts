@@ -3,7 +3,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ConnectionService } from './connection.service';
 import { ConnectedComponent } from './connected-component/connected.component';
-import { IncomingMessage, MessageType } from './messages/Message';
+import { IncomingMessage, MessageType, WelcomeMessageType } from './messages/Message';
+import { environment } from '../environments/environment';
 
 @Component({
     selector: 'app-root',
@@ -16,10 +17,16 @@ export class AppComponent extends ConnectedComponent implements OnInit {
   activateAnyComponent = true;
   activateLoginComponent = false;
   activateSetupConfigComponent = false;
+  frontendVersion = environment.appVersion;
+  backendVersion?: string;
 
   constructor(private specificService:ConnectionService) {
     super(specificService);
     this.setComponentID('AppComponent');
+    console.groupCollapsed(this.componentID, 'constructed');
+    console.log('Environment:', environment.production ? 'Production' : 'Development');
+    console.log('App Version:', environment.appVersion);
+    console.groupEnd();
   }
 
   override handleMessages(message: IncomingMessage): void {
@@ -40,7 +47,14 @@ export class AppComponent extends ConnectedComponent implements OnInit {
     if (message.type == MessageType.Welcome) {
       // we are logged in, destroy LoginComponent
       this.activateLoginComponent = false;
+      if ('version_info' in message) {
+        const versionInfo = (message as WelcomeMessageType).version_info;
+        if (versionInfo && typeof versionInfo === 'object' && 'version' in versionInfo) {
+          this.backendVersion = versionInfo.version;
+        }
+      }
     }
+    console.log('App logged in:', this)
   }
 
   // Creates the connection to the backend when the component is initialized.

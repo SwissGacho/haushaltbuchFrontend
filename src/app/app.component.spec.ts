@@ -3,7 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import * as rxjs from 'rxjs';
 import { AppComponent } from './app.component';
 import { Message, MessageType } from './messages/Message';
-import { WelcomeMessage, ByeMessage } from "./messages/admin.messages";
+import { WelcomeMessage, ByeMessage, HelloMessage } from "./messages/admin.messages";
 import { ConnectionService } from './connection.service';
 
 class MockConnectionService {
@@ -56,29 +56,42 @@ describe('AppComponent', () => {
 
   it('should create connection on init', () => {
     const conSrv = fixture.debugElement.injector.get(ConnectionService);
-    const spyOnGetNewConn = spyOn(conSrv, 'getNewConnection');
-    const spyOnRemoveConn = spyOn(conSrv, 'removeConnection');
-    expect(appComponent.connected).toBeFalse();
+    const spyOnGetNewConn = jest.spyOn(conSrv, 'getNewConnection');
+    const spyOnRemoveConn = jest.spyOn(conSrv, 'removeConnection');
+    expect(appComponent.connected).toBe(false);
     appComponent.ngOnInit();
     expect(spyOnGetNewConn).toHaveBeenCalledWith(appComponent, true, true);
-    expect(appComponent.connected).toBeTrue();
+    expect(appComponent.connected).toBe(true);
     expect(spyOnRemoveConn).not.toHaveBeenCalled();
   })
 
   it('should remove connection on destroy', () => {
     const conSrv = fixture.debugElement.injector.get(ConnectionService);
-    const spyOnRemoveConn = spyOn(conSrv, 'removeConnection');
+    const spyOnRemoveConn = jest.spyOn(conSrv, 'removeConnection');
     appComponent.ngOnInit();
     expect(spyOnRemoveConn).not.toHaveBeenCalled();
     appComponent.ngOnDestroy();
     expect(spyOnRemoveConn).toHaveBeenCalled();
   })
 
-  it('should activate Login until receiving Welcome message', () => {
+  it('should activate Login when receiving Hello message', () => {
+    const mockHelloMessage = new HelloMessage(
+      {type: MessageType.Hello, token: 'mockToken'});
+    expect(appComponent.activateLoginComponent).toBe(false);
+    appComponent.handleMessages(mockHelloMessage);
+    expect(appComponent.activateLoginComponent).toBe(true);
+  });
+
+  it('should deactivate Login when receiving Welcome message', () => {
+    const mockHelloMessage = new HelloMessage(
+      {type: MessageType.Hello, token: 'mockToken'});
     const mockWelcomeMessage = new WelcomeMessage(
       {type: MessageType.Welcome, token: 'mockToken', ses_token: 'mockSession'});
-    expect(appComponent.activateLoginComponent).withContext('before Welcome').toBeTrue();
+    expect(appComponent.activateLoginComponent).toBe(false);
+    appComponent.handleMessages(mockHelloMessage);
+    expect(appComponent.activateLoginComponent).toBe(true);
     appComponent.handleMessages(mockWelcomeMessage);
-    expect(appComponent.activateLoginComponent).withContext('after Welcome').toBeFalse();
+    expect(appComponent.activateLoginComponent).toBe(false);
   });
+
 });
