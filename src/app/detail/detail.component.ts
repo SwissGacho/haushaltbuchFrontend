@@ -45,13 +45,13 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
       else if (message.type === MessageType.Object) {
         console.log(`${this.componentID} handling object message`, message);
         let cast = message as ObjectMessage;
-        this.updateObjectInfo(cast.payload);
+        this.updateObjectInfo(cast.payload, cast.object);
       }
       else if (message.type === MessageType.ObjectSchema) {
         console.log(`${this.componentID} handling object schema message`, message);
         let cast = message as ObjectSchemaMessage;
         console.log('Received schema', cast.schema);
-        this.updateSchemaInfo(cast.schema);
+        this.updateSchemaInfo(cast.schema, cast.object);
       }
       else {
           // We received an unexpected or unknown message
@@ -90,7 +90,12 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     this.sendMessage(message);
   }
 
-  updateSchemaInfo(schema: any) {
+  updateSchemaInfo(schema: any, object: string) {
+    // Check whether the schema is for the currently selected object
+    if (object !== this.selectedObject?.type) {
+      console.warn('Received schema for type', schema.type, 'but selected object is of type', this.selectedObject?.type);
+      return;
+    }
     this.objectSchema = schema;
     this.objectFields = Object.keys(this.objectSchema || {});
     this.schemaUpdating = false;
@@ -100,7 +105,12 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     }
   }
 
-  updateObjectInfo(objectInfo: any) {
+  updateObjectInfo(objectInfo: any, object: string){
+    // Check whether the object info is for the currently selected object
+    if (objectInfo.id !== this.selectedObject?.id || object !== this.selectedObject?.type) {
+      console.warn('Received object info for', object, 'with id', objectInfo.id, 'but selected object is', this.selectedObject?.type, 'with id', this.selectedObject?.id);
+      return;
+    }
     this.objectInfoCache = objectInfo;
     this.objectUpdating = false;
     if (!this.schemaUpdating) {
@@ -130,6 +140,12 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
 
   private onSelectedObjectChange(object: BoIdentifier | null) {
     this.selectedObject = object;
+
+    // Reset updating state
+    this.schemaUpdating = false;
+    this.objectUpdating = false;
+
+    // Fetch new object
     this.fetchObject();
     if (object?.type != this.objectSchema?.type) {
       this.fetchSchema();
