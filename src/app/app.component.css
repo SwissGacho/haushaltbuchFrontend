@@ -4,6 +4,11 @@
     margin-bottom: 20px;
   }
 
+:host {
+    display: block;
+    padding-bottom: 60px;
+  }
+
 .version-footer {
     position: fixed;
     bottom: 0;

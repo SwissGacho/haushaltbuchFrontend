@@ -7,6 +7,7 @@ import { SelectedObjectService } from '../selected-object.service';
 import { BoIdentifier } from '../business-object/bo.identifier';
 import { Subscription } from 'rxjs';
 
+
 @Component({
   selector: 'app-detail-component',
   templateUrl: './detail.component.html',
@@ -25,12 +26,13 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
 
   override OBSERVE_HANDSHAKE = true;
   objectInfo: any = null;
-  objectInfoCache: any = null;
-  objectInfoClean: any = null;
+  objectInfoCache: any = null;      // raw values coming from backend (timezone aware)
+  objectInfoClean: any = null;      // mirror of raw values for change detection
   objectFields: string[] = [];
   objectSchema: any = null;
   objectUpdating: boolean = false;
   schemaUpdating: boolean = false;
+
 
   override handleMessages(message: IncomingMessage): void {
       console.groupCollapsed(this.componentID, "received", message.type, "message");
@@ -109,21 +111,40 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
   }
 
   updateObjectFrontend() {
-    this.objectInfo = this.objectInfoCache;
+    // copy raw values into editable view; convert datetimes to local representation
+    this.objectInfo = { ...this.objectInfoCache };
     this.objectInfoClean = { ...this.objectInfoCache };
+
+    if (this.objectSchema) {
+      for (const key of Object.keys(this.objectSchema)) {
+        if (this.objectSchema[key].type === 'datetime' && this.objectInfo[key]) {
+          this.objectInfo[key] = this.formatDateTimeLocal(this.objectInfo[key]);
+        }
+      }
+    }
+
     this.objectInfoCache = null;
   }
 
   updateObject(key: string) {
     console.groupCollapsed(this.componentID, "updating object", key, this.objectInfo[key]);
-    console.log('Updating object', key, this.objectInfo[key]);
-    if(this.objectInfoClean[key] === this.objectInfo[key]) {
-      console.log('No change detected');
+    let value = this.objectInfo[key];
+
+    // if it's a datetime field we need to convert from local string back to
+    // a timezone-aware form that the backend understands
+    if (this.objectSchema && this.objectSchema[key]?.type === 'datetime' && value) {
+      value = this.toTimezoneAwareLocal(value);
+      console.log('converted local datetime to timezone-aware', value);
     }
-    else {
-      let message = new StoreMessage(this.selectedObject!.type, this.selectedObject!.id, { [key]: this.objectInfo[key] }, this.token!);
+
+    if (this.objectInfoClean[key] === value) {
+      console.log('No change detected');
+    } else {
+      let message = new StoreMessage(this.selectedObject!.type, this.selectedObject!.id, { [key]: value }, this.token!);
       this.sendMessage(message);
-    }  
+      // update clean copy so further edits compare correctly
+      this.objectInfoClean[key] = value;
+    }
     console.groupEnd();
   }
 
@@ -135,6 +156,55 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
       this.fetchSchema();
     }
     // TODO: Unsubscribe from previous object
+  }
+
+  /*
+   * Helpers for datetime handling
+   */
+  private formatDateTimeLocal(value: string): string {
+    try {
+      // Parse backend ISO string: "2026-03-02 13:16:53.208799+00:00"
+      // Replace space with 'T' for JS Date parsing
+      const iso = value.replace(' ', 'T');
+      const date = new Date(iso);
+      
+      if (isNaN(date.getTime())) {
+        console.warn('Failed to parse datetime:', value);
+        return value;
+      }
+      
+      // Convert to local timezone by getting local components
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hour = String(date.getHours()).padStart(2, '0');
+      const minute = String(date.getMinutes()).padStart(2, '0');
+      const second = String(date.getSeconds()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+    } catch (e) {
+      console.warn('formatDateTimeLocal failed', e, value);
+      return value;
+    }
+  }
+
+  private toTimezoneAwareLocal(localString: string): string {
+    try {
+      // localString is in format YYYY-MM-DDTHH:mm (no timezone info)
+      // Create a date in local timezone and convert to ISO with offset
+      const [dateStr, timeStr] = localString.split('T');
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const [hour, minute, second] = timeStr.split(':').map(Number);
+      
+      // Create date in local timezone
+      const date = new Date(year, month - 1, day, hour, minute, second, 0);
+      
+      // Return ISO string with timezone offset
+      return date.toISOString();
+    } catch (e) {
+      console.warn('toTimezoneAwareLocal failed', e, localString);
+      return localString;
+    }
   }
 
   override ngOnDestroy(): void {

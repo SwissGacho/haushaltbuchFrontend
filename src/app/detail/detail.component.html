@@ -32,7 +32,7 @@
       />
     </span>
     <!-- simple input by default-->
-    <span *ngIf="objectSchema[key].type !== 'str' && objectSchema[key].type !== 'datetime'">
+    <span *ngIf="objectSchema[key].type !== 'str' && !objectSchema[key].type.startsWith('datetime')">
       <input
         [(ngModel)]="objectInfo[key]"
         (blur)="updateObject(key)"
