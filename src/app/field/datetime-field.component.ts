@@ -29,7 +29,7 @@ export class DateTimeFieldComponent {
   /**
    * Convert backend ISO string (UTC) to local datetime format for display.
    * Input: "2026-03-02 13:16:53.208799+00:00"
-   * Output: "2026-03-02T13:16" (local time, no timezone info)
+   * Output: "2026-03-02T14:16" (local time, no timezone info)
    */
   private formatDateTimeLocal(value: string): string {
     try {
@@ -58,7 +58,7 @@ export class DateTimeFieldComponent {
 
   /**
    * Convert local datetime string back to timezone-aware ISO format for backend.
-   * Input: "2026-03-02T13:16" (from datetime-local input)
+   * Input: "2026-03-02T14:16" (from datetime-local input)
    * Output: "2026-03-02T13:16:00.000Z" or with offset (timezone-aware)
    */
   private toTimezoneAwareLocal(localString: string): string {
