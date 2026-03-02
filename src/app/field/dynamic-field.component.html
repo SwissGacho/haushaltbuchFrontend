@@ -1,0 +1,17 @@
+<ng-container [ngSwitch]="schema?.type">
+  <span *ngSwitchCase="'str'">
+    <input type="text" [(ngModel)]="value" (blur)="onBlur()" />
+  </span>
+
+  <span *ngSwitchCase="'datetime'">
+    <app-datetime-field [value]="value" (valueChange)="onDateTimeChange($event)"></app-datetime-field>
+  </span>
+
+  <span *ngSwitchCase="'date'">
+    <input type="date" [(ngModel)]="value" (blur)="onBlur()" />
+  </span>
+
+  <span *ngSwitchDefault>
+    <input [(ngModel)]="value" (blur)="onBlur()" />
+  </span>
+</ng-container>

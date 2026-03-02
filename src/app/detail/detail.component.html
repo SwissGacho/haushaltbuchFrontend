@@ -13,30 +13,11 @@
   -->
   <div *ngFor="let key of objectFields">
     <strong>{{ key }}:</strong>
-    <span *ngIf="objectSchema[key].type === 'str'">
-      <input style ="color: red"
-        [(ngModel)]="objectInfo[key]"
-        (blur)="updateObject(key)"
-      />
-    </span>
-    <span *ngIf="objectSchema[key].type === 'datetime'">
-      <input type="datetime-local"
-        [(ngModel)]="objectInfo[key]"
-        (blur)="updateObject(key)"
-      />
-    </span>
-    <span *ngIf="objectSchema[key].type === 'date'">
-      <input type="date"
-        [(ngModel)]="objectInfo[key]"
-        (blur)="updateObject(key)"
-      />
-    </span>
-    <!-- simple input by default-->
-    <span *ngIf="objectSchema[key].type !== 'str' && !objectSchema[key].type.startsWith('datetime')">
-      <input
-        [(ngModel)]="objectInfo[key]"
-        (blur)="updateObject(key)"
-      />
-    </span>
+    <app-dynamic-field
+      [key]="key"
+      [schema]="objectSchema[key]"
+      [(value)]="objectInfo[key]"
+      (valueChange)="updateObject(key)"
+    ></app-dynamic-field>
   </div>
 </div>
