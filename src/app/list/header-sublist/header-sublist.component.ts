@@ -19,7 +19,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
       this.setComponentID('Sublist');
   }
 
-  objects: string[] = [];
+  objects: {id: number; display_name: string;}[] = [];
 
   override OBSERVE_HANDSHAKE = true;
 
