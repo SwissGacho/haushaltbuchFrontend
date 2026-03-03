@@ -1,5 +1,5 @@
 <div *ngIf="selectedObject">
-  <p>Selected Object: {{ selectedObject.type }} - {{ selectedObject.id }}</p>
+  <p>Selected Object: {{ selectedObject.type }} {{ selectedObject.id }}: {{ selectedObject.display_name }}</p>
 </div>
 <div *ngIf="!selectedObject">
   <p>No object selected</p>

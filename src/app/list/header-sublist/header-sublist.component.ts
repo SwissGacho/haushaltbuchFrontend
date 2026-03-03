@@ -51,8 +51,12 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
       this.sendMessage(message);
   }
 
-  onObjectClick(object: string): void {
-    let id: BoIdentifier = new BoIdentifier(this.header, Number(object));
+  onObjectClick(object_id: number): void {
+    let id: BoIdentifier = new BoIdentifier(
+      this.header,
+      object_id,
+      this.objects.find(obj => obj.id === object_id)?.display_name
+    );
     this.selectedObjectService.selectObject(id);
   }
     
