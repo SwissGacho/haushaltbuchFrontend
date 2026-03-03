@@ -79,7 +79,7 @@ export class FetchList extends FetchMessage {
 
 export class ObjectList extends IncomingMessage implements ObjectListType {
   override type = MessageType.ObjectList as const;
-  objects: string[];
+  objects: {id: number; display_name: string;}[];
 
   constructor(data: Message) {
     super(data);
