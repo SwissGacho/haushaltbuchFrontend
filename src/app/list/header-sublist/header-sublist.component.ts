@@ -52,11 +52,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
   }
 
   onObjectClick(object_id: number): void {
-    let id: BoIdentifier = new BoIdentifier(
-      this.header,
-      object_id,
-      this.objects.find(obj => obj.id === object_id)?.display_name
-    );
+    let id: BoIdentifier = new BoIdentifier(this.header, object_id);
     this.selectedObjectService.selectObject(id);
   }
     

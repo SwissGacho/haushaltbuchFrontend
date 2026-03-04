@@ -6,6 +6,5 @@ export class BoIdentifier {
     constructor( type: string, id: number, display_name?: string) {
         this.type = type;
         this.id = id;
-        this.display_name = display_name;
     }
 }
