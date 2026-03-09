@@ -90,7 +90,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
 
   private onSelectedObjectChange(object: BoIdentifier | null) {
     this.selectedObject = object;
-    this.fetchObject();
+    if (object) this.fetchObject();
     // TODO: Unsubscribe from previous object
   }
 
