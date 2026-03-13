@@ -14,50 +14,50 @@ import { SelectedObjectService } from 'src/app/selected-object.service';
 })
 export class HeaderSublistComponent extends ConnectedComponent implements OnInit {
 
-  constructor(protected override connectionService: ConnectionService, private selectedObjectService: SelectedObjectService) {
-      super(connectionService);
-      this.setComponentID('Sublist');
-  }
+    constructor(protected override connectionService: ConnectionService, private selectedObjectService: SelectedObjectService) {
+        super(connectionService);
+        this.setComponentID('Sublist');
+    }
 
-  objects: string[] = [];
+    objects: string[] = [];
 
-  override OBSERVE_HANDSHAKE = true;
+    override OBSERVE_HANDSHAKE = true;
 
-  override handleMessages(message: IncomingMessage): void {
-      console.groupCollapsed(this.componentID, "received", message.type, "message");
-      if (message.type === MessageType.Welcome) {
-          console.log('Received welcome', message);
-          this.token = message.token;
-          this.fetchList();
-      }
-      else if (message.type === MessageType.ObjectList) {
-          let cast = message as ObjectList;
-          console.log(`Received object list for header ${this.header}`, cast);
-          this.objects = cast.objects;
-      }
-      else {
-          console.error('Unexpected message', message);
-      }
-      console.groupEnd();
-  }
+    override handleMessages(message: IncomingMessage): void {
+        console.groupCollapsed(this.componentID, "received", message.type, "message");
+        if (message.type === MessageType.Welcome) {
+            console.log('Received welcome', message);
+            this.token = message.token;
+            this.fetchList();
+        }
+        else if (message.type === MessageType.ObjectList) {
+            let cast = message as ObjectList;
+            console.log(`Received object list for header ${this.header}`, cast);
+            this.objects = cast.objects;
+        }
+        else if (message.type !== MessageType.Hello) {
+            console.error('Unexpected message', message);
+        }
+        console.groupEnd();
+    }
 
-  fetchList() {
-      if(this.token === null) {
-          console.error('No token available');
-          return;
-      }
-      console.log(`Fetching list for header ${this.header}`);
-      let message = new FetchList(this.header, undefined, this.token);
-      this.sendMessage(message);
-  }
+    fetchList() {
+        if(this.token === null) {
+            console.error('No token available');
+            return;
+        }
+        console.log(`Fetching list for header ${this.header}`);
+        let message = new FetchList(this.header, undefined, this.token);
+        this.sendMessage(message);
+    }
 
-  onObjectClick(object: string): void {
-    let id: BoIdentifier = new BoIdentifier(this.header, Number(object));
-    this.selectedObjectService.selectObject(id);
-  }
-    
+    onObjectClick(object: string): void {
+        let id: BoIdentifier = new BoIdentifier(this.header, Number(object));
+        this.selectedObjectService.selectObject(id);
+    }
+        
 
-  // An input property to receive the headers from the parent component
-  @Input() header: string = '';
+    // An input property to receive the headers from the parent component
+    @Input() header: string = '';
 
 }
