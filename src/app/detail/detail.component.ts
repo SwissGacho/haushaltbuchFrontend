@@ -140,7 +140,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
       console.log('No change detected');
     }
     else {
-      let message = new StoreMessage(this.selectedObject!.type, Number(this.selectedObject!.id), { [key]: this.objectInfo[key] }, this.token!);
+      let message = new StoreMessage(this.selectedObject!.type, Number(this.selectedObject!.id), { [key]: value }, this.token!);
       this.sendMessage(message);
       // update clean copy so further edits compare correctly
       this.objectInfoClean[key] = value;
