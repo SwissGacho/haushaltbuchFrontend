@@ -86,7 +86,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     }
     console.log('Fetching object');
     this.objectUpdating = true;
-    let message = new FetchMessage(this.selectedObject!.type, this.selectedObject!.id, this.token);
+    let message = new FetchMessage(this.selectedObject!.type, Number(this.selectedObject!.id), this.token);
     this.sendMessage(message);
   }
 
@@ -100,6 +100,10 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     this.objectFields = Object.keys(this.objectSchema || {});
     this.schemaUpdating = false;
     console.info('Schema updated', this.objectSchema);
+
+    if(this.selectedObject?.id == undefined) {
+      this.objectInfoCache = Object.keys(this.objectSchema || {});
+    }
     if (!this.objectUpdating) {
       this.updateObjectFrontend()
     }
@@ -131,7 +135,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
       console.log('No change detected');
     }
     else {
-      let message = new StoreMessage(this.selectedObject!.type, this.selectedObject!.id, { [key]: this.objectInfo[key] }, this.token!);
+      let message = new StoreMessage(this.selectedObject!.type, Number(this.selectedObject!.id), { [key]: this.objectInfo[key] }, this.token!);
       this.sendMessage(message);
     }  
     console.groupEnd();
@@ -146,7 +150,9 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     this.objectUpdating = false;
 
     // Fetch new object
-    this.fetchObject();
+    if(object?.id !== undefined) {
+      this.fetchObject();
+    }
     if (object?.type != this.objectSchema?.type) {
       this.fetchSchema();
     }
