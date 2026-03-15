@@ -4,7 +4,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
 import { IncomingMessage } from '../messages/Message';
-import { StoreMessage } from '../messages/data.messages';
+import { BoIdentifier } from '../business-object/bo.identifier';
+import { SelectedObjectService } from 'src/app/selected-object.service';
 
 @Component({
     selector: 'app-create-object-button',
@@ -13,7 +14,7 @@ import { StoreMessage } from '../messages/data.messages';
     standalone: false
 })
 export class CreateObjectButtonComponent extends ConnectedComponent implements OnInit {
-    constructor(protected override connectionService: ConnectionService) {
+    constructor(protected override connectionService: ConnectionService, private selectedObjectService: SelectedObjectService) {
         super(connectionService);
         this.setComponentID('CreateObjectButton');
     }
@@ -27,8 +28,8 @@ export class CreateObjectButtonComponent extends ConnectedComponent implements O
     }
 
     onButtonClick(): void {
-        let message = new StoreMessage(this.objectType, null, null, this.token!);
-        console.log('Sending create object message', message);
-        this.sendMessage(message);
+        let blankObject = new BoIdentifier(this.objectType, undefined);
+        console.log('Creating new object with identifier', blankObject);
+        this.selectedObjectService.selectObject(blankObject);
     }
 }

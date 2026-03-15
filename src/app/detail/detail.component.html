@@ -5,7 +5,7 @@
   <p>No object selected</p>
 </div>
 <!-- Else display selected object-->
-<div *ngIf="objectInfo">
+<div *ngIf="objectSchema">
   <h3>Object Information</h3>
   <pre>{{ objectSchema | json }}</pre>
   <!-- show all attributes of the objects in individual divs, with the ability to edit them
