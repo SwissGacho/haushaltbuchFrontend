@@ -2,6 +2,8 @@
 
 import { MessageType, Message, IncomingMessage, OutgoingMessage, ObjectMessageType, NavigationHeadersType, ObjectListType, FetchMessageType, StoreMessageType, FetchLikeType, StoreLikeType, ObjectLikeType, FetchSchemaMessageType, ObjectSchemaMessageType } from "../messages/Message";
 
+export type ListObject = {id: number; display_name: string;};
+
 export class FetchMessage extends OutgoingMessage implements FetchMessageType {
   override type: FetchLikeType = MessageType.Fetch as const;
   object: string;
@@ -79,7 +81,7 @@ export class FetchList extends FetchMessage {
 
 export class ObjectList extends IncomingMessage implements ObjectListType {
   override type = MessageType.ObjectList as const;
-  objects: string[];
+  objects: ListObject[];
 
   constructor(data: Message) {
     super(data);

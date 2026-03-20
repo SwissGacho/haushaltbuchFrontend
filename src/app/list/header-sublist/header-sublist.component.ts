@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { BoIdentifier } from 'src/app/business-object/bo.identifier';
 import { ConnectedComponent } from 'src/app/connected-component/connected.component';
 import { ConnectionService } from 'src/app/connection.service';
-import { FetchList, ObjectList } from 'src/app/messages/data.messages';
+import { FetchList, ObjectList, ListObject } from 'src/app/messages/data.messages';
 import { IncomingMessage, MessageType } from 'src/app/messages/Message';
 import { SelectedObjectService } from 'src/app/selected-object.service';
 
@@ -19,7 +19,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
         this.setComponentID('Sublist');
     }
 
-    objects: string[] = [];
+    objects: ListObject[] = [];
 
     override OBSERVE_HANDSHAKE = true;
 
@@ -51,8 +51,8 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
         this.sendMessage(message);
     }
 
-    onObjectClick(object: string): void {
-        let id: BoIdentifier = new BoIdentifier(this.header, Number(object));
+    onObjectClick(object_id: number): void {
+        let id: BoIdentifier = new BoIdentifier(this.header, object_id);
         this.selectedObjectService.selectObject(id);
     }
         
