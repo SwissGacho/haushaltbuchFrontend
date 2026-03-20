@@ -14,6 +14,7 @@ import { ListComponent } from './list/list.component';
 import { HeaderSublistComponent } from './list/header-sublist/header-sublist.component';
 import { DetailComponent } from './detail/detail.component';
 import { CreateObjectButtonComponent } from './create-object-button/create-object-button.component';
+import { DynamicFieldComponent } from './field/dynamic-field.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { CreateObjectButtonComponent } from './create-object-button/create-objec
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    DynamicFieldComponent
   ],
   providers: [],
   bootstrap: [AppComponent]
