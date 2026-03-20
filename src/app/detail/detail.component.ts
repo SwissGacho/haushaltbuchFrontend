@@ -132,7 +132,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     this.objectInfoCache = null;
   }
 
-  updateObject(key: string) {
+  onObjectValueChange(key: string) {
     console.groupCollapsed(this.componentID, "updating object", key, this.objectInfo[key]);
     const value = this.objectInfo[key];
 
