@@ -35,7 +35,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
             console.log(`Received object list for header ${this.header}`, cast);
             this.objects = cast.objects;
         }
-        else {
+        else if (message.type !== MessageType.Hello) {
             console.error('Unexpected message', message);
         }
         console.groupEnd();
