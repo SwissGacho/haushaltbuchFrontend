@@ -112,11 +112,21 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
   }
 
   updateObjectInfo(objectInfo: any, object: string){
-    // Check whether the object info is for the currently selected object
-    if (objectInfo.id !== this.selectedObject?.id || object !== this.selectedObject?.type) {
-      console.warn('Received object info for', object, 'with id', objectInfo.id, 'but selected object is', this.selectedObject?.type, 'with id', this.selectedObject?.id);
+    // If objectinfo.id is undefined, we assume it's a response to an object creation and accept the info if the type matches
+    // Tell the selected object service to select the new object, update our info and proceed
+    console.log('Received object info for type', object, 'with data', objectInfo, 'selected object is', this.selectedObject, 'with id', this.selectedObject?.id);
+    if(this.selectedObject?.id === undefined && this.selectedObject?.type === object) {
+      // console.info('Received object info for new object of type', object, 'with data', objectInfo);
+      this.selectedObjectService.selectObject({ type: object, id: objectInfo.id });
       return;
     }
+
+    // Check whether the object info is for the currently selected object.
+    if  (!(objectInfo.id === this.selectedObject?.id && object === this.selectedObject?.type)) {
+      // console.warn('Received object info for', object, 'with id', objectInfo.id, 'but selected object is', this.selectedObject?.type, 'with id', this.selectedObject?.id);
+      return;
+    }
+    
     this.objectInfoCache = objectInfo;
     this.objectUpdating = false;
     if (!this.schemaUpdating) {
