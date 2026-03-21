@@ -22,7 +22,7 @@ export class DynamicFieldComponent {
   }
 
   // Handle datetime field changes (timezone-aware value emitted from DateTimeFieldComponent)
-  onDateTimeChange(newValue: string) {
+  onDateTimeChange(newValue: string | null) {
     this.value = newValue;
     this.valueChange.emit(this.value);
   }

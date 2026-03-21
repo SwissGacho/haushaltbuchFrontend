@@ -10,14 +10,14 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule]
 })
 export class DateTimeFieldComponent {
-  @Input() set value(rawValue: string) {
-    this._rawValue = rawValue;
-    this._displayValue = this.formatDateTimeLocal(rawValue);
+  @Input() set value(rawValue: string | null) {
+    this._rawValue = rawValue || '';
+    this._displayValue = this.formatDateTimeLocal(rawValue || '');
   }
 
-  @Output() valueChange = new EventEmitter<string>();
+  @Output() valueChange = new EventEmitter<string | null>();
 
-  _rawValue: string = '';
+  _rawValue: string | null = null;
   _displayValue: string = '';
 
   onBlur() {
