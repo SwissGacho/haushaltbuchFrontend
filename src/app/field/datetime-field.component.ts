@@ -22,8 +22,12 @@ export class DateTimeFieldComponent {
 
   onBlur() {
     // Convert the local datetime back to timezone-aware format
-    const tzAwareValue = this.toTimezoneAwareLocal(this._displayValue);
-    this.valueChange.emit(tzAwareValue);
+    if (this._displayValue) {
+      const tzAwareValue = this.toTimezoneAwareLocal(this._displayValue);
+      this.valueChange.emit(tzAwareValue);
+    } else {
+      this.valueChange.emit(null);
+    }
   }
 
   /**
@@ -33,6 +37,9 @@ export class DateTimeFieldComponent {
    */
   private formatDateTimeLocal(value: string): string {
     try {
+      if (!value) {
+        return '';
+      }
       // Parse backend ISO string: replace space with 'T' for JS Date parsing
       const iso = value.replace(' ', 'T');
       const date = new Date(iso);
@@ -63,6 +70,9 @@ export class DateTimeFieldComponent {
    */
   private toTimezoneAwareLocal(localString: string): string {
     try {
+      if (!localString) {
+        return '';
+      }
       // localString is in format YYYY-MM-DDTHH:mm (no timezone info)
       // Create a date in local timezone and convert to ISO with offset
       const [dateStr, timeStr] = localString.split('T');
