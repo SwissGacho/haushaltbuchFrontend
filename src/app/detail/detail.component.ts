@@ -167,7 +167,6 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     this.objectUpdating = false;
     this.objectInfo = null;
     this.objectInfoCache = null;
-    this.objectSchema = null;
     this.objectFields = [];
 
     // Fetch new object
@@ -175,16 +174,8 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
       this.fetchObject();
     }
     if (object?.type != this.objectSchema?.type) {
+      this.objectSchema = null;
       this.fetchSchema();
-    this.objectFields = [];
-
-  // Fetch new object
-  if(object?.id !== undefined) {
-    this.fetchObject();
-  }
-  if (object?.type != this.objectSchema?.type) {
-    this.objectSchema = null;
-    this.fetchSchema();
     // TODO: Unsubscribe from previous object
   }
 
