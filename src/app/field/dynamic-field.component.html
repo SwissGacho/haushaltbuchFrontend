@@ -4,7 +4,7 @@
   </span>
 
   <span *ngSwitchCase="'int'">
-    <input type="number" [(ngModel)]="value" (blur)="onBlur()" />
+    <input type="number" step="1" [(ngModel)]="value" (blur)="onBlur()" />
   </span>
 
   <span *ngSwitchCase="'relation'">
