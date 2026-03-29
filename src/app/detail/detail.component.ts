@@ -176,7 +176,15 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     }
     if (object?.type != this.objectSchema?.type) {
       this.fetchSchema();
-    }
+    this.objectFields = [];
+
+  // Fetch new object
+  if(object?.id !== undefined) {
+    this.fetchObject();
+  }
+  if (object?.type != this.objectSchema?.type) {
+    this.objectSchema = null;
+    this.fetchSchema();
     // TODO: Unsubscribe from previous object
   }
 
