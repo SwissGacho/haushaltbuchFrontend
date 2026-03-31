@@ -13,7 +13,6 @@ import { ConfigurationComponent } from './configuration/configuration.component'
 import { ListComponent } from './list/list.component';
 import { HeaderSublistComponent } from './list/header-sublist/header-sublist.component';
 import { DetailComponent } from './detail/detail.component';
-import { CreateObjectButtonComponent } from './create-object-button/create-object-button.component';
 import { DynamicFieldComponent } from './field/dynamic-field.component';
 
 @NgModule({
@@ -27,8 +26,7 @@ import { DynamicFieldComponent } from './field/dynamic-field.component';
     ConfigurationComponent,
     ListComponent,
     HeaderSublistComponent,
-    DetailComponent,
-    CreateObjectButtonComponent
+    DetailComponent
   ],
   imports: [
     BrowserModule,
