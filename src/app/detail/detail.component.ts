@@ -162,15 +162,19 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
   private onSelectedObjectChange(object: BoIdentifier | null) {
     this.selectedObject = object;
 
-    // Reset updating state
+    // Reset updating state and clear old object info
     this.schemaUpdating = false;
     this.objectUpdating = false;
+    this.objectInfo = null;
+    this.objectInfoCache = null;
+    this.objectFields = [];
 
     // Fetch new object
     if(object?.id !== undefined) {
       this.fetchObject();
     }
     if (object?.type != this.objectSchema?.type) {
+      this.objectSchema = null;
       this.fetchSchema();
     }
     // TODO: Unsubscribe from previous object

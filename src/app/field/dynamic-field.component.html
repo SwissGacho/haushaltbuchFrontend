@@ -3,6 +3,14 @@
     <input type="text" [(ngModel)]="value" (blur)="onBlur()" />
   </span>
 
+  <span *ngSwitchCase="'int'">
+    <input type="number" step="1" [(ngModel)]="value" (blur)="onBlur()" />
+  </span>
+
+  <span *ngSwitchCase="'relation'">
+    <input type="number" [(ngModel)]="value" (blur)="onBlur()" />
+  </span>
+
   <span *ngSwitchCase="'datetime'">
     <app-datetime-field [value]="value" (valueChange)="onDateTimeChange($event)"></app-datetime-field>
   </span>
