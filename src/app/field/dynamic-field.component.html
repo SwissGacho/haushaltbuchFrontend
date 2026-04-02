@@ -1,25 +1,25 @@
 <ng-container [ngSwitch]="schema?.type">
-  <span *ngSwitchCase="'str'">
-    <input type="text" [(ngModel)]="value" (blur)="onBlur()" />
-  </span>
+    <span *ngSwitchCase="'str'">
+        <input type="text" [(ngModel)]="value" (blur)="onBlur()" />
+    </span>
 
-  <span *ngSwitchCase="'int'">
-    <input type="number" step="1" [(ngModel)]="value" (blur)="onBlur()" />
-  </span>
+    <span *ngSwitchCase="'int'">
+        <input type="number" step="1" [(ngModel)]="value" (blur)="onBlur()" />
+    </span>
 
-  <span *ngSwitchCase="'relation'">
-    <input type="number" [(ngModel)]="value" (blur)="onBlur()" />
-  </span>
+    <span *ngSwitchCase="'relation'">
+        <app-relation-field [value]="value" [schema]="schema" (valueChange)="onRelationChange($event)"></app-relation-field>
+    </span>
 
-  <span *ngSwitchCase="'datetime'">
-    <app-datetime-field [value]="value" (valueChange)="onDateTimeChange($event)"></app-datetime-field>
-  </span>
+    <span *ngSwitchCase="'datetime'">
+        <app-datetime-field [value]="value" (valueChange)="onDateTimeChange($event)"></app-datetime-field>
+    </span>
 
-  <span *ngSwitchCase="'date'">
-    <input type="date" [(ngModel)]="value" (blur)="onBlur()" />
-  </span>
+    <span *ngSwitchCase="'date'">
+        <input type="date" [(ngModel)]="value" (blur)="onBlur()" />
+    </span>
 
-  <span *ngSwitchDefault>
-    <input [(ngModel)]="value" (blur)="onBlur()" />
-  </span>
+    <span *ngSwitchDefault>
+        <input [(ngModel)]="value" (blur)="onBlur()" />
+    </span>
 </ng-container>

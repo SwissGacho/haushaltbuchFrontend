@@ -1,0 +1,10 @@
+<select [(ngModel)]="selectedId" (ngModelChange)="onSelectionChange($event)" (focus)="onFocus()" [disabled]="isLoading">
+    <option value="">-- None --</option>
+    <option *ngIf="id && displayName" [value]="id.toString()">
+        {{ displayName }}
+    </option>
+    <option *ngFor="let option of possibleValues" [value]="option.id.toString()" [hidden]="option.id.toString() === id?.toString()">
+        {{ option.display_name }}
+    </option>
+</select>
+<div *ngIf="isLoading">Loading...</div>
