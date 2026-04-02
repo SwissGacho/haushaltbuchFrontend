@@ -5,6 +5,13 @@ import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
 import { IncomingMessage, MessageType } from '../messages/Message';
 import { FetchList, ObjectList, ListObject } from '../messages/data.messages';
+import { BehaviorSubject } from 'rxjs';
+
+interface SelectOption {
+    id: number | null;
+    display_name: string;
+    bo_type?: string;
+}
 
 @Component({
     selector: 'app-relation-field',
@@ -14,20 +21,17 @@ import { FetchList, ObjectList, ListObject } from '../messages/data.messages';
     imports: [CommonModule, FormsModule]
 })
 export class RelationFieldComponent extends ConnectedComponent implements OnInit, OnDestroy {
-    @Input() 
-    set value(val: any) {
-        this._value = val;
-        this.selectedId = val?.id?.toString() || '';
-    }
-    get value(): any {
-        return this._value;
-    }
-    private _value: any;
+    @Input() value: SelectOption | null = null;
     @Input() schema: any;
-    @Output() valueChange = new EventEmitter<any>();
+    @Output() valueChange = new EventEmitter<SelectOption | null>();
 
-    possibleValues: ListObject[] = [];
-    isLoading = false;    selectedId: string = '';
+    // Ein Subject, das die Optionen hält
+    options$ = new BehaviorSubject<SelectOption[]>([]);
+    isOpen = false;
+    isLoading = false;
+
+    // possibleValues: ListObject[] = [];
+    // isLoading = false;    selectedId: string = '';
     constructor(protected override connectionService: ConnectionService) {
         super(connectionService);
         this.setComponentID('RelationFieldComponent');
@@ -35,23 +39,14 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
 
     override ngOnInit() {
         super.ngOnInit();
-        // Don't fetch automatically - wait for focus
     }
 
     override ngOnDestroy() {
         super.ngOnDestroy();
     }
 
-    get displayName(): string {
-        return this._value?.display_name || '';
-    }
-
     get boType(): string {
-        return this._value?.bo_type || this.schema?.flags?.relation?.relation || '';
-    }
-
-    get id(): number | null {
-        return this._value?.id || null;
+        return this.schema?.flags?.relation?.relation || '';
     }
 
     fetchPossibleValues() {
@@ -63,53 +58,48 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
         this.sendMessage(message);
     }
 
+    toggleOpen() {
+        if (this.isOpen) {
+            this.isOpen = false;
+            return;
+        }
+
+        // If no options are loaded (except for the initial value)
+        if (this.options$.value.length <= 1) {
+            this.fetchPossibleValues();
+        } else {
+            this.isOpen = true;
+        }
+    }
+
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, "received", message.type, "message");
         if (message.type === MessageType.ObjectList) {
             console.log(`${this.componentID} handling ObjectList`, message);
             const objectList = message as ObjectList;
-            this.possibleValues = objectList.objects;
+            const emptyOption: SelectOption = { id: null, display_name: '--- None ---' };
+            this.options$.next([emptyOption, ...objectList.objects]);            
             this.isLoading = false;
+            this.isOpen = true;
         } else {
             console.error(`${this.componentID} handling Unexpected message`, message);
         }
         console.groupEnd();
     }
 
-    onFocus() {
-        if (!this.isLoading && this.possibleValues.length === 0 && this.boType) {
-            if (this.token) {
-                this.fetchPossibleValues();
-            } else {
-                // Token not available yet, wait a bit and try again
-                setTimeout(() => {
-                    if (this.token) {
-                        this.fetchPossibleValues();
-                    }
-                }, 100);
-            }
+    selectOption(option: SelectOption) {
+        if (option.id === null) {
+            this.value = null;
+            this.valueChange.emit(null);
+        } else {
+            this.value = option;
+            this.valueChange.emit({...option, bo_type: this.boType});
         }
+        this.isOpen = false;
     }
 
-    onSelectionChange(selectedId: string) {
-        if (selectedId === '') {
-            // User unselected, set to null
-            this._value = null;
-            this.valueChange.emit(this._value);
-        } else {
-            const selectedValue = this.possibleValues.find(v => v.id.toString() === selectedId);
-            if (selectedValue) {
-                const newValue = {
-                    bo_type: this.boType,
-                    id: selectedValue.id,
-                    display_name: selectedValue.display_name
-                };
-                this._value = newValue;
-                this.valueChange.emit(this._value);
-            } else if (selectedId === this.id?.toString()) {
-                // Current value was re-selected, no change needed
-                return;
-            }
-        }
+    close() {
+        this.isOpen = false;
     }
+
 }

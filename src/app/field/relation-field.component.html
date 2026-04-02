@@ -1,10 +1,29 @@
-<select [(ngModel)]="selectedId" (ngModelChange)="onSelectionChange($event)" (focus)="onFocus()" [disabled]="isLoading">
-    <option value="">-- None --</option>
-    <option *ngIf="id && displayName" [value]="id.toString()">
-        {{ displayName }}
-    </option>
-    <option *ngFor="let option of possibleValues" [value]="option.id.toString()" [hidden]="option.id.toString() === id?.toString()">
-        {{ option.display_name }}
-    </option>
-</select>
-<div *ngIf="isLoading">Loading...</div>
+<div class="custom-select-container" (clickOutside)="close()">
+    <div class="select-box" 
+        (click)="toggleOpen()" 
+        [class.active]="isOpen"
+        [class.loading]="isLoading"
+        [title]="value?.display_name || ''">
+        
+        <span class="selected-text">
+        {{ value ? value.display_name : 'Select...' }}
+        </span>
+        
+        <span class="arrow" [class.up]="isOpen">▼</span>
+    </div>
+
+    <div class="dropdown-panel" *ngIf="isOpen && !isLoading">
+        <div *ngFor="let opt of (options$ | async)" 
+            class="option-item"
+            [class.selected]="(opt.id === null && !value) || (opt.id === value?.id)"
+            [class.empty-action]="opt.id === null"
+            (click)="selectOption(opt)"
+            [title]="opt.display_name">
+        {{ opt.display_name }}
+        </div>
+    </div>
+
+    <div class="loading-overlay" *ngIf="isLoading">
+        <span>Loading...</span>
+    </div>
+</div>
