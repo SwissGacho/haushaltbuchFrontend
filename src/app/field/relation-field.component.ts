@@ -7,11 +7,10 @@ import { IncomingMessage, MessageType } from '../messages/Message';
 import { FetchList, ObjectList, ListObject } from '../messages/data.messages';
 import { BehaviorSubject } from 'rxjs';
 
-interface SelectOption {
+ type SelectOption = Omit<ListObject, 'id'> & {
     id: number | null;
-    display_name: string;
     bo_type?: string;
-}
+};
 
 @Component({
     selector: 'app-relation-field',
