@@ -31,11 +31,18 @@
     box-shadow: 0 0 0 0.2rem rgba(0, 120, 212, 0.25);
 }
 
-.selected-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-right: 8px;
+.input-field {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    padding: 0 8px;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.input-field[readonly] {
+    cursor: pointer;
 }
 
 .arrow {
@@ -94,6 +101,6 @@
     font-style: italic;
 }
 
-.option-item.empty-action:hover {
-    background-color: #fff5f5;
+.option-item.highlighted {
+    background-color: #e0e0e0;
 }
