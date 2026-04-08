@@ -38,6 +38,7 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
     isOpen = false;
     isLoading = false;
     shouldOpenOnLoad = false;
+    dropUp = false;
     selectedIndex = -1;
     currentFilteredOptions: SelectOption[] = [];
 
@@ -68,26 +69,6 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
         this.sendMessage(message);
     }
 
-    toggleOpen() {
-        if (this.isOpen) {
-            this.isOpen = false;
-            this.filterText$.next('');
-            this.selectedIndex = -1;
-            return;
-        }
-
-        // If no options are loaded (except for the initial value)
-        if (this.options$.value.length <= 1) {
-            this.shouldOpenOnLoad = true;
-            this.fetchPossibleValues();
-        } else {
-            this.isOpen = true;
-            this.selectedIndex = this.currentFilteredOptions.findIndex(opt => 
-                (opt.id === null && !this.value) || (opt.id === this.value?.id)
-            );
-            setTimeout(() => this.inputElement.nativeElement.focus());
-        }
-    }
 
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, "received", message.type, "message");
@@ -100,7 +81,7 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
 
             if (this.shouldOpenOnLoad) {
                 this.shouldOpenOnLoad = false;
-                this.isOpen = true;
+                this.open();
                 this.selectedIndex = this.currentFilteredOptions.findIndex(opt => 
                     (opt.id === null && !this.value) || (opt.id === this.value?.id)
                 );
@@ -126,19 +107,53 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
         this.selectedIndex = -1;
     }
 
+    toggleOpen() {
+        if (this.isOpen) {
+            this.isOpen = false;
+            this.filterText$.next('');
+            this.selectedIndex = -1;
+            return;
+        }
+
+        // If no options are loaded (except for the initial value)
+        if (this.options$.value.length <= 1) {
+            this.shouldOpenOnLoad = true;
+            this.fetchPossibleValues();
+        } else {
+            this.isOpen = true;
+            this.selectedIndex = this.currentFilteredOptions.findIndex(opt => 
+                (opt.id === null && !this.value) || (opt.id === this.value?.id)
+            );
+            setTimeout(() => this.inputElement.nativeElement.focus());
+        }
+    }
+
+    open() {
+        if (!this.isOpen) {
+            this.updateDropDirection();
+            this.toggleOpen();
+        }
+    }
+
+
     close() {
         this.isOpen = false;
         this.filterText$.next('');
         this.selectedIndex = -1;
     }
 
+    updateDropDirection() {
+        const rect = this.elementRef.nativeElement.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const estimatedHeight = 200; // match your max-height in CSS
+        this.dropUp = spaceBelow < estimatedHeight;
+    }
+
     onInput(event: Event) {
         const target = event.target as HTMLInputElement;
         const value = target.value;
         this.filterText$.next(value);
-        if (!this.isOpen) {
-            this.isOpen = true;
-        }
+        this.open();
         if (this.options$.value.length <= 1 && !this.isLoading) {
             this.fetchPossibleValues();
         }
@@ -169,7 +184,7 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
                 this.shouldOpenOnLoad = true;
                 this.fetchPossibleValues();
             }
-            this.isOpen = true;
+            this.open();
             this.selectedIndex = this.currentFilteredOptions.findIndex(opt => 
                 (opt.id === null && !this.value) || (opt.id === this.value?.id)
             );

@@ -66,8 +66,13 @@
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     z-index: 1000;
-    max-height: 300px;
+    max-height: 200px;
     overflow-y: auto;
+}
+
+.dropdown-panel.drop-up {
+    top: auto;
+    bottom: 100%;
 }
 
 .option-item {

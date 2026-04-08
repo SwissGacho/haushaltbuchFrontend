@@ -18,7 +18,10 @@
         <span class="arrow" [class.up]="isOpen">▼</span>
     </div>
 
-    <div class="dropdown-panel" *ngIf="isOpen && !isLoading" (mousedown)="$event.preventDefault()">
+    <div class="dropdown-panel" 
+        *ngIf="isOpen && !isLoading"
+        [class.drop-up]="dropUp"
+        (mousedown)="$event.preventDefault()">
         <div *ngFor="let opt of (filteredOptions$ | async); let i = index" 
             class="option-item"
             [class.selected]="(opt.id === null && !value) || (opt.id === value?.id)"
