@@ -37,6 +37,7 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
     );
     isOpen = false;
     isLoading = false;
+    shouldOpenOnLoad = false;
     selectedIndex = -1;
     currentFilteredOptions: SelectOption[] = [];
 
@@ -77,6 +78,7 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
 
         // If no options are loaded (except for the initial value)
         if (this.options$.value.length <= 1) {
+            this.shouldOpenOnLoad = true;
             this.fetchPossibleValues();
         } else {
             this.isOpen = true;
@@ -95,11 +97,15 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
             const emptyOption: SelectOption = { id: null, display_name: '--- None ---' };
             this.options$.next([emptyOption, ...objectList.objects]);            
             this.isLoading = false;
-            this.isOpen = true;
-            this.selectedIndex = this.currentFilteredOptions.findIndex(opt => 
-                (opt.id === null && !this.value) || (opt.id === this.value?.id)
-            );
-            setTimeout(() => this.inputElement.nativeElement.focus());
+
+            if (this.shouldOpenOnLoad) {
+                this.shouldOpenOnLoad = false;
+                this.isOpen = true;
+                this.selectedIndex = this.currentFilteredOptions.findIndex(opt => 
+                    (opt.id === null && !this.value) || (opt.id === this.value?.id)
+                );
+                setTimeout(() => this.inputElement.nativeElement.focus());
+            }
         } else {
             console.error(`${this.componentID} handling Unexpected message`, message);
         }
@@ -128,11 +134,53 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
 
     onInput(event: Event) {
         const target = event.target as HTMLInputElement;
-        this.filterText$.next(target.value);
-        this.selectedIndex = -1;
+        const value = target.value;
+        this.filterText$.next(value);
+        if (!this.isOpen) {
+            this.isOpen = true;
+        }
+        if (this.options$.value.length <= 1 && !this.isLoading) {
+            this.fetchPossibleValues();
+        }
+        this.selectedIndex = this.currentFilteredOptions.length > 0 ? 0 : -1;
+    }
+
+    onFocus() {
+        if (this.options$.value.length <= 1 && !this.isLoading) {
+            this.shouldOpenOnLoad = false;
+            this.fetchPossibleValues();
+        }
+    }
+
+    onBlur() {
+        const inputValue = this.inputElement.nativeElement.value.trim();
+        const matched = this.currentFilteredOptions.find(opt => opt.display_name === inputValue);
+        if (matched) {
+            this.selectOption(matched);
+        } else {
+            this.close();
+        }
     }
 
     onKeyDown(event: KeyboardEvent) {
+        if (!this.isOpen && (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Enter')) {
+            event.preventDefault();
+            if (this.options$.value.length <= 1 && !this.isLoading) {
+                this.shouldOpenOnLoad = true;
+                this.fetchPossibleValues();
+            }
+            this.isOpen = true;
+            this.selectedIndex = this.currentFilteredOptions.findIndex(opt => 
+                (opt.id === null && !this.value) || (opt.id === this.value?.id)
+            );
+            if (this.selectedIndex === -1 && this.currentFilteredOptions.length > 0) {
+                this.selectedIndex = 0;
+            }
+            if (event.key === 'Enter') {
+                return;
+            }
+        }
+
         if (event.key === 'ArrowDown') {
             event.preventDefault();
             if (this.selectedIndex < this.currentFilteredOptions.length - 1) {
@@ -142,8 +190,6 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
             event.preventDefault();
             if (this.selectedIndex > 0) {
                 this.selectedIndex--;
-            } else if (this.selectedIndex === 0) {
-                this.selectedIndex = -1;
             }
         } else if (event.key === 'Enter') {
             event.preventDefault();

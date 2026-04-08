@@ -49,6 +49,11 @@
     font-size: 0.8em;
     color: #666;
     user-select: none;
+    transition: transform 0.2s ease;
+}
+
+.arrow.up {
+    transform: rotate(180deg);
 }
 
 .dropdown-panel {
@@ -88,15 +93,15 @@
     padding-top: 2px;
 }
 
-/* Styling für den Platzhalter im geschlossenen Zustand */
+/* Styling for the placeholder in the closed state */
 .select-box.placeholder .selected-text {
     color: #888;
     font-style: italic;
 }
 
-/* Spezielles Styling für die "Null"-Option in der Liste */
+/* Special styling for the "Null"-Option in the list */
 .option-item.empty-action {
-    color: #d9534f; /* Ein dezentes Rot oder Grau */
+    color: #d9534f; 
     border-bottom: 1px solid #eee;
     font-style: italic;
 }
