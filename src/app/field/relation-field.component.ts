@@ -42,13 +42,16 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
     selectedIndex = -1;
     currentFilteredOptions: SelectOption[] = [];
 
+    override OBSERVE_HANDSHAKE = true;
+
     constructor(protected override connectionService: ConnectionService, private elementRef: ElementRef) {
         super(connectionService);
         this.setComponentID('RelationFieldComponent');
     }
 
     override ngOnInit() {
-        super.ngOnInit();
+        // Do NOT call super.ngOnInit() — connection is opened lazily
+        // super.ngOnInit();
         this.filteredOptions$.subscribe(options => this.currentFilteredOptions = options);
     }
 
@@ -61,14 +64,27 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
     }
 
     fetchPossibleValues() {
-        if (!this.boType || this.token === null) {
+        if (!this.boType) {
             return;
         }
         this.isLoading = true;
+        console.log(`${this.componentID} fetching possible values for`, this.boType);
+        console.log(`${this.componentID} checking if should open on load:`, this.shouldOpenOnLoad, "or is loading:", this.isLoading);
+        // Open the connection the first time it's actually needed
+        if (!this.connected) {
+            console.log(`${this.componentID} opening connection to fetch possible values`);
+            this.getConnection();
+            // connection is set up asynchronously during handshake, so return here;
+            // shouldOpenOnLoad / the caller will retry once Welcome message arrives
+            return;
+        }
+        if (this.token === null) {
+            return;
+        }
+
         const message = new FetchList(this.boType, '', this.token);
         this.sendMessage(message);
     }
-
 
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, "received", message.type, "message");
@@ -87,7 +103,14 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
                 );
                 setTimeout(() => this.inputElement.nativeElement.focus());
             }
-        } else {
+        } else if (message.type === MessageType.Welcome) {
+            console.log(`${this.componentID} received Welcome message`, message);
+            console.log(`${this.componentID} checking if should open on load:`, this.shouldOpenOnLoad, "or is loading:", this.isLoading);
+            // If someone is already waiting for a fetch, kick it off now
+            if (this.shouldOpenOnLoad || this.isLoading) {
+                this.fetchPossibleValues();
+            }
+        } else if (message.type !== MessageType.Hello) {
             console.error(`${this.componentID} handling Unexpected message`, message);
         }
         console.groupEnd();
