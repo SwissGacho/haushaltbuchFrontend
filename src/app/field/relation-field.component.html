@@ -1,0 +1,39 @@
+<div class="custom-select-container">
+    <div class="select-box" 
+        (click)="toggleOpen()"
+        (mousedown)="$event.preventDefault()"
+        [class.active]="isOpen"
+        [class.loading]="isLoading"
+        [title]="value?.display_name || ''">
+        
+        <input #inputElement
+            [value]="isOpen ? (filterText$ | async) : (value ? value.display_name : 'Select...')"
+            (input)="onInput($event)"
+            (keydown)="onKeyDown($event)"
+            (focus)="onFocus()"
+            (blur)="onBlur()"
+            class="input-field"
+            autocomplete="off">
+        
+        <span class="arrow" [class.up]="isOpen">▼</span>
+    </div>
+
+    <div class="dropdown-panel" 
+        *ngIf="isOpen && !isLoading"
+        [class.drop-up]="dropUp"
+        (mousedown)="$event.preventDefault()">
+        <div *ngFor="let opt of (filteredOptions$ | async); let i = index" 
+            class="option-item"
+            [class.selected]="(opt.id === null && !value) || (opt.id === value?.id)"
+            [class.highlighted]="i === selectedIndex"
+            [class.empty-action]="opt.id === null"
+            (click)="selectOption(opt)"
+            [title]="opt.display_name">
+        {{ opt.display_name }}
+        </div>
+    </div>
+
+    <div class="loading-overlay" *ngIf="isLoading">
+        <span>Loading...</span>
+    </div>
+</div>

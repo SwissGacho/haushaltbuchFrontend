@@ -2,13 +2,14 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DateTimeFieldComponent } from './datetime-field.component';
+import { RelationFieldComponent } from './relation-field.component';
 
 @Component({
   selector: 'app-dynamic-field',
   templateUrl: './dynamic-field.component.html',
   styleUrls: ['./dynamic-field.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, DateTimeFieldComponent]
+  imports: [CommonModule, FormsModule, DateTimeFieldComponent, RelationFieldComponent]
 })
 export class DynamicFieldComponent {
   @Input() key!: string;
@@ -23,6 +24,12 @@ export class DynamicFieldComponent {
 
   // Handle datetime field changes (timezone-aware value emitted from DateTimeFieldComponent)
   onDateTimeChange(newValue: string | null) {
+    this.value = newValue;
+    this.valueChange.emit(this.value);
+  }
+
+  // Handle relation field changes
+  onRelationChange(newValue: any) {
     this.value = newValue;
     this.valueChange.emit(this.value);
   }
