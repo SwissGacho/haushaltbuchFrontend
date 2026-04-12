@@ -1,0 +1,13 @@
+.add-new {
+    list-style-type: none;
+    position: relative;
+}
+
+.add-new::before {
+    content: '►';
+    position: absolute;
+    left: -1.3em;
+    top: 2pt;
+    color: blue;
+    font-size: 70%;
+}

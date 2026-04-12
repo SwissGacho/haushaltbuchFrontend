@@ -55,6 +55,11 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
         let id: BoIdentifier = new BoIdentifier(this.header, object_id);
         this.selectedObjectService.selectObject(id);
     }
+
+    onCreateNew(): void {
+        let blankObject = new BoIdentifier(this.header, undefined);
+        this.selectedObjectService.selectObject(blankObject);
+    }
         
 
     // An input property to receive the headers from the parent component
