@@ -1,6 +1,6 @@
 
 
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ConnectionService } from '../connection.service';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { IncomingMessage, MessageType } from '../messages/Message';
@@ -22,7 +22,8 @@ export class ListComponent extends ConnectedComponent implements OnInit {
 
     // A list of the headers we received
     headers: string[] = [];
-    selectedObject: BoIdentifier | null = null;
+
+    @Input() parentObject: BoIdentifier | null = null;
 
     override OBSERVE_HANDSHAKE = true;
 
@@ -54,13 +55,16 @@ export class ListComponent extends ConnectedComponent implements OnInit {
             return;
         }
         console.log('Fetching list');
-        let message = new FetchNavigationHeaders(this.token);
+        let message = new FetchNavigationHeaders(this.parentObject?.type, this.token);
         console.log('Sending fetch list message', message);
         this.sendMessage(message);
     }
 
-    handleObjectClick(object: BoIdentifier): void {
-        console.log('Object clicked:', object);
-        this.selectedObject = object;
+    ngOnChanges(changes: SimpleChanges): void {
+        if (!changes['parentObject'] || this.token === null) {
+            return;
+        }
+
+        this.fetchNavigationHeaders();
     }
 }

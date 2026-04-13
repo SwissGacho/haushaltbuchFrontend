@@ -2,10 +2,14 @@
   @for (object of objects; track object.id) {
     <div>
       <li 
-        (click)="onObjectClick(object.id)" 
+        (click)="onObjectClick(object.id)"
+        (dblclick)="onObjectDoubleClick(object.id)"
         style="cursor: pointer;">
         {{ object.display_name }}
       </li>
+      @if (expandedObject?.id === object.id) {
+        <app-list-component [parentObject]="expandedObject"></app-list-component>
+      }
     </div>
   }
   <li class="add-new" (click)="onCreateNew()" style="cursor: pointer; font-style: italic; color: blue;">

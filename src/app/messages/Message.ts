@@ -119,6 +119,7 @@ export interface FetchMessageType extends OutgoingBaseMessage {
   type: FetchLikeType;
   object: string;
   index: number | string;
+  conditions?: Record<string, unknown>;
 }
 
 export interface FetchSchemaMessageType extends OutgoingBaseMessage {
