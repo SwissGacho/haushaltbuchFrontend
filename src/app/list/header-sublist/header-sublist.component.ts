@@ -71,13 +71,26 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
     onObjectDoubleClick(objectId: number): void {
         this.clearPendingClick();
         const { objectType } = this.parseHeader(this.header);
-        let id: BoIdentifier = new BoIdentifier(objectType, objectId);
+        const objectDisplayName = this.findObjectDisplayName(objectId);
+        let id: BoIdentifier = new BoIdentifier(objectType, objectId, undefined, objectDisplayName);
         this.selectedObjectService.selectObject(id);
     }
 
     onCreateNew(): void {
-        const { objectType } = this.parseHeader(this.header);
-        let blankObject = new BoIdentifier(objectType, undefined);
+        const { objectType, referenceAttribute } = this.parseHeader(this.header);
+        let initialValues: Record<string, unknown> | undefined;
+
+        if (referenceAttribute && this.parentObject?.id !== undefined) {
+            initialValues = {
+                [referenceAttribute]: {
+                    id: this.parentObject.id,
+                    display_name: this.parentObject.displayName || String(this.parentObject.id),
+                    bo_type: this.parentObject.type
+                }
+            };
+        }
+
+        let blankObject = new BoIdentifier(objectType, undefined, initialValues);
         this.selectedObjectService.selectObject(blankObject);
     }
 
@@ -93,7 +106,12 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
             return;
         }
 
-        this.expandedObject = new BoIdentifier(objectType, objectId);
+        const objectDisplayName = this.findObjectDisplayName(objectId);
+        this.expandedObject = new BoIdentifier(objectType, objectId, undefined, objectDisplayName);
+    }
+
+    private findObjectDisplayName(objectId: number): string | undefined {
+        return this.objects.find((object) => object.id === objectId)?.display_name;
     }
 
     private clearPendingClick(): void {

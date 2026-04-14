@@ -87,4 +87,34 @@ describe('HeaderSublistComponent', () => {
     expect(selectedObjectService.selectObject).toHaveBeenCalledTimes(1);
     expect(selectedObjectService.selectObject).toHaveBeenCalledWith(expect.objectContaining({ type: 'Invoice', id: 7 }));
   });
+
+  it('creates a blank object on add-new click when no parent reference is available', () => {
+    component.header = 'Invoice.customer';
+    component.parentObject = null;
+
+    component.onCreateNew();
+
+    expect(selectedObjectService.selectObject).toHaveBeenCalledTimes(1);
+    expect(selectedObjectService.selectObject).toHaveBeenCalledWith(expect.objectContaining({ type: 'Invoice', id: undefined, initialValues: undefined }));
+  });
+
+  it('prefills parent reference on add-new click', () => {
+    component.header = 'Invoice.customer';
+    component.parentObject = { type: 'Customer', id: 42, displayName: 'ACME Corp' };
+
+    component.onCreateNew();
+
+    expect(selectedObjectService.selectObject).toHaveBeenCalledTimes(1);
+    expect(selectedObjectService.selectObject).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'Invoice',
+      id: undefined,
+      initialValues: {
+        customer: {
+          id: 42,
+          display_name: 'ACME Corp',
+          bo_type: 'Customer'
+        }
+      }
+    }));
+  });
 });
