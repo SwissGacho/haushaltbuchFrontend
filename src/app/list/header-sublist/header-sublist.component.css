@@ -1,3 +1,26 @@
+.object-item {
+    list-style-type: none;
+    position: relative;
+}
+
+.object-item::before {
+    content: '►';
+    position: absolute;
+    left: -1.3em;
+    top: 2pt;
+    color: #555;
+    font-size: 70%;
+}
+
+.object-item.expanded::before {
+    content: '▼';
+}
+
+.object-item.known-empty::before {
+    content: '○';
+    font-size: 80%;
+}
+
 .add-new {
     list-style-type: none;
     position: relative;

@@ -21,6 +21,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
 
     objects: ListObject[] = [];
     expandedObject: BoIdentifier | null = null;
+    knownEmptyIds = new Set<number>();
     private clickTimeoutId: number | null = null;
 
     override OBSERVE_HANDSHAKE = true;
@@ -97,6 +98,10 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
     override ngOnDestroy(): void {
         this.clearPendingClick();
         super.ngOnDestroy();
+    }
+
+    onSublistEmpty(objectId: number): void {
+        this.knownEmptyIds.add(objectId);
     }
 
     private toggleExpandedObject(objectId: number): void {

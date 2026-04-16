@@ -2,13 +2,16 @@
   @for (object of objects; track object.id) {
     <div>
       <li 
+        [class.expanded]="expandedObject?.id === object.id"
+        [class.known-empty]="knownEmptyIds.has(object.id)"
+        class="object-item"
         (click)="onObjectClick(object.id)"
         (dblclick)="onObjectDoubleClick(object.id)"
         style="cursor: pointer;">
         {{ object.display_name }}
       </li>
       @if (expandedObject?.id === object.id) {
-        <app-list-component [parentObject]="expandedObject"></app-list-component>
+        <app-list-component [parentObject]="expandedObject" (empty)="onSublistEmpty(object.id)"></app-list-component>
       }
     </div>
   }

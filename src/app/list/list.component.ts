@@ -1,6 +1,6 @@
 
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ConnectionService } from '../connection.service';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { IncomingMessage, MessageType } from '../messages/Message';
@@ -24,6 +24,7 @@ export class ListComponent extends ConnectedComponent implements OnInit {
     headers: string[] = [];
 
     @Input() parentObject: BoIdentifier | null = null;
+    @Output() empty = new EventEmitter<void>();
 
     override OBSERVE_HANDSHAKE = true;
 
@@ -38,6 +39,9 @@ export class ListComponent extends ConnectedComponent implements OnInit {
             // Log which component received the message with format string
             console.log(`${this.componentID} handling NavigationHeaders`, message);
             this.headers = (message as NavigationHeaders).headers;
+            if (this.headers.length === 0) {
+                this.empty.emit();
+            }
         }
         else if (message.type === MessageType.Hello) {
             console.log(`${this.componentID} handling hello`, message);
