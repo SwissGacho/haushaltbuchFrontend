@@ -204,7 +204,8 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
           }
         }
       }
-      let message = new StoreMessage(this.selectedObject.type, Number(this.selectedObject.id), payload, this.token);
+      const index = this.selectedObject.id === undefined ? null : Number(this.selectedObject.id);
+      let message = new StoreMessage(this.selectedObject.type, index, payload, this.token);
       this.sendMessage(message);
       // update clean copy so further edits compare correctly
       this.objectInfoClean[key] = value;
