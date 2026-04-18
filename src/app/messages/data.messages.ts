@@ -1,8 +1,7 @@
 // console.log('init messages.data');
 
-import { MessageType, Message, IncomingMessage, OutgoingMessage, ObjectMessageType, NavigationHeadersType, ObjectListType, FetchMessageType, StoreMessageType, FetchLikeType, StoreLikeType, ObjectLikeType, FetchSchemaMessageType, ObjectSchemaMessageType } from "../messages/Message";
+import { MessageType, Message, IncomingMessage, OutgoingMessage, ObjectMessageType, NavigationHeadersType, ObjectListType, FetchMessageType, StoreMessageType, FetchLikeType, StoreLikeType, ObjectLikeType, FetchSchemaMessageType, ObjectSchemaMessageType, ListObject } from "../messages/Message";
 
-export type ListObject = {id: number; display_name: string;};
 
 export class FetchMessage extends OutgoingMessage implements FetchMessageType {
   override type: FetchLikeType = MessageType.Fetch as const;
