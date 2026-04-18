@@ -104,7 +104,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     console.info('Schema updated', this.objectSchema);
 
     if(this.selectedObject?.id == undefined) {
-      this.objectInfoCache = Object.keys(this.objectSchema || {});
+      this.objectInfoCache = this.normalizeInitialValues(this.selectedObject.initialValues || {}, this.objectSchema);
     }
     if (!this.objectUpdating) {
       this.updateObjectFrontend()
@@ -138,19 +138,74 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     // copy raw values into editable view
     // specialized field components (DateTimeFieldComponent, etc) handle their own display conversions
     this.objectInfo = { ...this.objectInfoCache };
-    this.objectInfoClean = { ...this.objectInfoCache };
+    // For new objects, exclude prefilled initial values from objectInfoClean so they are always detected as changes
+    if (this.selectedObject?.id === undefined) {
+      const prefilled = new Set(Object.keys(this.selectedObject?.initialValues || {}));
+      this.objectInfoClean = Object.fromEntries(
+        Object.entries(this.objectInfoCache || {}).filter(([key]) => !prefilled.has(key))
+      );
+    } else {
+      this.objectInfoClean = { ...this.objectInfoCache };
+    }
     this.objectInfoCache = null;
   }
 
+  private normalizeInitialValues(initialValues: Record<string, unknown>, schema: any): Record<string, unknown> {
+    const normalized: Record<string, unknown> = { ...initialValues };
+
+    for (const [key, value] of Object.entries(normalized)) {
+      if (schema?.[key]?.type !== 'relation' || typeof value !== 'number') {
+        continue;
+      }
+
+      normalized[key] = {
+        id: value,
+        display_name: String(value),
+        bo_type: schema[key]?.flags?.relation?.relation
+      };
+    }
+
+    return normalized;
+  }
+
   onObjectValueChange(key: string) {
+    // Blur/valueChange events can still arrive while the component is switching selections.
+    // Ignore these stale events when the backing state was already reset.
+    if (!this.objectInfo || !this.objectInfoClean || !this.selectedObject || !this.token) {
+      console.warn('Ignoring value change while detail state is not ready', {
+        key,
+        hasObjectInfo: !!this.objectInfo,
+        hasObjectInfoClean: !!this.objectInfoClean,
+        hasSelectedObject: !!this.selectedObject,
+        hasToken: !!this.token
+      });
+      return;
+    }
+
     console.groupCollapsed(this.componentID, "updating object", key, this.objectInfo[key]);
     const value = this.objectInfo[key];
 
-    if (this.objectInfoClean[key] === value) {
+    // For new objects with prefilled values, missing keys from objectInfoClean indicate prefilled fields
+    const cleanValue = Object.prototype.hasOwnProperty.call(this.objectInfoClean, key) ? this.objectInfoClean[key] : undefined;
+    const hasChanged = cleanValue !== value;
+
+    if (!hasChanged) {
       console.log('No change detected');
     }
     else {
-      let message = new StoreMessage(this.selectedObject!.type, Number(this.selectedObject!.id), { [key]: value }, this.token!);
+      // Build payload: for new objects, include all prefilled fields; for existing objects, just the changed field
+      let payload: Record<string, unknown> = { [key]: value };
+      if (this.selectedObject.id === undefined) {
+        // Include all prefilled fields in the payload for new objects
+        const preFilled = this.selectedObject.initialValues || {};
+        for (const preFillKey of Object.keys(preFilled)) {
+          if (Object.prototype.hasOwnProperty.call(this.objectInfo, preFillKey)) {
+            payload[preFillKey] = this.objectInfo[preFillKey];
+          }
+        }
+      }
+      const index = this.selectedObject.id === undefined ? null : Number(this.selectedObject.id);
+      let message = new StoreMessage(this.selectedObject.type, index, payload, this.token);
       this.sendMessage(message);
       // update clean copy so further edits compare correctly
       this.objectInfoClean[key] = value;

@@ -1,6 +1,6 @@
 
 
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ConnectionService } from '../connection.service';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { IncomingMessage, MessageType } from '../messages/Message';
@@ -22,7 +22,9 @@ export class ListComponent extends ConnectedComponent implements OnInit {
 
     // A list of the headers we received
     headers: string[] = [];
-    selectedObject: BoIdentifier | null = null;
+
+    @Input() parentObject: BoIdentifier | null = null;
+    @Output() empty = new EventEmitter<void>();
 
     override OBSERVE_HANDSHAKE = true;
 
@@ -37,6 +39,9 @@ export class ListComponent extends ConnectedComponent implements OnInit {
             // Log which component received the message with format string
             console.log(`${this.componentID} handling NavigationHeaders`, message);
             this.headers = (message as NavigationHeaders).headers;
+            if (this.headers.length === 0) {
+                this.empty.emit();
+            }
         }
         else if (message.type === MessageType.Hello) {
             console.log(`${this.componentID} handling hello`, message);
@@ -54,13 +59,16 @@ export class ListComponent extends ConnectedComponent implements OnInit {
             return;
         }
         console.log('Fetching list');
-        let message = new FetchNavigationHeaders(this.token);
+        let message = new FetchNavigationHeaders(this.parentObject?.type, this.token);
         console.log('Sending fetch list message', message);
         this.sendMessage(message);
     }
 
-    handleObjectClick(object: BoIdentifier): void {
-        console.log('Object clicked:', object);
-        this.selectedObject = object;
+    ngOnChanges(changes: SimpleChanges): void {
+        if (!changes['parentObject'] || this.token === null) {
+            return;
+        }
+
+        this.fetchNavigationHeaders();
     }
 }
