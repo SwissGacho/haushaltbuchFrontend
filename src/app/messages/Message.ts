@@ -9,7 +9,6 @@ export enum MessageType {
   Hello = "Hello",
   Login = "Login",
   Welcome = "Welcome",
-  Setup = "Setup",
   Bye = "Bye",
   Echo = "Echo",
   Fetch = "Fetch",
@@ -25,6 +24,8 @@ export enum MessageType {
   FetchSchema = 'FetchSchema',
   ObjectSchema = 'ObjectSchema',
 }
+
+export type ListObject = { id: number; display_name: string };
 
 // Type unions for polymorphic message classes
 export type FetchLikeType = MessageType.Fetch | MessageType.FetchSetup | MessageType.FetchNavigationHeaders | MessageType.FetchList;
@@ -89,7 +90,7 @@ export interface NavigationHeadersType extends IncomingBaseMessage {
 
 export interface ObjectListType extends IncomingBaseMessage {
   type: MessageType.ObjectList;
-  payload?: { objects?: string[] };
+  payload?: { objects?: ListObject[] };
 }
 
 // Discriminated union types for outgoing messages

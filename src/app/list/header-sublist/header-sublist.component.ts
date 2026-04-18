@@ -2,7 +2,8 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BoIdentifier } from 'src/app/business-object/bo.identifier';
 import { ConnectedComponent } from 'src/app/connected-component/connected.component';
 import { ConnectionService } from 'src/app/connection.service';
-import { FetchList, ObjectList, ListObject } from 'src/app/messages/data.messages';
+import { FetchList, ObjectList } from 'src/app/messages/data.messages';
+import { ListObject } from 'src/app/messages/Message';
 import { IncomingMessage, MessageType } from 'src/app/messages/Message';
 import { SelectedObjectService } from 'src/app/selected-object.service';
 
