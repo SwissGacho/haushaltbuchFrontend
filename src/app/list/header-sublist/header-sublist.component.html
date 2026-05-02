@@ -2,10 +2,17 @@
   @for (object of objects; track object.id) {
     <div>
       <li 
-        (click)="onObjectClick(object.id)" 
+        [class.expanded]="expandedObject?.id === object.id"
+        [class.known-empty]="knownEmptyIds.has(object.id)"
+        class="object-item"
+        (click)="onObjectClick(object.id)"
+        (dblclick)="onObjectDoubleClick(object.id)"
         style="cursor: pointer;">
         <app-boname-renderer [value]="object.display_name"></app-boname-renderer>
       </li>
+      @if (expandedObject?.id === object.id) {
+        <app-list-component [parentObject]="expandedObject" (empty)="onSublistEmpty(object.id)"></app-list-component>
+      }
     </div>
   }
   <li class="add-new" (click)="onCreateNew()" style="cursor: pointer; font-style: italic; color: blue;">

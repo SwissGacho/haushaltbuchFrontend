@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
 import { IncomingMessage, MessageType } from '../messages/Message';
-import { FetchList, ObjectList, ListObject } from '../messages/data.messages';
+import { FetchList, ObjectList } from '../messages/data.messages';
+import { ListObject } from '../messages/Message';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
