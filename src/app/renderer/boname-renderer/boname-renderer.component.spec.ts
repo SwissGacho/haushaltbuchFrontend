@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BONameRendererComponent } from './boname-renderer.component';
+import { BoNameRendererComponent } from './boname-renderer.component';
 
-describe('BONameRendererComponent', () => {
-  let component: BONameRendererComponent;
-  let fixture: ComponentFixture<BONameRendererComponent>;
+describe('BoNameRendererComponent', () => {
+  let component: BoNameRendererComponent;
+  let fixture: ComponentFixture<BoNameRendererComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BONameRendererComponent]
+      imports: [BoNameRendererComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(BONameRendererComponent);
+    fixture = TestBed.createComponent(BoNameRendererComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

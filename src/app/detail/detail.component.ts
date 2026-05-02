@@ -231,8 +231,8 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     if(object?.id !== undefined) {
       this.fetchObject();
     }
-    console.log("Type:")
-    console.log(this.selectedType)
+    // console.log("Type:")
+    // console.log(this.selectedType)
     if (object?.type != this.selectedType) {
       this.objectSchema = null;
       this.fetchSchema();
