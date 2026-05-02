@@ -6,18 +6,18 @@
 </div>
 <!-- Else display selected object-->
 <div *ngIf="objectSchema && objectInfo">
-  <h3>Object Information</h3>
-  <pre>{{ objectSchema | json }}</pre>
   <!-- show all attributes of the objects in individual divs, with the ability to edit them
   On losing focus, send an update message to the backend with the updated object information. 
   -->
   <div *ngFor="let key of objectFields">
     <strong>{{ key }}:</strong>
     <app-dynamic-field
-      [key]="key"
-      [schema]="objectSchema[key]"
-      [(value)]="objectInfo[key]"
-      (valueChange)="onObjectValueChange(key)"
+    [key]="key"
+    [schema]="objectSchema[key]"
+    [(value)]="objectInfo[key]"
+    (valueChange)="onObjectValueChange(key)"
     ></app-dynamic-field>
   </div>
+  <h3>Object Information</h3>
+  <pre>{{ objectSchema | json }}</pre>
 </div>

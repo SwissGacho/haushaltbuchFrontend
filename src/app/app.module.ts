@@ -14,6 +14,7 @@ import { ListComponent } from './list/list.component';
 import { HeaderSublistComponent } from './list/header-sublist/header-sublist.component';
 import { DetailComponent } from './detail/detail.component';
 import { DynamicFieldComponent } from './field/dynamic-field.component';
+import { BoNameRendererComponent } from './renderer/boname-renderer/boname-renderer.component';
 
 @NgModule({
   declarations: [
@@ -26,13 +27,14 @@ import { DynamicFieldComponent } from './field/dynamic-field.component';
     ConfigurationComponent,
     ListComponent,
     HeaderSublistComponent,
-    DetailComponent
+    DetailComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    DynamicFieldComponent
+    DynamicFieldComponent,
+    BoNameRendererComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

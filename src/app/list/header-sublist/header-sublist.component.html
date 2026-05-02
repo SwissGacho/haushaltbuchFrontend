@@ -4,11 +4,11 @@
       <li 
         (click)="onObjectClick(object.id)" 
         style="cursor: pointer;">
-        {{ object.display_name }}
+        <app-boname-renderer [value]="object.display_name"></app-boname-renderer>
       </li>
     </div>
   }
   <li class="add-new" (click)="onCreateNew()" style="cursor: pointer; font-style: italic; color: blue;">
-    Add new {{ header }}
+    <app-boname-renderer [value]="'Add new ' + header"></app-boname-renderer>
   </li>
 </ul>
