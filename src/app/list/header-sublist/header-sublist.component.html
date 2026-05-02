@@ -8,7 +8,7 @@
         (click)="onObjectClick(object.id)"
         (dblclick)="onObjectDoubleClick(object.id)"
         style="cursor: pointer;">
-        {{ object.display_name }}
+        <app-boname-renderer [value]="object.display_name"></app-boname-renderer>
       </li>
       @if (expandedObject?.id === object.id) {
         <app-list-component [parentObject]="expandedObject" (empty)="onSublistEmpty(object.id)"></app-list-component>
@@ -16,6 +16,6 @@
     </div>
   }
   <li class="add-new" (click)="onCreateNew()" style="cursor: pointer; font-style: italic; color: blue;">
-    Add new {{ header }}
+    <app-boname-renderer [value]="'Add new ' + header"></app-boname-renderer>
   </li>
 </ul>

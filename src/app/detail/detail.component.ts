@@ -6,6 +6,8 @@ import { FetchMessage, FetchSchemaMessage, ObjectMessage, ObjectSchemaMessage, S
 import { SelectedObjectService } from '../selected-object.service';
 import { BoIdentifier } from '../business-object/bo.identifier';
 import { Subscription } from 'rxjs';
+import { parseObjectSchema } from '../business-object/bo-schema/bo.schema.parse';
+import { ObjectSchema } from '../business-object/bo-schema/bo.schema.types';
 
 
 @Component({
@@ -25,11 +27,12 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
   }
 
   override OBSERVE_HANDSHAKE = true;
+  selectedType: string | null = null;
   objectInfo: any = null;
   objectInfoCache: any = null;      // raw values coming from backend (timezone aware)
   objectInfoClean: any = null;      // mirror of raw values for change detection
   objectFields: string[] = [];
-  objectSchema: any = null;
+  objectSchema: ObjectSchema | null = null;
   objectUpdating: boolean = false;
   schemaUpdating: boolean = false;
 
@@ -95,10 +98,10 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
   updateSchemaInfo(schema: any, object: string) {
     // Check whether the schema is for the currently selected object
     if (object !== this.selectedObject?.type) {
-      console.warn('Received schema for type', schema.type, 'but selected object is of type', this.selectedObject?.type);
+      console.warn('Received schema for type', object, 'but selected object is of type', this.selectedObject?.type);
       return;
     }
-    this.objectSchema = schema;
+    this.objectSchema = parseObjectSchema(schema);
     this.objectFields = Object.keys(this.objectSchema || {});
     this.schemaUpdating = false;
     console.info('Schema updated', this.objectSchema);
@@ -228,11 +231,14 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     if(object?.id !== undefined) {
       this.fetchObject();
     }
-    if (object?.type != this.objectSchema?.type) {
+    // console.log("Type:")
+    // console.log(this.selectedType)
+    if (object?.type != this.selectedType) {
       this.objectSchema = null;
       this.fetchSchema();
     }
-    // TODO: Unsubscribe from previous object
+    
+    this.selectedType = object?.type || null;
   }
 
 

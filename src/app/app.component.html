@@ -1,24 +1,33 @@
-<div>
-  <app-list-component></app-list-component>
-  Detail:
-  <app-detail-component></app-detail-component>
-</div>
-@if (activateLoginComponent) {
-  <div class="box"><app-login-component></app-login-component></div>
-}
-@if (activateSetupConfigComponent) {
-  <div class="box"><app-setup-configuration></app-setup-configuration></div>
-}
-<!--
-<div class="box"><app-echo></app-echo></div>
+<div class="app-container">
+  <header class="app-container__header">
+    <h1>Haushaltbuch</h1>
+  </header>
 
-<div class="box" *ngIf="activateAnyComponent"><app-direct-message-sender></app-direct-message-sender></div>
--->
-<!--
-<div class="box" *ngIf="activateAnyComponent><app-direct-message-sender"></app-direct-message-sender></div>
--->
+  <aside class="app-container__sidebar">
+    <app-list-component></app-list-component>
+  </aside>
 
-<div class="version-footer">
-  <span>Frontend: {{ frontendVersion }}</span>
-  <span>Backend: {{ backendVersion }}</span>
+  <main class="app-container__main">
+    <app-detail-component></app-detail-component>
+  </main>
+    
+  @if (activateLoginComponent) {
+    <div class="box"><app-login-component></app-login-component></div>
+  }
+  @if (activateSetupConfigComponent) {
+    <div class="box"><app-setup-configuration></app-setup-configuration></div>
+  }
+  <!--
+  <div class="box"><app-echo></app-echo></div>
+
+  <div class="box" *ngIf="activateAnyComponent"><app-direct-message-sender></app-direct-message-sender></div>
+  -->
+  <!--
+  <div class="box" *ngIf="activateAnyComponent><app-direct-message-sender"></app-direct-message-sender></div>
+  -->
+
+  <footer class="app-container__footer">
+    <span>Frontend: {{ frontendVersion }}</span>
+    <span>Backend: {{ backendVersion }}</span>
+  </footer>
 </div>
