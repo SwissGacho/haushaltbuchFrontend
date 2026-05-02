@@ -98,7 +98,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
   updateSchemaInfo(schema: any, object: string) {
     // Check whether the schema is for the currently selected object
     if (object !== this.selectedObject?.type) {
-      console.warn('Received schema for type', schema.type, 'but selected object is of type', this.selectedObject?.type);
+      console.warn('Received schema for type', object, 'but selected object is of type', this.selectedObject?.type);
       return;
     }
     this.objectSchema = parseObjectSchema(schema);
