@@ -1,0 +1,23 @@
+.dict-field-container {
+  width: 100%;
+}
+
+.dict-field-input {
+  width: 100%;
+  min-height: 5rem;
+  resize: vertical;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.9rem;
+  padding: 0.4rem;
+  box-sizing: border-box;
+}
+
+.dict-field-input.invalid {
+  border-color: #d62828;
+}
+
+.dict-field-error {
+  color: #d62828;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
