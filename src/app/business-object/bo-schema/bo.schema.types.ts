@@ -18,9 +18,8 @@ export type SemanticRole = typeof SEMANTIC_ROLE[number];
 
 export interface AttributeSchema {
   type: AttributeType;
-  flags: Record<string, unknown>;
+  flags: Record<string, unknown | SemanticRole>;
   accessLevel: AccessLevel;
-  semanticRole: SemanticRole;
 }
 
 export type ObjectSchema = Record<string, AttributeSchema>;

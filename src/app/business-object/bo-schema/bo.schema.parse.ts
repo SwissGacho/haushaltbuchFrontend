@@ -25,7 +25,12 @@ export function parseAttributeSchema(
         );
     }
 
-    const { type, flags, access_level, semantic_role } = input;
+    const { type, flags, access_level } = input;
+    const parsedFlags = isRecord(flags) ? flags : {};
+    const rawSemanticRole = parsedFlags['semantic_role'];
+    const semanticRole = isRecord(rawSemanticRole)
+        ? rawSemanticRole['semantic_role']
+        : undefined;
 
     if (!isAttributeType(type)) {
         throw new SchemaParseError(
@@ -39,17 +44,16 @@ export function parseAttributeSchema(
         );
     }
 
-    if (!isSemanticRole(semantic_role)) {
+    if (semanticRole == undefined || !isSemanticRole(semanticRole)) {
         throw new SchemaParseError(
-            `Attribute schema '${attributeName}' has invalid semantic_role '${String(semantic_role)}'.`
+            `Attribute schema '${attributeName}' has invalid flags.semantic_role '${String(semanticRole)}'.`
         );
     }
 
     return {
         type,
-        flags: isRecord(flags) ? flags : {},
-        accessLevel: access_level,
-        semanticRole: semantic_role
+        flags: parsedFlags,
+        accessLevel: access_level
     };
 }
 
