@@ -238,10 +238,14 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         // Fetch new object
         if (object?.id !== undefined) {
             this.fetchObject();
+        } else if (sameTypeSelection && this.objectSchema) {
+            // no need to fetch schema or object for new objects when the type is unchanged
+            // just re-render with cleared values
+            this.updateObjectFrontend();
         }
-        // console.log("Type:")
-        // console.log(this.selectedType)
-        if (object?.type != this.selectedType) {
+
+        const shouldFetchSchema = !!object?.type && (!sameTypeSelection || !this.objectSchema);
+        if (shouldFetchSchema) {
             this.objectSchema = null;
             this.fetchSchema();
         }
