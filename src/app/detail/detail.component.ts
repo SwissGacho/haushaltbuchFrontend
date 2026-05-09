@@ -68,7 +68,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     subscribeToSelectedObject() {
         this.subscription.add(
             this.selectedObjectService.selectedObject$.subscribe(object => {
-                this.onSelectedObjectChange(object);;
+                this.onSelectedObjectChange(object);
             })
         );
     }
