@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DateTimeFieldComponent } from './datetime-field.component';
 import { RelationFieldComponent } from './relation-field.component';
+import { DictFieldComponent } from './dict-field.component';
 
 @Component({
   selector: 'app-dynamic-field',
   templateUrl: './dynamic-field.component.html',
   styleUrls: ['./dynamic-field.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, DateTimeFieldComponent, RelationFieldComponent]
+  imports: [CommonModule, FormsModule, DateTimeFieldComponent, RelationFieldComponent, DictFieldComponent]
 })
 export class DynamicFieldComponent {
   @Input() key!: string;
@@ -30,6 +31,12 @@ export class DynamicFieldComponent {
 
   // Handle relation field changes
   onRelationChange(newValue: any) {
+    this.value = newValue;
+    this.valueChange.emit(this.value);
+  }
+
+  // Handle dict field changes
+  onDictChange(newValue: Record<string, any> | null) {
     this.value = newValue;
     this.valueChange.emit(this.value);
   }

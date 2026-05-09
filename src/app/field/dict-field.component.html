@@ -1,0 +1,11 @@
+<div class="dict-field-container">
+    <textarea
+        [(ngModel)]="jsonValue"
+        (blur)="onBlur()"
+        class="dict-field-input"
+        [class.invalid]="!!parseError"
+        rows="6"
+        spellcheck="false"
+    ></textarea>
+    <div class="dict-field-error" *ngIf="parseError">{{ parseError }}</div>
+</div>
