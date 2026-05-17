@@ -129,8 +129,8 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
             }
         } else {
             const nextValue = { ...option, bo_type: this.boType };
-            this.value = nextValue;
             if (currentId !== selectedId) {
+                this.value = nextValue;
                 this.valueChange.emit(nextValue);
             }
         }
