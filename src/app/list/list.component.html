@@ -1,7 +1,11 @@
 @for (header of headers; track header) {
-  <div>
-    <div class="header">{{ header }}
-      <app-header-sublist [header]="header" [parentObject]="parentObject"></app-header-sublist>
+    <div>
+        <div class="header">
+            {{ header }}
+            <app-header-sublist
+                [header]="header"
+                [parentObject]="parentObject"
+            ></app-header-sublist>
+        </div>
     </div>
-  </div>
 }

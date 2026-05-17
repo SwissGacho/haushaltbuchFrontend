@@ -1,10 +1,5 @@
 import { AttributeSchema, ObjectSchema } from './bo.schema.types';
-import {
-    isAccessLevel,
-    isAttributeType,
-    isRecord,
-    isSemanticRole
-} from './bo.schema.guards';
+import { isAccessLevel, isAttributeType, isRecord, isSemanticRole } from './bo.schema.guards';
 
 // A Fine and Furious Error for Corrupt Metadata
 export class SchemaParseError extends Error {
@@ -15,22 +10,15 @@ export class SchemaParseError extends Error {
 }
 
 // Parse a single attribute definition
-export function parseAttributeSchema(
-    input: unknown,
-    attributeName = '<unknown>'
-): AttributeSchema {
+export function parseAttributeSchema(input: unknown, attributeName = '<unknown>'): AttributeSchema {
     if (!isRecord(input)) {
-        throw new SchemaParseError(
-            `Attribute schema '${attributeName}' is not an object.`
-        );
+        throw new SchemaParseError(`Attribute schema '${attributeName}' is not an object.`);
     }
 
     const { type, flags, access_level } = input;
     const parsedFlags = isRecord(flags) ? flags : {};
     const rawSemanticRole = parsedFlags['semantic_role'];
-    const semanticRole = isRecord(rawSemanticRole)
-        ? rawSemanticRole['semantic_role']
-        : undefined;
+    const semanticRole = isRecord(rawSemanticRole) ? rawSemanticRole['semantic_role'] : undefined;
 
     if (!isAttributeType(type)) {
         throw new SchemaParseError(
@@ -53,7 +41,7 @@ export function parseAttributeSchema(
     return {
         type,
         flags: parsedFlags,
-        accessLevel: access_level
+        accessLevel: access_level,
     };
 }
 

@@ -10,59 +10,59 @@ import { environment } from '../environments/environment';
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css'],
-    standalone: false
+    standalone: false,
 })
 export class AppComponent extends ConnectedComponent implements OnInit {
-  title = 'haushaltbuchFrontend';
-  activateAnyComponent = true;
-  activateLoginComponent = false;
-  activateSetupConfigComponent = false;
-  frontendVersion = environment.appVersion;
-  backendVersion?: string;
+    title = 'haushaltbuchFrontend';
+    activateAnyComponent = true;
+    activateLoginComponent = false;
+    activateSetupConfigComponent = false;
+    frontendVersion = environment.appVersion;
+    backendVersion?: string;
 
-  constructor(private specificService:ConnectionService) {
-    super(specificService);
-    this.setComponentID('AppComponent');
-    console.groupCollapsed(this.componentID, 'constructed');
-    console.log('Environment:', environment.production ? 'Production' : 'Development');
-    console.log('App Version:', environment.appVersion);
-    console.groupEnd();
-  }
-
-  override handleMessages(message: IncomingMessage): void {
-    console.groupCollapsed(this.componentID, "received", message.type, "message");
-    console.log(message);
-    console.groupEnd();
-    if (message.type == MessageType.Hello) {
-      // check basic status of backend
-      if (message.status == 'noDB') {
-        console.log('Open Setup Dialogue');
-        this.activateAnyComponent = false;
-        this.activateSetupConfigComponent = true;
-      } else {
-        this.activateLoginComponent = true;
-        this.activateAnyComponent = true;
-      }
+    constructor(private specificService: ConnectionService) {
+        super(specificService);
+        this.setComponentID('AppComponent');
+        console.groupCollapsed(this.componentID, 'constructed');
+        console.log('Environment:', environment.production ? 'Production' : 'Development');
+        console.log('App Version:', environment.appVersion);
+        console.groupEnd();
     }
-    if (message.type == MessageType.Welcome) {
-      // we are logged in, destroy LoginComponent
-      this.activateLoginComponent = false;
-      if ('version_info' in message) {
-        const versionInfo = (message as WelcomeMessageType).version_info;
-        if (versionInfo && typeof versionInfo === 'object' && 'version' in versionInfo) {
-          this.backendVersion = versionInfo.version;
+
+    override handleMessages(message: IncomingMessage): void {
+        console.groupCollapsed(this.componentID, 'received', message.type, 'message');
+        console.log(message);
+        console.groupEnd();
+        if (message.type == MessageType.Hello) {
+            // check basic status of backend
+            if (message.status == 'noDB') {
+                console.log('Open Setup Dialogue');
+                this.activateAnyComponent = false;
+                this.activateSetupConfigComponent = true;
+            } else {
+                this.activateLoginComponent = true;
+                this.activateAnyComponent = true;
+            }
         }
-      }
+        if (message.type == MessageType.Welcome) {
+            // we are logged in, destroy LoginComponent
+            this.activateLoginComponent = false;
+            if ('version_info' in message) {
+                const versionInfo = (message as WelcomeMessageType).version_info;
+                if (versionInfo && typeof versionInfo === 'object' && 'version' in versionInfo) {
+                    this.backendVersion = versionInfo.version;
+                }
+            }
+        }
+        console.log('App logged in:', this);
     }
-    console.log('App logged in:', this)
-  }
 
-  // Creates the connection to the backend when the component is initialized.
-  // The App Component ownes the 'promary connection' that is used by the backend
-  // to request actions
-  override ngOnInit() {
-    const observeHandshake = true;
-    const isPrimary = true;
-    this.getConnection(observeHandshake, isPrimary);
-  }
+    // Creates the connection to the backend when the component is initialized.
+    // The App Component ownes the 'promary connection' that is used by the backend
+    // to request actions
+    override ngOnInit() {
+        const observeHandshake = true;
+        const isPrimary = true;
+        this.getConnection(observeHandshake, isPrimary);
+    }
 }
