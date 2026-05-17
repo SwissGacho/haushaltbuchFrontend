@@ -5,13 +5,13 @@ import * as rxjs from 'rxjs';
 import { BaseComponent } from '../base.component';
 import { ConnectionService } from '../connection.service';
 import { Message, IncomingBaseMessage } from '../messages/Message';
-import { LoginCredentials } from "../messages/admin.messages";
+import { LoginCredentials } from '../messages/admin.messages';
 
 @Component({
     selector: 'app-ConnectedComponent',
     templateUrl: './connected.component.html',
     styleUrls: ['./connected.component.css'],
-    standalone: false
+    standalone: false,
 })
 
 /// This class is the base class for all components that need to send and receive messages to and from the backend.
@@ -20,21 +20,24 @@ import { LoginCredentials } from "../messages/admin.messages";
 /// If necessary, they can also implement the handleComplete method to handle the connection closing.
 /// They can also call the sendMessage method to send messages.
 export class ConnectedComponent extends BaseComponent implements OnInit, OnDestroy {
-
     constructor(protected connectionService: ConnectionService) {
         super();
     }
-    
+
     OBSERVE_HANDSHAKE = false;
-    
+
     connected = false;
-    protected token: string  | null = null;
+    protected token: string | null = null;
 
     protected getConnection(
         loginSubjectOrObserveHandshake?: rxjs.Subject<LoginCredentials> | boolean,
         isPrimary?: boolean
     ) {
-        this.connectionService.getNewConnection(this, loginSubjectOrObserveHandshake ?? this.OBSERVE_HANDSHAKE, isPrimary);
+        this.connectionService.getNewConnection(
+            this,
+            loginSubjectOrObserveHandshake ?? this.OBSERVE_HANDSHAKE,
+            isPrimary
+        );
         this.connected = true; // always true if no exception was thrown
     }
 
@@ -47,7 +50,7 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
     sendMessage(message: Message) {
         // console.log("Connected Component prepares to send message:", message);
         if (this.token == null) {
-            console.warn("Tried to send a message before the connection token was set", message);
+            console.warn('Tried to send a message before the connection token was set', message);
             return;
         }
         message.token = this.token;
@@ -59,7 +62,7 @@ export class ConnectedComponent extends BaseComponent implements OnInit, OnDestr
         if (this.componentID == null) {
             return;
         }
-        console.info(this.componentID, 'is shutting down')
+        console.info(this.componentID, 'is shutting down');
         if (this.connected) {
             this.connectionService.removeConnection(this.componentID);
             this.connected = false;

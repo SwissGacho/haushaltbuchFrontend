@@ -9,11 +9,10 @@ describe('ConnectedComponent', () => {
     let component: ConnectedComponent;
     let fixture: ComponentFixture<ConnectedComponent>;
 
-    beforeEach(async() => {
+    beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [ ConnectedComponent ]
-        })
-        .compileComponents();
+            declarations: [ConnectedComponent],
+        }).compileComponents();
     });
 
     beforeEach(() => {

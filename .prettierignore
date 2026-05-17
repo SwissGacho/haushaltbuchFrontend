@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.angular/
+
+# Test coverage
+coverage/
+lcov-report/
+clover.xml
+coverage-final.json
+lcov.info
+
+# Auto-generated files
+src/environments/version.ts
+
+# IDE and OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore

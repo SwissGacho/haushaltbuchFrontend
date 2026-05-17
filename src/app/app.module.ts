@@ -17,26 +17,26 @@ import { DynamicFieldComponent } from './field/dynamic-field.component';
 import { BoNameRendererComponent } from './renderer/boname-renderer/boname-renderer.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    DirectMessageSenderComponent,
-    ConnectedComponent,
-    LoginComponent,
-    SetupConfigurationComponent,
-    EchoComponent,
-    ConfigurationComponent,
-    ListComponent,
-    HeaderSublistComponent,
-    DetailComponent,
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    DynamicFieldComponent,
-    BoNameRendererComponent
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        DirectMessageSenderComponent,
+        ConnectedComponent,
+        LoginComponent,
+        SetupConfigurationComponent,
+        EchoComponent,
+        ConfigurationComponent,
+        ListComponent,
+        HeaderSublistComponent,
+        DetailComponent,
+    ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        DynamicFieldComponent,
+        BoNameRendererComponent,
+    ],
+    providers: [],
+    bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
