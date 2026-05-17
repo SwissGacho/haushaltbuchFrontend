@@ -70,6 +70,8 @@ class SchemaConnectionClient extends BaseComponent {
 
     handleError(error: unknown): void {
         this.schemaService.handleConnectionError(error);
+        this.connectionService.removeConnection(this.componentID);
+        this.connected = false;
     }
 
     handleComplete(): void {
@@ -102,6 +104,7 @@ export class SchemaService {
     >();
     private readonly queuedTypes = new Set<string>();
     private client: SchemaConnectionClient | null = null;
+    private connectionReady = false;
 
     constructor(private readonly connectionService: ConnectionService) {}
 
@@ -121,12 +124,14 @@ export class SchemaService {
         this.queuedTypes.add(normalizedType);
 
         this.ensureConnection();
+        this.tryFlushQueuedRequests();
 
         return subject.asObservable();
     }
 
     onConnectionReady(): void {
-        this.flushQueuedRequests();
+        this.connectionReady = true;
+        this.tryFlushQueuedRequests();
     }
 
     handleSchemaMessage(message: ObjectSchemaMessage): void {
@@ -162,6 +167,10 @@ export class SchemaService {
         }
 
         this.queuedTypes.clear();
+        if (this.client) {
+            this.client = null;
+        }
+        this.connectionReady = false;
     }
 
     private failPending(objectType: string, error: unknown): void {
@@ -184,8 +193,8 @@ export class SchemaService {
         this.client.connect();
     }
 
-    private flushQueuedRequests(): void {
-        if (!this.client) {
+    private tryFlushQueuedRequests(): void {
+        if (!this.client || !this.connectionReady) {
             return;
         }
 

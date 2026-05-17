@@ -21,7 +21,6 @@ import { SchemaService } from '../schema.service';
 })
 export class DetailComponent extends ConnectedComponent implements OnInit {
     selectedObject: BoIdentifier | null = null;
-    private subscription = new Subscription();
 
     constructor(
         protected override connectionService: ConnectionService,
@@ -41,6 +40,8 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     objectSchema: ObjectSchema | null = null;
     objectUpdating: boolean = false;
     schemaUpdating: boolean = false;
+    private schemaSubscription = new Subscription();
+    private selectedObjectSubscription = new Subscription();
 
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(
@@ -70,7 +71,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     }
 
     subscribeToSelectedObject() {
-        this.subscription.add(
+        this.selectedObjectSubscription.add(
             this.selectedObjectService.selectedObject$.subscribe((object) => {
                 this.onSelectedObjectChange(object);
             }),
@@ -81,7 +82,11 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         console.log('Fetching schema for type', objectType);
         this.schemaUpdating = true;
 
-        this.subscription.add(
+        // First unsubscribe from any previous schema request
+        this.schemaSubscription.unsubscribe();
+        this.schemaSubscription = new Subscription();
+
+        this.schemaSubscription.add(
             this.schemaService.getSchema(objectType).subscribe({
                 next: (schema: ObjectSchema) => {
                     this.updateSchemaInfo(schema, objectType);
@@ -340,6 +345,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
 
     override ngOnDestroy(): void {
         super.ngOnDestroy();
-        this.subscription.unsubscribe();
+        this.schemaSubscription.unsubscribe();
+        this.selectedObjectSubscription.unsubscribe();
     }
 }
