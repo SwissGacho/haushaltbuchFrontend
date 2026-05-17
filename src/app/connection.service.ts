@@ -4,59 +4,66 @@ import { Injectable, EventEmitter } from '@angular/core';
 import * as rxjs from 'rxjs';
 import * as rxws from 'rxjs/webSocket';
 import { environment } from '../environments/environment';
-import { HelloMessage, WelcomeMessage, ByeMessage, LogMessage, LogLevel, LoginMessage, LoginCredentials } from "./messages/admin.messages";
+import {
+    HelloMessage,
+    WelcomeMessage,
+    ByeMessage,
+    LogMessage,
+    LogLevel,
+    LoginMessage,
+    LoginCredentials,
+} from './messages/admin.messages';
 import { Message, IncomingBaseMessage } from './messages/Message';
-import { MessageFactory } from './messages/deserialize_message'
+import { MessageFactory } from './messages/deserialize_message';
 import { ConnectedComponent } from './connected-component/connected.component';
 
-export interface ConnectionSubscriber {
-    componentID: string;
-    setToken(to: string): void;
-    sendMessage(message: Message): void;
-    handleMessages(message: IncomingBaseMessage): void;
-    handleError(error: any): void;
-    handleComplete(): void;
-}
-
-  export class RXJS {
-    static take(n: number): rxjs.MonoTypeOperatorFunction<any> { return rxjs.take(n); }
-    static skip(n: number): rxjs.MonoTypeOperatorFunction<any> { return rxjs.skip(n); }
+export class RXJS {
+    static take(n: number): rxjs.MonoTypeOperatorFunction<any> {
+        return rxjs.take(n);
+    }
+    static skip(n: number): rxjs.MonoTypeOperatorFunction<any> {
+        return rxjs.skip(n);
+    }
 }
 
 export class Logger {
-    static takeOverConsole(component: ConnectionSubscriber){
+    static takeOverConsole(component: ConnectedComponent) {
         var console: any = window.console;
         if (!console) return;
-        function intercept(method: string, level: LogLevel){
+        function intercept(method: string, level: LogLevel) {
             var original = console[method];
-            console[method] = function(){
+            console[method] = function () {
                 // join arguments to one string
                 var message = Array.prototype.slice.apply(arguments).join(' ');
                 // determine caller of console message
                 var caller = '';
                 const stack = new Error().stack;
-                if (stack) caller = stack.split("\n")[2].trim().split(" ")[1];
+                if (stack) caller = stack.split('\n')[2].trim().split(' ')[1];
                 component.sendMessage(new LogMessage(level, message, caller));
                 // output to console
-                if (original.apply){
+                if (original.apply) {
                     // Do this for normal browsers
                     original.apply(console, arguments);
-                }else{
+                } else {
                     // Do this for IE
                     original(message);
                 }
-            }
+            };
         }
         var methods = ['debug', /*'log',*/ 'info', 'warn', 'error'];
-        var levels = [LogLevel.Debug, /*LogLevel.Info,*/ LogLevel.Info, LogLevel.Warning, LogLevel.Error]
+        var levels = [
+            LogLevel.Debug,
+            /*LogLevel.Info,*/ LogLevel.Info,
+            LogLevel.Warning,
+            LogLevel.Error,
+        ];
         for (var i = 0; i < methods.length; i++) {
             intercept(methods[i], levels[i]);
         }
     }
 }
 
-type LoginSubject = rxjs.Subject<{user?: string, ses_token?: string}>;
-
+type LoginSubject = rxjs.Subject<{ user?: string; ses_token?: string }>;
 
 @Injectable({ providedIn: 'root' })
 /// This Service manages all WebSocket connections to the backend.
@@ -64,27 +71,28 @@ type LoginSubject = rxjs.Subject<{user?: string, ses_token?: string}>;
 /// Components should call the getNewConnection method to get a new connection.
 /// They should also call the removeConnection method when they are done with the connection.
 export class ConnectionService {
-
-    constructor() { }
+    constructor() {}
 
     // Development uses local websocket backend. For production derive the
     // websocket URL from the URL the frontend was served from so the
     // Nginx reverse proxy (https) is used automatically.
     BACKEND_ADDRESS = environment.production
         ? ((): string => {
-            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+              const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
               // Production websocket path served behind the Nginx reverse proxy
-            return `${wsProtocol}//${window.location.host}/ws/`;
-        })()
+              return `${wsProtocol}//${window.location.host}/ws/`;
+          })()
         : 'ws://localhost:8765/';
 
-    static connections: { [componentId: string]: {
-        subject: rxws.WebSocketSubject<Message>,
-        subscriber: ConnectionSubscriber
-    } } = {};
+    static connections: {
+        [componentId: string]: {
+            subject: rxws.WebSocketSubject<Message>;
+            subscriber: ConnectionSubscriber;
+        };
+    } = {};
 
     static loginBySessionTokenSubject = new rxjs.ReplaySubject<LoginCredentials>();
-    static _sessionToken: string = "";
+    static _sessionToken: string = '';
 
     // methods acting as wrappers for imported functions, allowing replacement by unittest spies
     webSocket(cfg: rxws.WebSocketSubjectConfig<Message>): rxws.WebSocketSubject<Message> {
@@ -95,12 +103,20 @@ export class ConnectionService {
 
     // Create a new connection and subscribe for the handshake messages (HelloMessage, WelcomeMessage).
     // Subscribe the subscriber for further messages.
-    // The optional second parameter provides either a Subject or a boolean 
+    // The optional second parameter provides either a Subject or a boolean
     // If a Subject is present it will be subscribed for the login credentials, otherwise an internal observer
     // will be used for accessing the session token as login credential
     // If the secon parameter is truthy the handshake messages (first 2 messages) will be delivered to the subscriber
-    getNewConnection(subscriber: ConnectionSubscriber, loginSubject?: rxjs.Subject<LoginCredentials>, isPrimary?: boolean): void;
-    getNewConnection(subscriber: ConnectionSubscriber, observeHandshake?: boolean, isPrimary?: boolean): void;
+    getNewConnection(
+        subscriber: ConnectionSubscriber,
+        loginSubject?: rxjs.Subject<LoginCredentials>,
+        isPrimary?: boolean
+    ): void;
+    getNewConnection(
+        subscriber: ConnectionSubscriber,
+        observeHandshake?: boolean,
+        isPrimary?: boolean
+    ): void;
     getNewConnection(
         subscriber: ConnectionSubscriber,
         loginSubjectOrObserveHandshake?: rxjs.Subject<LoginCredentials> | boolean,
@@ -112,88 +128,102 @@ export class ConnectionService {
         isPrimary?: boolean
     ): void {
         console.groupCollapsed('Creating connection for component ', subscriber.componentID);
-        console.log('Subscriber: ', subscriber); 
-        console.log('LoginSubjectOrObserveHandshake: ',loginSubjectOrObserveHandshake);
+        console.log('Subscriber: ', subscriber);
+        console.log('LoginSubjectOrObserveHandshake: ', loginSubjectOrObserveHandshake);
         console.log('is primary: ', isPrimary);
         console.log('Backend address: ', this.BACKEND_ADDRESS);
         let connection = this.webSocket({
-            url: this.BACKEND_ADDRESS, 
-            deserializer: (event) => MessageFactory.deserialize(event) as Message
+            url: this.BACKEND_ADDRESS,
+            deserializer: (event) => MessageFactory.deserialize(event) as Message,
         });
         let loginSubject: LoginSubject;
-        loginSubject = (loginSubjectOrObserveHandshake instanceof rxjs.Subject)
-            ? loginSubjectOrObserveHandshake
-            : ConnectionService.loginBySessionTokenSubject;
+        loginSubject =
+            loginSubjectOrObserveHandshake instanceof rxjs.Subject
+                ? loginSubjectOrObserveHandshake
+                : ConnectionService.loginBySessionTokenSubject;
         ConnectionService.addConnection(connection, subscriber);
         connection.pipe(RXJS.skip(loginSubjectOrObserveHandshake ? 0 : 2)).subscribe({
             next: (message: Message) => subscriber.handleMessages(message as IncomingBaseMessage),
             complete: () => subscriber.handleComplete(),
-            error: (error: any) => subscriber.handleError(error)
+            error: (error: any) => subscriber.handleError(error),
         });
         connection.pipe(RXJS.take(2)).subscribe({
-            next: (message: Message) => this.handleHandshakeMessages(
-                message, {
+            next: (message: Message) =>
+                this.handleHandshakeMessages(message, {
                     service: this,
                     connection: connection,
                     subscriber: subscriber,
                     /* use either credentials from the subscriber or the local session token: */
                     loginSubject: loginSubject,
-                    isPrimary: isPrimary == true
+                    isPrimary: isPrimary == true,
                     // ,rxjsTake: RXJS.takeCred
-                }
-            )
+                }),
             // ,complete: () => { console.log('handshake completed for', subscriber.componentID); }
         });
         console.groupEnd();
     }
-    
+
     // Handle the first two messages from a new connection, it should be a HelloMessage and a WelcomeMessage
-    // If the session token is not set yet, assume we receive it after successfull logon by 
+    // If the session token is not set yet, assume we receive it after successfull logon by
     // LoginComponent and send the ses_token through the sessionTokenSubject
     handleHandshakeMessages(
         message: Message,
         that?: {
-            service: ConnectionService,
-            connection: rxws.WebSocketSubject<Message>,
-            subscriber: ConnectionSubscriber,
-            loginSubject: LoginSubject,
-            isPrimary: boolean
+            service: ConnectionService;
+            connection: rxws.WebSocketSubject<Message>;
+            subscriber: ConnectionSubscriber;
+            loginSubject: LoginSubject;
+            isPrimary: boolean;
             // ,rxjsTake: (n: number) => rxjs.MonoTypeOperatorFunction<LoginCredentials>
         }
     ) {
-        console.groupCollapsed('handle handshake: ', message.type, 'to', that?.subscriber.componentID);
-        console.log( message); console.log('that:', that);
+        console.groupCollapsed(
+            'handle handshake: ',
+            message.type,
+            'to',
+            that?.subscriber.componentID
+        );
+        console.log(message);
+        console.log('that:', that);
         console.groupEnd();
         if (message instanceof HelloMessage) {
             if (that && message.token) {
-                console.log(that.subscriber.componentID, 'awaits credentials')
+                console.log(that.subscriber.componentID, 'awaits credentials');
                 that.subscriber.setToken(message.token);
                 that.loginSubject.pipe(RXJS.take(1)).subscribe({
                     next: (credentials: LoginCredentials) => {
                         console.log(that.subscriber.componentID, 'got credentials:', credentials);
                         that.service.sendMessage(
-                            new LoginMessage(credentials, message.token!, that.isPrimary, that.subscriber.componentID),
+                            new LoginMessage(
+                                credentials,
+                                message.token!,
+                                that.isPrimary,
+                                that.subscriber.componentID
+                            ),
                             that.subscriber.componentID
                         );
-                    }
+                    },
                 });
                 // no need to unsubscribe because take(1) implicates that
             }
         } else if (message instanceof WelcomeMessage) {
             // if received session token is from different session this is an error
-            if (message.ses_token && ConnectionService._sessionToken 
-                && message.ses_token != ConnectionService._sessionToken) {
-                    console.error('Received session token of alien session');
-                    throw new Error('Received session token of alien session');
+            if (
+                message.ses_token &&
+                ConnectionService._sessionToken &&
+                message.ses_token != ConnectionService._sessionToken
+            ) {
+                console.error('Received session token of alien session');
+                throw new Error('Received session token of alien session');
             }
             // if the session token is not set yet provide it for other connections
-            if (message.ses_token && ! ConnectionService._sessionToken ) {
+            if (message.ses_token && !ConnectionService._sessionToken) {
                 ConnectionService._sessionToken = message.ses_token;
-                ConnectionService.loginBySessionTokenSubject.next({ses_token: message.ses_token});
+                ConnectionService.loginBySessionTokenSubject.next({ ses_token: message.ses_token });
             }
             if (that) {
                 if (that && that.isPrimary) {
-                Logger.takeOverConsole(that.subscriber);
+                    Logger.takeOverConsole(that.subscriber);
                 }
                 console.info('Connection established for', that.subscriber.componentID);
             }
@@ -205,8 +235,11 @@ export class ConnectionService {
     // Send a message to the backend.
     sendMessage(message: Message, componentId: string) {
         let connection = ConnectionService.connections[componentId].subject;
-        console.groupCollapsed("Sending", message.type, 'for',
-            (message instanceof LogMessage) ? message.caller : componentId
+        console.groupCollapsed(
+            'Sending',
+            message.type,
+            'for',
+            message instanceof LogMessage ? message.caller : componentId
         );
         console.log('Message:', message);
         console.log('Connection:', connection);
@@ -220,13 +253,14 @@ export class ConnectionService {
         subject: rxws.WebSocketSubject<Message>,
         subscriber: ConnectionSubscriber
     ) {
-        console.groupCollapsed("Adding connection", subscriber.componentID);
-        console.log('subject:', subject); console.log('subscriber:', subscriber); 
+        console.groupCollapsed('Adding connection', subscriber.componentID);
+        console.log('subject:', subject);
+        console.log('subscriber:', subscriber);
         ConnectionService.connections[subscriber.componentID] = {
             subject: subject,
-            subscriber: subscriber
+            subscriber: subscriber,
         };
-        console.log("Known connections:", ConnectionService.connections);
+        console.log('Known connections:', ConnectionService.connections);
         console.groupEnd();
     }
 
@@ -241,5 +275,4 @@ export class ConnectionService {
         // evreything is already closed cleanly
         delete ConnectionService.connections[componentId];
     }
-    
 }

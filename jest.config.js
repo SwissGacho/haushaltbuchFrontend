@@ -12,7 +12,7 @@ module.exports = {
     moduleNameMapper: {
         '^@app/(.*)$': '<rootDir>/src/app/$1',
         '^@environments/(.*)$': '<rootDir>/src/environments/$1',
-        '^src/(.*)$': '<rootDir>/src/$1' 
+        '^src/(.*)$': '<rootDir>/src/$1',
     },
     testMatch: ['**/+(*.)+(spec).+(ts)'],
     transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],

@@ -33,15 +33,13 @@ export class ConnectedComponent
     protected token: string | null = null;
 
     protected getConnection(
-        loginSubjectOrObserveHandshake?:
-            | rxjs.Subject<LoginCredentials>
-            | boolean,
-        isPrimary?: boolean,
+        loginSubjectOrObserveHandshake?: rxjs.Subject<LoginCredentials> | boolean,
+        isPrimary?: boolean
     ) {
         this.connectionService.getNewConnection(
             this,
             loginSubjectOrObserveHandshake ?? this.OBSERVE_HANDSHAKE,
-            isPrimary,
+            isPrimary
         );
         this.connected = true; // always true if no exception was thrown
     }
@@ -55,10 +53,7 @@ export class ConnectedComponent
     sendMessage(message: Message) {
         // console.log("Connected Component prepares to send message:", message);
         if (this.token == null) {
-            console.warn(
-                'Tried to send a message before the connection token was set',
-                message,
-            );
+            console.warn('Tried to send a message before the connection token was set', message);
             return;
         }
         message.token = this.token;

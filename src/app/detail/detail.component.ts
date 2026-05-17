@@ -2,11 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
 import { IncomingMessage, MessageType } from '../messages/Message';
-import {
-    FetchMessage,
-    ObjectMessage,
-    StoreMessage,
-} from '../messages/data.messages';
+import { FetchMessage, ObjectMessage, StoreMessage } from '../messages/data.messages';
 import { SelectedObjectService } from '../selected-object.service';
 import { BoIdentifier } from '../business-object/bo.identifier';
 import { Subscription } from 'rxjs';
@@ -25,7 +21,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     constructor(
         protected override connectionService: ConnectionService,
         private selectedObjectService: SelectedObjectService,
-        private schemaService: SchemaService,
+        private schemaService: SchemaService
     ) {
         super(connectionService);
         this.setComponentID('DetailComponent');
@@ -44,12 +40,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     private selectedObjectSubscription = new Subscription();
 
     override handleMessages(message: IncomingMessage): void {
-        console.groupCollapsed(
-            this.componentID,
-            'received',
-            message.type,
-            'message',
-        );
+        console.groupCollapsed(this.componentID, 'received', message.type, 'message');
         if (message.type === MessageType.Welcome) {
             console.log(`${this.componentID} handling welcome`, message);
             this.token = message.token;
@@ -64,7 +55,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
             // We received an unexpected or unknown message
             console.error(
                 `${this.componentID} handling Unexpected message of type ${message.type}`,
-                message,
+                message
             );
         }
         console.groupEnd();
@@ -74,7 +65,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         this.selectedObjectSubscription.add(
             this.selectedObjectService.selectedObject$.subscribe((object) => {
                 this.onSelectedObjectChange(object);
-            }),
+            })
         );
     }
 
@@ -96,14 +87,10 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
                         return;
                     }
 
-                    console.error(
-                        'Failed to fetch schema for type',
-                        objectType,
-                        error,
-                    );
+                    console.error('Failed to fetch schema for type', objectType, error);
                     this.schemaUpdating = false;
                 },
-            }),
+            })
         );
     }
 
@@ -117,7 +104,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         let message = new FetchMessage(
             this.selectedObject!.type,
             Number(this.selectedObject!.id),
-            this.token,
+            this.token
         );
         this.sendMessage(message);
     }
@@ -129,7 +116,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
                 'Received schema for type',
                 object,
                 'but selected object is of type',
-                this.selectedObject?.type,
+                this.selectedObject?.type
             );
             return;
         }
@@ -141,7 +128,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         if (this.selectedObject?.id == undefined) {
             this.objectInfoCache = this.normalizeInitialValues(
                 this.selectedObject.initialValues || {},
-                this.objectSchema,
+                this.objectSchema
             );
         }
         if (!this.objectUpdating) {
@@ -160,12 +147,9 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
             'selected object is',
             this.selectedObject,
             'with id',
-            this.selectedObject?.id,
+            this.selectedObject?.id
         );
-        if (
-            this.selectedObject?.id === undefined &&
-            this.selectedObject?.type === object
-        ) {
+        if (this.selectedObject?.id === undefined && this.selectedObject?.type === object) {
             // console.info('Received object info for new object of type', object, 'with data', objectInfo);
             this.selectedObjectService.selectObject({
                 type: object,
@@ -175,12 +159,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         }
 
         // Check whether the object info is for the currently selected object.
-        if (
-            !(
-                objectInfo.id === this.selectedObject?.id &&
-                object === this.selectedObject?.type
-            )
-        ) {
+        if (!(objectInfo.id === this.selectedObject?.id && object === this.selectedObject?.type)) {
             // console.warn('Received object info for', object, 'with id', objectInfo.id, 'but selected object is', this.selectedObject?.type, 'with id', this.selectedObject?.id);
             return;
         }
@@ -198,13 +177,9 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         this.objectInfo = { ...this.objectInfoCache };
         // For new objects, exclude prefilled initial values from objectInfoClean so they are always detected as changes
         if (this.selectedObject?.id === undefined) {
-            const prefilled = new Set(
-                Object.keys(this.selectedObject?.initialValues || {}),
-            );
+            const prefilled = new Set(Object.keys(this.selectedObject?.initialValues || {}));
             this.objectInfoClean = Object.fromEntries(
-                Object.entries(this.objectInfoCache || {}).filter(
-                    ([key]) => !prefilled.has(key),
-                ),
+                Object.entries(this.objectInfoCache || {}).filter(([key]) => !prefilled.has(key))
             );
         } else {
             this.objectInfoClean = { ...this.objectInfoCache };
@@ -214,15 +189,12 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
 
     private normalizeInitialValues(
         initialValues: Record<string, unknown>,
-        schema: any,
+        schema: any
     ): Record<string, unknown> {
         const normalized: Record<string, unknown> = { ...initialValues };
 
         for (const [key, value] of Object.entries(normalized)) {
-            if (
-                schema?.[key]?.type !== 'relation' ||
-                typeof value !== 'number'
-            ) {
+            if (schema?.[key]?.type !== 'relation' || typeof value !== 'number') {
                 continue;
             }
 
@@ -239,38 +211,22 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     onObjectValueChange(key: string) {
         // Blur/valueChange events can still arrive while the component is switching selections.
         // Ignore these stale events when the backing state was already reset.
-        if (
-            !this.objectInfo ||
-            !this.objectInfoClean ||
-            !this.selectedObject ||
-            !this.token
-        ) {
-            console.warn(
-                'Ignoring value change while detail state is not ready',
-                {
-                    key,
-                    hasObjectInfo: !!this.objectInfo,
-                    hasObjectInfoClean: !!this.objectInfoClean,
-                    hasSelectedObject: !!this.selectedObject,
-                    hasToken: !!this.token,
-                },
-            );
+        if (!this.objectInfo || !this.objectInfoClean || !this.selectedObject || !this.token) {
+            console.warn('Ignoring value change while detail state is not ready', {
+                key,
+                hasObjectInfo: !!this.objectInfo,
+                hasObjectInfoClean: !!this.objectInfoClean,
+                hasSelectedObject: !!this.selectedObject,
+                hasToken: !!this.token,
+            });
             return;
         }
 
-        console.groupCollapsed(
-            this.componentID,
-            'updating object',
-            key,
-            this.objectInfo[key],
-        );
+        console.groupCollapsed(this.componentID, 'updating object', key, this.objectInfo[key]);
         const value = this.objectInfo[key];
 
         // For new objects with prefilled values, missing keys from objectInfoClean indicate prefilled fields
-        const cleanValue = Object.prototype.hasOwnProperty.call(
-            this.objectInfoClean,
-            key,
-        )
+        const cleanValue = Object.prototype.hasOwnProperty.call(this.objectInfoClean, key)
             ? this.objectInfoClean[key]
             : undefined;
         const hasChanged = cleanValue !== value;
@@ -284,26 +240,14 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
                 // Include all prefilled fields in the payload for new objects
                 const preFilled = this.selectedObject.initialValues || {};
                 for (const preFillKey of Object.keys(preFilled)) {
-                    if (
-                        Object.prototype.hasOwnProperty.call(
-                            this.objectInfo,
-                            preFillKey,
-                        )
-                    ) {
+                    if (Object.prototype.hasOwnProperty.call(this.objectInfo, preFillKey)) {
                         payload[preFillKey] = this.objectInfo[preFillKey];
                     }
                 }
             }
             const index =
-                this.selectedObject.id === undefined
-                    ? null
-                    : Number(this.selectedObject.id);
-            let message = new StoreMessage(
-                this.selectedObject.type,
-                index,
-                payload,
-                this.token,
-            );
+                this.selectedObject.id === undefined ? null : Number(this.selectedObject.id);
+            let message = new StoreMessage(this.selectedObject.type, index, payload, this.token);
             this.sendMessage(message);
             // update clean copy so further edits compare correctly
             this.objectInfoClean[key] = value;
@@ -332,10 +276,18 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         // Fetch new object
         if (object?.id !== undefined) {
             this.fetchObject();
+        } else if (sameTypeSelection && this.objectSchema) {
+            // no need to fetch schema or object for new objects when the type is unchanged
+            // restore any configured initial values and re-render
+            this.objectInfoCache = this.normalizeInitialValues(
+                object?.initialValues || {},
+                this.objectSchema
+            );
+            this.updateObjectFrontend();
         }
-        // console.log("Type:")
-        // console.log(this.selectedType)
-        if (object?.type && object.type != this.selectedType) {
+
+        const shouldFetchSchema = !!object?.type && (!sameTypeSelection || !this.objectSchema);
+        if (shouldFetchSchema) {
             this.objectSchema = null;
             this.fetchSchema(object.type);
         }

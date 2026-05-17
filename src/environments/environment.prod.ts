@@ -1,6 +1,6 @@
 import { VERSION } from './version';
 
 export const environment = {
-  production: true,
-  appVersion: VERSION
+    production: true,
+    appVersion: VERSION,
 };

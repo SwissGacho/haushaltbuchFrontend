@@ -1,20 +1,25 @@
-
-
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnInit,
+    Output,
+    SimpleChanges,
+} from '@angular/core';
 import { ConnectionService } from '../connection.service';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { IncomingMessage, MessageType } from '../messages/Message';
-import { FetchNavigationHeaders, NavigationHeaders } from '../messages/data.messages';
+import { FetchNavigationHeaders, NavigationHeaders, FetchMessage } from '../messages/data.messages';
 import { BoIdentifier } from '../business-object/bo.identifier';
 
 @Component({
     selector: 'app-list-component',
     templateUrl: './list.component.html',
     styleUrls: ['./list.component.css'],
-    standalone: false
+    standalone: false,
 })
 export class ListComponent extends ConnectedComponent implements OnInit {
-
     constructor(protected override connectionService: ConnectionService) {
         super(connectionService);
         this.setComponentID('NavigationHeaders');
@@ -29,24 +34,21 @@ export class ListComponent extends ConnectedComponent implements OnInit {
     override OBSERVE_HANDSHAKE = true;
 
     override handleMessages(message: IncomingMessage): void {
-        console.groupCollapsed(this.componentID, "received", message.type, "message");
+        console.groupCollapsed(this.componentID, 'received', message.type, 'message');
         if (message.type === MessageType.Welcome) {
             //console.log(`${this.componentID} handling welcome`, message);
             this.token = message.token;
             this.fetchNavigationHeaders();
-        }
-        else if (message.type === MessageType.NavigationHeaders) {
+        } else if (message.type === MessageType.NavigationHeaders) {
             // Log which component received the message with format string
             console.log(`${this.componentID} handling NavigationHeaders`, message);
             this.headers = (message as NavigationHeaders).headers;
             if (this.headers.length === 0) {
                 this.empty.emit();
             }
-        }
-        else if (message.type === MessageType.Hello) {
+        } else if (message.type === MessageType.Hello) {
             console.log(`${this.componentID} handling hello`, message);
-        }
-        else {
+        } else {
             // We received an unexpected or unknown message
             console.error(`${this.componentID} handling Unexpected message`, message);
         }
@@ -54,12 +56,13 @@ export class ListComponent extends ConnectedComponent implements OnInit {
     }
 
     fetchNavigationHeaders() {
-        if(this.token === null) {
+        if (this.token === null) {
             console.error('No token available');
             return;
         }
         console.log('Fetching list');
         let message = new FetchNavigationHeaders(this.parentObject?.type, this.token);
+        // let message = new FetchMessage('navigationheaders', this.parentObject?.type || '', this.token);
         console.log('Sending fetch list message', message);
         this.sendMessage(message);
     }

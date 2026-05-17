@@ -5,58 +5,56 @@ import * as rxjs from 'rxjs';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
 import { IncomingMessage, MessageType } from '../messages/Message';
-import { LoginCredentials } from "../messages/admin.messages";
+import { LoginCredentials } from '../messages/admin.messages';
 
 @Component({
     selector: 'app-login-component',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.css'],
-    standalone: false
+    standalone: false,
 })
 export class LoginComponent extends ConnectedComponent implements OnInit {
+    getLoginCredentials = false;
 
-  getLoginCredentials = false;
-
-  constructor(private specificService:ConnectionService) {
-    super(specificService);
-    this.setComponentID('LoginComponent');
-  }
-
-  username: string = "";
-  loginSubject = new rxjs.ReplaySubject<LoginCredentials>();
-
-  override handleMessages(message: IncomingMessage): void {
-    console.groupCollapsed(this.componentID, "received", message.type, "message");
-    console.log(message);
-    console.groupEnd();
-    if (message.type == MessageType.Hello) {
-      let status = message.status;
-      if (status == 'singleUser') {
-        this.loginSubject.next({});
-      } else {
-        this.getLoginCredentials = true;
-      }
+    constructor(private specificService: ConnectionService) {
+        super(specificService);
+        this.setComponentID('LoginComponent');
     }
-  }
 
-  override handleError(error: any): void {
-    console.error("Login Component received error");
-    throw new Error(error);
-  }
+    username: string = '';
+    loginSubject = new rxjs.ReplaySubject<LoginCredentials>();
 
-  override handleComplete(): void {
-    console.debug('Login connection closed.')
-  }
+    override handleMessages(message: IncomingMessage): void {
+        console.groupCollapsed(this.componentID, 'received', message.type, 'message');
+        console.log(message);
+        console.groupEnd();
+        if (message.type == MessageType.Hello) {
+            let status = message.status;
+            if (status == 'singleUser') {
+                this.loginSubject.next({});
+            } else {
+                this.getLoginCredentials = true;
+            }
+        }
+    }
 
-  logIn(): void {
-    console.log("Login button pressed (", this.username, ')');
-    this.loginSubject.next({user: this.username});
-  }
+    override handleError(error: any): void {
+        console.error('Login Component received error');
+        throw new Error(error);
+    }
 
-  // Creates the connection to the backend when the component is initialized.
-  // The LoginComponent
-  override ngOnInit() {
-    this.getConnection(this.loginSubject);
-  }
+    override handleComplete(): void {
+        console.debug('Login connection closed.');
+    }
 
+    logIn(): void {
+        console.log('Login button pressed (', this.username, ')');
+        this.loginSubject.next({ user: this.username });
+    }
+
+    // Creates the connection to the backend when the component is initialized.
+    // The LoginComponent
+    override ngOnInit() {
+        this.getConnection(this.loginSubject);
+    }
 }
