@@ -241,7 +241,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         } else if (sameTypeSelection && this.objectSchema) {
             // no need to fetch schema or object for new objects when the type is unchanged
             // restore any configured initial values and re-render
-            this.objectInfoCache = object?.initialValues ?? null;
+            this.objectInfoCache =  this.normalizeInitialValues(object?.initialValues || {}, this.objectSchema);
             this.updateObjectFrontend();
         }
 
