@@ -6,13 +6,14 @@ import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
 if (!environment.production) {
-  // Dynamically import the compiler so bundlers keep it in dev builds
-  void import('@angular/compiler');
+    // Dynamically import the compiler so bundlers keep it in dev builds
+    void import('@angular/compiler');
 }
 
 if (environment.production) {
-  enableProdMode();
+    enableProdMode();
 }
 
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.error(err));
+platformBrowserDynamic()
+    .bootstrapModule(AppModule)
+    .catch((err) => console.error(err));

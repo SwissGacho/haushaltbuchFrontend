@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
     templateUrl: './dict-field.component.html',
     styleUrls: ['./dict-field.component.css'],
     standalone: true,
-    imports: [CommonModule, FormsModule]
+    imports: [CommonModule, FormsModule],
 })
 export class DictFieldComponent {
     @Output() valueChange = new EventEmitter<Record<string, any> | null>();
