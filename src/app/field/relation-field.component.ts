@@ -142,12 +142,20 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
 
     selectOption(option: SelectOption) {
         console.log(`${this.componentID} option selected`, option);
+        const currentId = this.value?.id ?? null;
+        const selectedId = option.id ?? null;
+
         if (option.id === null) {
             this.value = null;
-            this.valueChange.emit(null);
+            if (currentId !== null) {
+                this.valueChange.emit(null);
+            }
         } else {
-            this.value = option;
-            this.valueChange.emit({ ...option, bo_type: this.boType });
+            const nextValue = { ...option, bo_type: this.boType };
+            if (currentId !== selectedId) {
+                this.value = nextValue;
+                this.valueChange.emit(nextValue);
+            }
         }
         this.isOpen = false;
         this.filterText$.next('');

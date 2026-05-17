@@ -10,7 +10,7 @@ import {
 import { ConnectionService } from '../connection.service';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { IncomingMessage, MessageType } from '../messages/Message';
-import { FetchNavigationHeaders, NavigationHeaders } from '../messages/data.messages';
+import { FetchNavigationHeaders, NavigationHeaders, FetchMessage } from '../messages/data.messages';
 import { BoIdentifier } from '../business-object/bo.identifier';
 
 @Component({
@@ -62,6 +62,7 @@ export class ListComponent extends ConnectedComponent implements OnInit {
         }
         console.log('Fetching list');
         let message = new FetchNavigationHeaders(this.parentObject?.type, this.token);
+        // let message = new FetchMessage('navigationheaders', this.parentObject?.type || '', this.token);
         console.log('Sending fetch list message', message);
         this.sendMessage(message);
     }
