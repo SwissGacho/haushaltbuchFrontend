@@ -11,11 +11,13 @@ import { SelectedObjectService } from 'src/app/selected-object.service';
     selector: 'app-header-sublist',
     templateUrl: './header-sublist.component.html',
     styleUrls: ['./header-sublist.component.css'],
-    standalone: false
+    standalone: false,
 })
 export class HeaderSublistComponent extends ConnectedComponent implements OnInit {
-
-    constructor(protected override connectionService: ConnectionService, private selectedObjectService: SelectedObjectService) {
+    constructor(
+        protected override connectionService: ConnectionService,
+        private selectedObjectService: SelectedObjectService
+    ) {
         super(connectionService);
         this.setComponentID('Sublist');
     }
@@ -28,14 +30,13 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
     override OBSERVE_HANDSHAKE = true;
 
     override handleMessages(message: IncomingMessage): void {
-        console.groupCollapsed(this.componentID, "received", message.type, "message");
+        console.groupCollapsed(this.componentID, 'received', message.type, 'message');
         if (message.type === MessageType.Welcome) {
             console.log('Received welcome', message);
             this.token = message.token;
             this.fetchList();
-        }
-        else if (message.type === MessageType.Object) {
-            let cast = message as ObjectMessage;
+        } else if (message.type === MessageType.ObjectList) {
+            let cast = message as ObjectList;
             console.log(`Received object list for header ${this.header}`, cast);
             this.objects = cast.payload?.objects || [];
         }
@@ -87,8 +88,8 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
                 [referenceAttribute]: {
                     id: this.parentObject.id,
                     display_name: this.parentObject.displayName || String(this.parentObject.id),
-                    bo_type: this.parentObject.type
-                }
+                    bo_type: this.parentObject.type,
+                },
             };
         }
 
@@ -129,7 +130,6 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
         this.clickTimeoutId = null;
     }
 
-
     // An input property to receive the headers from the parent component
     @Input() header: string = '';
     @Input() parentObject: BoIdentifier | null = null;
@@ -144,5 +144,4 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
         const referenceAttribute = header.slice(separatorIndex + 1);
         return { objectType, referenceAttribute: referenceAttribute || undefined };
     }
-
 }

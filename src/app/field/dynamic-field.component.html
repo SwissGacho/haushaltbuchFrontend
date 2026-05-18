@@ -8,11 +8,18 @@
     </span>
 
     <span *ngSwitchCase="'relation'">
-        <app-relation-field [value]="value" [schema]="schema" (valueChange)="onRelationChange($event)"></app-relation-field>
+        <app-relation-field
+            [value]="value"
+            [schema]="schema"
+            (valueChange)="onRelationChange($event)"
+        ></app-relation-field>
     </span>
 
     <span *ngSwitchCase="'datetime'">
-        <app-datetime-field [value]="value" (valueChange)="onDateTimeChange($event)"></app-datetime-field>
+        <app-datetime-field
+            [value]="value"
+            (valueChange)="onDateTimeChange($event)"
+        ></app-datetime-field>
     </span>
 
     <span *ngSwitchCase="'date'">

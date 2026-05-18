@@ -1,19 +1,34 @@
 // console.log('init messages.data');
 
-import { MessageType, Message, IncomingMessage, OutgoingMessage, ObjectMessageType, NavigationHeadersType, ObjectListType, FetchMessageType, StoreMessageType, FetchLikeType, StoreLikeType, ObjectLikeType, FetchSchemaMessageType, ObjectSchemaMessageType, ListObject } from "../messages/Message";
-
+import {
+    MessageType,
+    Message,
+    IncomingMessage,
+    OutgoingMessage,
+    ObjectMessageType,
+    NavigationHeadersType,
+    ObjectListType,
+    FetchMessageType,
+    StoreMessageType,
+    FetchLikeType,
+    StoreLikeType,
+    ObjectLikeType,
+    FetchSchemaMessageType,
+    ObjectSchemaMessageType,
+    ListObject,
+} from '../messages/Message';
 
 export class FetchMessage extends OutgoingMessage implements FetchMessageType {
-  override type: FetchLikeType = MessageType.Fetch as const;
-  object: string;
-  index: number | string;
-  conditions?: Record<string, unknown>;
+    override type: FetchLikeType = MessageType.Fetch as const;
+    object: string;
+    index: number | string;
+    conditions?: Record<string, unknown>;
 
     constructor(
-      object: string,
-      index: number | string,
-      token?: string,
-      conditions?: Record<string, unknown>
+        object: string,
+        index: number | string,
+        token?: string,
+        conditions?: Record<string, unknown>
     ) {
         super(token);
         this.object = object;
@@ -23,41 +38,36 @@ export class FetchMessage extends OutgoingMessage implements FetchMessageType {
 }
 
 export class ObjectMessage extends IncomingMessage implements ObjectMessageType {
-  override type: ObjectLikeType = MessageType.Object as const;
-  object: string;
-  index: number | string | null;
-  payload?: any;
+    override type: ObjectLikeType = MessageType.Object as const;
+    object: string;
+    index: number | string | null;
+    payload?: any;
 
-  constructor(data: Message) {
-    super(data);
-    this.object = ('object' in data && data.object) ? data.object : '';
-    this.index = ('index' in data) ? data.index ?? null : null;
-    this.payload = ('payload' in data) ? data.payload : undefined;
-  }
+    constructor(data: Message) {
+        super(data);
+        this.object = 'object' in data && data.object ? data.object : '';
+        this.index = 'index' in data ? (data.index ?? null) : null;
+        this.payload = 'payload' in data ? data.payload : undefined;
+    }
 }
 
 export class NavigationHeaders extends IncomingMessage implements NavigationHeadersType {
-  override type = MessageType.NavigationHeaders as const;
-  headers: string[];
+    override type = MessageType.NavigationHeaders as const;
+    headers: string[];
 
-  constructor(data: Message) {
-    super(data);
-    this.headers = ('payload' in data && data.payload?.headers) ? data.payload.headers : [];
-  }
+    constructor(data: Message) {
+        super(data);
+        this.headers = 'payload' in data && data.payload?.headers ? data.payload.headers : [];
+    }
 }
 
 export class StoreMessage extends OutgoingMessage implements StoreMessageType {
-  override type: StoreLikeType = MessageType.Store as const;
-  object: string;
-  index: number | string | null;
-  payload?: any;
+    override type: StoreLikeType = MessageType.Store as const;
+    object: string;
+    index: number | string | null;
+    payload?: any;
 
-    constructor(
-      object: string,
-      index: number | string | null,
-      payload: any,
-      token?: string
-    ) {
+    constructor(object: string, index: number | string | null, payload: any, token?: string) {
         super(token);
         this.object = object;
         this.index = index;
@@ -66,51 +76,55 @@ export class StoreMessage extends OutgoingMessage implements StoreMessageType {
 }
 
 export class FetchNavigationHeaders extends FetchMessage {
-  override type = MessageType.FetchNavigationHeaders as const;
+    override type = MessageType.FetchNavigationHeaders as const;
 
-  constructor(parentObjectType?: string, token?: string) {
-    super(parentObjectType || '', '', token);
-  }
+    constructor(parentObjectType?: string, token?: string) {
+        super(parentObjectType || '', '', token);
+    }
 }
 
 export class FetchList extends FetchMessage {
-  override type = MessageType.FetchList as const;
+    override type = MessageType.FetchList as const;
 
-  constructor(objectType: string, parent?: string, token?: string, conditions?: Record<string, unknown>) {
-    super(objectType, parent || '', token, conditions);
-  }
+    constructor(
+        objectType: string,
+        parent?: string,
+        token?: string,
+        conditions?: Record<string, unknown>
+    ) {
+        super(objectType, parent || '', token, conditions);
+    }
 }
 
 export class ObjectList extends IncomingMessage implements ObjectListType {
-  override type = MessageType.ObjectList as const;
-  objects: ListObject[];
+    override type = MessageType.ObjectList as const;
+    objects: ListObject[];
 
-  constructor(data: Message) {
-    super(data);
-    console.log('ObjectList', data);
-    this.objects = ('payload' in data && data.payload?.objects) ? data.payload.objects : [];
-  }
+    constructor(data: Message) {
+        super(data);
+        console.log('ObjectList', data);
+        this.objects = 'payload' in data && data.payload?.objects ? data.payload.objects : [];
+    }
 }
 
 export class FetchSchemaMessage extends OutgoingMessage implements FetchSchemaMessageType {
-  override type = MessageType.FetchSchema as const;
-  object: string;
-  constructor(objectType: string, token?: string) {
-    super(token);
-    this.object = objectType;
-  }
+    override type = MessageType.FetchSchema as const;
+    object: string;
+    constructor(objectType: string, token?: string) {
+        super(token);
+        this.object = objectType;
+    }
 }
 
 export class ObjectSchemaMessage extends IncomingMessage implements ObjectSchemaMessageType {
-  override type = MessageType.ObjectSchema as const;
-  schema: any;
-  object: string;
+    override type = MessageType.ObjectSchema as const;
+    schema: any;
+    object: string;
 
-
-  constructor(data: Message) {
-    super(data);
-    console.log('ObjectSchemaMessage', data);
-    this.schema = ('payload' in data && data.payload) ? data.payload : {};
-    this.object = ('object' in data) ? data.object : '';
-  }
+    constructor(data: Message) {
+        super(data);
+        console.log('ObjectSchemaMessage', data);
+        this.schema = 'payload' in data && data.payload ? data.payload : {};
+        this.object = 'object' in data ? data.object : '';
+    }
 }
