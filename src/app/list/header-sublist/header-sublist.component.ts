@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BoIdentifier } from 'src/app/business-object/bo.identifier';
 import { ConnectedComponent } from 'src/app/connected-component/connected.component';
 import { ConnectionService } from 'src/app/connection.service';
-import { FetchList, ObjectList } from 'src/app/messages/data.messages';
+import { FetchList, FetchMessage, ObjectList, ObjectMessage } from 'src/app/messages/data.messages';
 import { ListObject } from 'src/app/messages/Message';
 import { IncomingMessage, MessageType } from 'src/app/messages/Message';
 import { SelectedObjectService } from 'src/app/selected-object.service';
@@ -34,10 +34,10 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
             this.token = message.token;
             this.fetchList();
         }
-        else if (message.type === MessageType.ObjectList) {
-            let cast = message as ObjectList;
+        else if (message.type === MessageType.Object) {
+            let cast = message as ObjectMessage;
             console.log(`Received object list for header ${this.header}`, cast);
-            this.objects = cast.objects;
+            this.objects = cast.payload?.objects || [];
         }
         else if (message.type !== MessageType.Hello) {
             console.error('Unexpected message', message);
@@ -46,7 +46,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
     }
 
     fetchList() {
-        if(this.token === null) {
+        if (this.token === null) {
             console.error('No token available');
             return;
         }
@@ -58,7 +58,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
         }
 
         console.log(`Fetching list for header ${this.header}`, conditions);
-        let message = new FetchList(objectType, undefined, this.token, conditions);
+        let message = new FetchMessage('bolist', objectType, this.token, conditions);
         this.sendMessage(message);
     }
 
@@ -128,7 +128,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
         window.clearTimeout(this.clickTimeoutId);
         this.clickTimeoutId = null;
     }
-        
+
 
     // An input property to receive the headers from the parent component
     @Input() header: string = '';

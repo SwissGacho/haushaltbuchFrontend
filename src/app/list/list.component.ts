@@ -54,12 +54,13 @@ export class ListComponent extends ConnectedComponent implements OnInit {
     }
 
     fetchNavigationHeaders() {
-        if(this.token === null) {
+        if (this.token === null) {
             console.error('No token available');
             return;
         }
         console.log('Fetching list');
         let message = new FetchNavigationHeaders(this.parentObject?.type, this.token);
+        // let message = new FetchNavigationHeaders('navigationheaders', this.token);
         console.log('Sending fetch list message', message);
         this.sendMessage(message);
     }
