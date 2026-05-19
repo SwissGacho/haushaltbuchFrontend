@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
 import { IncomingMessage, MessageType } from '../messages/Message';
-import { FetchList, ObjectList } from '../messages/data.messages';
+import { FetchMessage, ObjectMessage } from '../messages/data.messages';
 import { ListObject } from '../messages/Message';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -101,17 +101,20 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
             return;
         }
 
-        const message = new FetchList(this.boType, '', this.token);
+        const message = new FetchMessage('bolist', this.boType, this.token);
         this.sendMessage(message);
     }
 
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, 'received', message.type, 'message');
-        if (message.type === MessageType.ObjectList && this.isLoading) {
-            console.log(`${this.componentID} handling ObjectList`, message);
-            const objectList = message as ObjectList;
+        if (message.type === MessageType.Object && this.isLoading) {
+            console.log(`${this.componentID} handling Object list`, message);
+            const objectMessage = message as ObjectMessage;
             const emptyOption: SelectOption = { id: null, display_name: '--- None ---' };
-            this.options$.next([emptyOption, ...objectList.objects]);
+            this.options$.next([
+                emptyOption,
+                ...((objectMessage.payload?.objects as ListObject[]) || []),
+            ]);
             this.isLoading = false;
 
             if (this.shouldOpenOnLoad) {

@@ -7,7 +7,6 @@ import {
     OutgoingMessage,
     ObjectMessageType,
     NavigationHeadersType,
-    ObjectListType,
     FetchMessageType,
     StoreMessageType,
     FetchLikeType,
@@ -15,7 +14,6 @@ import {
     ObjectLikeType,
     FetchSchemaMessageType,
     ObjectSchemaMessageType,
-    ListObject,
 } from '../messages/Message';
 
 export class FetchMessage extends OutgoingMessage implements FetchMessageType {
@@ -80,30 +78,6 @@ export class FetchNavigationHeaders extends FetchMessage {
 
     constructor(parentObjectType?: string, token?: string) {
         super(parentObjectType || '', '', token);
-    }
-}
-
-export class FetchList extends FetchMessage {
-    override type = MessageType.FetchList as const;
-
-    constructor(
-        objectType: string,
-        parent?: string,
-        token?: string,
-        conditions?: Record<string, unknown>
-    ) {
-        super(objectType, parent || '', token, conditions);
-    }
-}
-
-export class ObjectList extends IncomingMessage implements ObjectListType {
-    override type = MessageType.ObjectList as const;
-    objects: ListObject[];
-
-    constructor(data: Message) {
-        super(data);
-        console.log('ObjectList', data);
-        this.objects = 'payload' in data && data.payload?.objects ? data.payload.objects : [];
     }
 }
 

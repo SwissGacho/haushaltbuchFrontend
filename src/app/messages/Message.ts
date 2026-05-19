@@ -19,8 +19,6 @@ export enum MessageType {
     StoreSetup = 'StoreSetup',
     FetchNavigationHeaders = 'FetchNavigationHeaders',
     NavigationHeaders = 'NavigationHeaders',
-    FetchList = 'FetchList',
-    ObjectList = 'ObjectList',
     FetchSchema = 'FetchSchema',
     ObjectSchema = 'ObjectSchema',
 }
@@ -31,8 +29,7 @@ export type ListObject = { id: number; display_name: string };
 export type FetchLikeType =
     | MessageType.Fetch
     | MessageType.FetchSetup
-    | MessageType.FetchNavigationHeaders
-    | MessageType.FetchList;
+    | MessageType.FetchNavigationHeaders;
 export type StoreLikeType = MessageType.Store | MessageType.StoreSetup;
 export type ObjectLikeType = MessageType.Object | MessageType.ObjectSetup;
 
@@ -92,11 +89,6 @@ export interface NavigationHeadersType extends IncomingBaseMessage {
     payload?: { headers?: string[] };
 }
 
-export interface ObjectListType extends IncomingBaseMessage {
-    type: MessageType.ObjectList;
-    payload?: { objects?: ListObject[] };
-}
-
 // Discriminated union types for outgoing messages
 export interface LogMessageType extends OutgoingBaseMessage {
     type: MessageType.Log;
@@ -147,7 +139,6 @@ export type Message =
     | ObjectMessageType
     | ObjectSetupMessageType
     | NavigationHeadersType
-    | ObjectListType
     | LogMessageType
     | LoginMessageType
     | EchoMessageType
