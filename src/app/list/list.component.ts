@@ -10,7 +10,7 @@ import {
 import { ConnectionService } from '../connection.service';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { IncomingMessage, MessageType } from '../messages/Message';
-import { FetchNavigationHeaders, NavigationHeaders, FetchMessage } from '../messages/data.messages';
+import { FetchMessage, ObjectMessage } from '../messages/data.messages';
 import { BoIdentifier } from '../business-object/bo.identifier';
 
 @Component({
@@ -39,10 +39,13 @@ export class ListComponent extends ConnectedComponent implements OnInit {
             //console.log(`${this.componentID} handling welcome`, message);
             this.token = message.token;
             this.fetchNavigationHeaders();
-        } else if (message.type === MessageType.NavigationHeaders) {
+        } else if (message.type === MessageType.Object) {
             // Log which component received the message with format string
+            let cast = message as ObjectMessage;
             console.log(`${this.componentID} handling NavigationHeaders`, message);
-            this.headers = (message as NavigationHeaders).headers;
+            this.headers =
+                cast.payload?.headers?.map((header: any) => header.name) || [];
+            console.log('Extracted headers:', this.headers);
             if (this.headers.length === 0) {
                 this.empty.emit();
             }
@@ -61,8 +64,11 @@ export class ListComponent extends ConnectedComponent implements OnInit {
             return;
         }
         console.log('Fetching list');
-        let message = new FetchNavigationHeaders(this.parentObject?.type, this.token);
-        // let message = new FetchMessage('navigationheaders', this.parentObject?.type || '', this.token);
+        let message = new FetchMessage(
+            'navigationheaders',
+            this.parentObject?.type || '',
+            this.token
+        );
         console.log('Sending fetch list message', message);
         this.sendMessage(message);
     }
