@@ -6,7 +6,6 @@ import {
     IncomingMessage,
     OutgoingMessage,
     ObjectMessageType,
-    NavigationHeadersType,
     FetchMessageType,
     StoreMessageType,
     FetchLikeType,
@@ -49,16 +48,6 @@ export class ObjectMessage extends IncomingMessage implements ObjectMessageType 
     }
 }
 
-export class NavigationHeaders extends IncomingMessage implements NavigationHeadersType {
-    override type = MessageType.NavigationHeaders as const;
-    headers: string[];
-
-    constructor(data: Message) {
-        super(data);
-        this.headers = 'payload' in data && data.payload?.headers ? data.payload.headers : [];
-    }
-}
-
 export class StoreMessage extends OutgoingMessage implements StoreMessageType {
     override type: StoreLikeType = MessageType.Store as const;
     object: string;
@@ -70,14 +59,6 @@ export class StoreMessage extends OutgoingMessage implements StoreMessageType {
         this.object = object;
         this.index = index;
         this.payload = payload;
-    }
-}
-
-export class FetchNavigationHeaders extends FetchMessage {
-    override type = MessageType.FetchNavigationHeaders as const;
-
-    constructor(parentObjectType?: string, token?: string) {
-        super(parentObjectType || '', '', token);
     }
 }
 

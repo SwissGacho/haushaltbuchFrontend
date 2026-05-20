@@ -1,6 +1,6 @@
 import { IncomingMessage, IncomingBaseMessage, MessageType } from './Message';
 import { HelloMessage, WelcomeMessage, ByeMessage } from './admin.messages';
-import { NavigationHeaders, ObjectMessage, ObjectSchemaMessage } from './data.messages';
+import { ObjectMessage, ObjectSchemaMessage } from './data.messages';
 import { ObjectSetupMessage } from './setup.messages';
 
 export class MessageFactory {
@@ -18,8 +18,6 @@ export class MessageFactory {
                 return new WelcomeMessage(data);
             case MessageType.Bye:
                 return new ByeMessage(data);
-            case MessageType.NavigationHeaders:
-                return new NavigationHeaders(data);
             case MessageType.ObjectSchema:
                 return new ObjectSchemaMessage(data);
             default:
