@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, Input } from '@angular/core';
 declare const require: any;
 declare const __dirname: string;
 
@@ -8,6 +9,16 @@ const path = require('path');
 import { ListComponent } from './list.component';
 import { ConnectionService } from '../connection.service';
 import { MessageType } from '../messages/Message';
+
+@Component({
+    selector: 'app-header-sublist',
+    template: '',
+    standalone: false,
+})
+class HeaderSublistStubComponent {
+    @Input() header: string | null = null;
+    @Input() parentObject: unknown;
+}
 
 describe('ListComponent', () => {
     let component: ListComponent;
@@ -25,7 +36,7 @@ describe('ListComponent', () => {
         };
 
         await TestBed.configureTestingModule({
-            declarations: [ListComponent],
+            declarations: [ListComponent, HeaderSublistStubComponent],
             providers: [{ provide: ConnectionService, useValue: connectionServiceSpy }],
         }).compileComponents();
     });
