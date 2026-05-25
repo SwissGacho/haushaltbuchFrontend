@@ -38,11 +38,28 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
         } else if (message.type === MessageType.Object) {
             let cast = message as ObjectMessage;
             console.log(`Received object list for header ${this.header}`, cast);
-            if (cast.object === 'bolist' && Array.isArray(cast.payload?.objects)) {
-                this.objects = cast.payload.objects;
-            } else {
-                console.error('Unexpected object message', cast);
+            const expectedObject = 'bolist';
+            const expectedIndex = this.parseHeader(this.header).objectType;
+            if (cast.object !== expectedObject || cast.index !== expectedIndex) {
+                console.warn(`${this.componentID} ignoring object message for unexpected target`, {
+                    expected: { object: expectedObject, index: expectedIndex },
+                    received: { object: cast.object, index: cast.index },
+                });
+                console.groupEnd();
+                return;
             }
+
+            if (!Array.isArray(cast.payload?.objects)) {
+                console.error(
+                    `${this.componentID} received invalid Object payload; expected objects array`,
+                    cast.payload
+                );
+                this.objects = [];
+                console.groupEnd();
+                return;
+            }
+
+            this.objects = cast.payload.objects;
         } else if (message.type !== MessageType.Hello) {
             console.error('Unexpected message', message);
         }

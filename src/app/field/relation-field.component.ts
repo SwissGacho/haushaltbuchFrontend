@@ -110,14 +110,27 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
         if (message.type === MessageType.Object && this.isLoading) {
             console.log(`${this.componentID} handling Object list`, message);
             const objectMessage = message as ObjectMessage;
+            if (objectMessage.object !== 'bolist' || objectMessage.index !== this.boType) {
+                console.warn(`${this.componentID} ignoring object message for unexpected target`, {
+                    expected: { object: 'bolist', index: this.boType },
+                    received: { object: objectMessage.object, index: objectMessage.index },
+                });
+                console.groupEnd();
+                return;
+            }
+
+            if (!Array.isArray(objectMessage.payload?.objects)) {
+                console.error(
+                    `${this.componentID} received invalid Object payload; expected objects array`,
+                    objectMessage.payload
+                );
+                this.isLoading = false;
+                console.groupEnd();
+                return;
+            }
+
             const emptyOption: SelectOption = { id: null, display_name: '--- None ---' };
-            const objects = Array.isArray(objectMessage.payload?.objects)
-                ? objectMessage.payload.objects
-                : [];
-            this.options$.next([
-                emptyOption,
-                ...objects,
-            ]);
+            this.options$.next([emptyOption, ...objectMessage.payload.objects]);
             this.isLoading = false;
 
             if (this.shouldOpenOnLoad) {
