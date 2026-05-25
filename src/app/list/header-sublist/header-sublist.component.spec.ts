@@ -78,7 +78,8 @@ describe('HeaderSublistComponent', () => {
 
         expect(sendMessageSpy).toHaveBeenCalledTimes(1);
         const sentMessage = sendMessageSpy.mock.calls[0][0] as any;
-        expect(sentMessage.object).toBe('Invoice');
+        expect(sentMessage.object).toBe('bolist');
+        expect(sentMessage.index).toBe('Invoice');
         expect(sentMessage.conditions).toEqual({ customer: 42 });
     });
 
