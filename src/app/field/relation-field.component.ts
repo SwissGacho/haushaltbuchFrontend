@@ -111,9 +111,12 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
             console.log(`${this.componentID} handling Object list`, message);
             const objectMessage = message as ObjectMessage;
             const emptyOption: SelectOption = { id: null, display_name: '--- None ---' };
+            const objects = Array.isArray(objectMessage.payload?.objects)
+                ? objectMessage.payload.objects
+                : [];
             this.options$.next([
                 emptyOption,
-                ...((objectMessage.payload?.objects as ListObject[]) || []),
+                ...objects,
             ]);
             this.isLoading = false;
 
