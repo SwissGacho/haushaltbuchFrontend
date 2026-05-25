@@ -1,10 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input } from '@angular/core';
-declare const require: any;
+import * as fs from 'fs';
+import * as path from 'path';
 declare const __dirname: string;
-
-const fs = require('fs');
-const path = require('path');
 
 import { ListComponent } from './list.component';
 import { ConnectionService } from '../connection.service';
