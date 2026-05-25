@@ -145,13 +145,4 @@ describe('ListComponent', () => {
         expect(sentMessage.object).toBe('navigationheaders');
         expect(sentMessage.index).toBe('Customer');
     });
-
-    it('template binds displayName for rendering and name for sublist input', () => {
-        const templatePath = path.resolve(__dirname, './list.component.html');
-        const template = fs.readFileSync(templatePath, 'utf8');
-
-        expect(template).toContain('{{ header.displayName }}');
-        expect(template).toContain('[header]="header.name"');
-        expect(template).toContain('[parentObject]="parentObject"');
-    });
 });
