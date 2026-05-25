@@ -1,9 +1,9 @@
-@for (header of headers; track header) {
+@for (header of headers; track header.name) {
     <div>
         <div class="header">
-            {{ header }}
+            {{ header.displayName }}
             <app-header-sublist
-                [header]="header"
+                [header]="header.name"
                 [parentObject]="parentObject"
             ></app-header-sublist>
         </div>

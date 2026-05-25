@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BoIdentifier } from 'src/app/business-object/bo.identifier';
 import { ConnectedComponent } from 'src/app/connected-component/connected.component';
 import { ConnectionService } from 'src/app/connection.service';
-import { FetchList, ObjectList } from 'src/app/messages/data.messages';
+import { FetchMessage, ObjectMessage } from 'src/app/messages/data.messages';
 import { ListObject } from 'src/app/messages/Message';
 import { IncomingMessage, MessageType } from 'src/app/messages/Message';
 import { SelectedObjectService } from 'src/app/selected-object.service';
@@ -35,10 +35,31 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
             console.log('Received welcome', message);
             this.token = message.token;
             this.fetchList();
-        } else if (message.type === MessageType.ObjectList) {
-            let cast = message as ObjectList;
+        } else if (message.type === MessageType.Object) {
+            const cast = message as ObjectMessage;
             console.log(`Received object list for header ${this.header}`, cast);
-            this.objects = cast.objects;
+            const expectedObject = 'bolist';
+            const expectedIndex = this.parseHeader(this.header).objectType;
+            if (cast.object !== expectedObject || cast.index !== expectedIndex) {
+                console.warn(`${this.componentID} ignoring object message for unexpected target`, {
+                    expected: { object: expectedObject, index: expectedIndex },
+                    received: { object: cast.object, index: cast.index },
+                });
+                console.groupEnd();
+                return;
+            }
+
+            if (!Array.isArray(cast.payload?.objects)) {
+                console.error(
+                    `${this.componentID} received invalid Object payload; expected objects array`,
+                    cast.payload
+                );
+                this.objects = [];
+                console.groupEnd();
+                return;
+            }
+
+            this.objects = cast.payload.objects;
         } else if (message.type !== MessageType.Hello) {
             console.error('Unexpected message', message);
         }
@@ -58,7 +79,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
         }
 
         console.log(`Fetching list for header ${this.header}`, conditions);
-        let message = new FetchList(objectType, undefined, this.token, conditions);
+        let message = new FetchMessage('bolist', objectType, this.token, conditions);
         this.sendMessage(message);
     }
 

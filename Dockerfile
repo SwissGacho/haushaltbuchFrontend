@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Abhängigkeiten kopieren und installieren
 COPY package*.json ./
-RUN npm ci
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # Quellcode kopieren und bauen
 COPY . .

@@ -10,8 +10,18 @@ import {
 import { ConnectionService } from '../connection.service';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { IncomingMessage, MessageType } from '../messages/Message';
-import { FetchNavigationHeaders, NavigationHeaders, FetchMessage } from '../messages/data.messages';
+import { FetchMessage, ObjectMessage } from '../messages/data.messages';
 import { BoIdentifier } from '../business-object/bo.identifier';
+
+interface NavigationHeader {
+    name: string;
+    displayName: string;
+}
+
+interface IncomingNavigationHeader {
+    name?: unknown;
+    display_name?: unknown;
+}
 
 @Component({
     selector: 'app-list-component',
@@ -20,13 +30,15 @@ import { BoIdentifier } from '../business-object/bo.identifier';
     standalone: false,
 })
 export class ListComponent extends ConnectedComponent implements OnInit {
+    private static readonly NAVIGATION_HEADERS_OBJECT = 'navigationheaders';
+
     constructor(protected override connectionService: ConnectionService) {
         super(connectionService);
         this.setComponentID('NavigationHeaders');
     }
 
-    // A list of the headers we received
-    headers: string[] = [];
+    // A list of headers with machine-readable and display values.
+    headers: NavigationHeader[] = [];
 
     @Input() parentObject: BoIdentifier | null = null;
     @Output() empty = new EventEmitter<void>();
@@ -39,10 +51,53 @@ export class ListComponent extends ConnectedComponent implements OnInit {
             //console.log(`${this.componentID} handling welcome`, message);
             this.token = message.token;
             this.fetchNavigationHeaders();
-        } else if (message.type === MessageType.NavigationHeaders) {
+        } else if (message.type === MessageType.Object) {
             // Log which component received the message with format string
+            const cast = message as ObjectMessage;
             console.log(`${this.componentID} handling NavigationHeaders`, message);
-            this.headers = (message as NavigationHeaders).headers;
+
+            const expectedObject = ListComponent.NAVIGATION_HEADERS_OBJECT;
+            const expectedIndex = this.parentObject?.type || '';
+            if (cast.object !== expectedObject || cast.index !== expectedIndex) {
+                console.warn(`${this.componentID} ignoring object message for unexpected target`, {
+                    expected: { object: expectedObject, index: expectedIndex },
+                    received: { object: cast.object, index: cast.index },
+                });
+                console.groupEnd();
+                return;
+            }
+
+            const incomingHeaders = cast.payload?.headers;
+            if (!Array.isArray(incomingHeaders)) {
+                console.warn(
+                    `${this.componentID} received invalid headers payload; expected an array`,
+                    cast.payload
+                );
+                this.headers = [];
+                this.empty.emit();
+                console.groupEnd();
+                return;
+            }
+
+            this.headers = incomingHeaders
+                .map((header: IncomingNavigationHeader) => {
+                    if (typeof header?.name !== 'string' || header.name.length === 0) {
+                        return null;
+                    }
+
+                    const displayName =
+                        typeof header.display_name === 'string' && header.display_name.length > 0
+                            ? header.display_name
+                            : header.name;
+
+                    return {
+                        name: header.name,
+                        displayName,
+                    };
+                })
+                .filter((header): header is NavigationHeader => header !== null);
+
+            console.log('Extracted headers:', this.headers);
             if (this.headers.length === 0) {
                 this.empty.emit();
             }
@@ -61,8 +116,11 @@ export class ListComponent extends ConnectedComponent implements OnInit {
             return;
         }
         console.log('Fetching list');
-        let message = new FetchNavigationHeaders(this.parentObject?.type, this.token);
-        // let message = new FetchMessage('navigationheaders', this.parentObject?.type || '', this.token);
+        let message = new FetchMessage(
+            ListComponent.NAVIGATION_HEADERS_OBJECT,
+            this.parentObject?.type || '',
+            this.token
+        );
         console.log('Sending fetch list message', message);
         this.sendMessage(message);
     }

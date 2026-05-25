@@ -17,10 +17,6 @@ export enum MessageType {
     FetchSetup = 'FetchSetup',
     ObjectSetup = 'ObjectSetup',
     StoreSetup = 'StoreSetup',
-    FetchNavigationHeaders = 'FetchNavigationHeaders',
-    NavigationHeaders = 'NavigationHeaders',
-    FetchList = 'FetchList',
-    ObjectList = 'ObjectList',
     FetchSchema = 'FetchSchema',
     ObjectSchema = 'ObjectSchema',
 }
@@ -28,11 +24,7 @@ export enum MessageType {
 export type ListObject = { id: number; display_name: string };
 
 // Type unions for polymorphic message classes
-export type FetchLikeType =
-    | MessageType.Fetch
-    | MessageType.FetchSetup
-    | MessageType.FetchNavigationHeaders
-    | MessageType.FetchList;
+export type FetchLikeType = MessageType.Fetch | MessageType.FetchSetup;
 export type StoreLikeType = MessageType.Store | MessageType.StoreSetup;
 export type ObjectLikeType = MessageType.Object | MessageType.ObjectSetup;
 
@@ -87,16 +79,6 @@ export interface ObjectSchemaMessageType extends IncomingBaseMessage {
     schema: { [key: string]: any };
 }
 
-export interface NavigationHeadersType extends IncomingBaseMessage {
-    type: MessageType.NavigationHeaders;
-    payload?: { headers?: string[] };
-}
-
-export interface ObjectListType extends IncomingBaseMessage {
-    type: MessageType.ObjectList;
-    payload?: { objects?: ListObject[] };
-}
-
 // Discriminated union types for outgoing messages
 export interface LogMessageType extends OutgoingBaseMessage {
     type: MessageType.Log;
@@ -146,8 +128,6 @@ export type Message =
     | ByeMessageType
     | ObjectMessageType
     | ObjectSetupMessageType
-    | NavigationHeadersType
-    | ObjectListType
     | LogMessageType
     | LoginMessageType
     | EchoMessageType
