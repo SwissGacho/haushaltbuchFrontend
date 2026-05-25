@@ -53,7 +53,7 @@ export class ListComponent extends ConnectedComponent implements OnInit {
             this.fetchNavigationHeaders();
         } else if (message.type === MessageType.Object) {
             // Log which component received the message with format string
-            let cast = message as ObjectMessage;
+            const cast = message as ObjectMessage;
             console.log(`${this.componentID} handling NavigationHeaders`, message);
 
             const expectedObject = ListComponent.NAVIGATION_HEADERS_OBJECT;

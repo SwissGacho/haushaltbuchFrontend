@@ -1,8 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input } from '@angular/core';
-import * as fs from 'fs';
-import * as path from 'path';
-declare const __dirname: string;
 
 import { ListComponent } from './list.component';
 import { ConnectionService } from '../connection.service';

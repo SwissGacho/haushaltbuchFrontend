@@ -36,7 +36,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
             this.token = message.token;
             this.fetchList();
         } else if (message.type === MessageType.Object) {
-            let cast = message as ObjectMessage;
+            const cast = message as ObjectMessage;
             console.log(`Received object list for header ${this.header}`, cast);
             const expectedObject = 'bolist';
             const expectedIndex = this.parseHeader(this.header).objectType;
