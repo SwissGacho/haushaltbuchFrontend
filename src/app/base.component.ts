@@ -6,7 +6,7 @@ let nextComponentId = 1;
     template: '',
     standalone: false,
 })
-export class BaseComponent {
+export class IdentifiedComponent {
     componentName: string = 'component';
     componentID: string = 'undefined component';
 

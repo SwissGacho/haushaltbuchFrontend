@@ -15,7 +15,15 @@ import {
 } from './messages/admin.messages';
 import { Message, IncomingBaseMessage } from './messages/Message';
 import { MessageFactory } from './messages/deserialize_message';
-import { ConnectedComponent } from './connected-component/connected.component';
+
+export interface ConnectionSubscriber {
+    componentID: string;
+    setToken(to: string): void;
+    sendMessage(message: Message): void;
+    handleMessages(message: IncomingBaseMessage): void;
+    handleError(error: any): void;
+    handleComplete(): void;
+}
 
 export class RXJS {
     static take(n: number): rxjs.MonoTypeOperatorFunction<any> {
@@ -27,7 +35,7 @@ export class RXJS {
 }
 
 export class Logger {
-    static takeOverConsole(component: ConnectedComponent) {
+    static takeOverConsole(component: ConnectionSubscriber) {
         var console: any = window.console;
         if (!console) return;
         function intercept(method: string, level: LogLevel) {

@@ -2,7 +2,7 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BaseComponent } from '../base.component';
+import { IdentifiedComponent } from '../base.component';
 import { ConnectionService, ConnectionSubscriber } from '../connection.service';
 import { Message, IncomingBaseMessage } from '../messages/Message';
 import { LoginCredentials } from '../messages/admin.messages';
@@ -20,7 +20,7 @@ import { LoginCredentials } from '../messages/admin.messages';
 /// If necessary, they can also implement the handleComplete method to handle the connection closing.
 /// They can also call the sendMessage method to send messages.
 export class ConnectedComponent
-    extends BaseComponent
+    extends IdentifiedComponent
     implements OnInit, OnDestroy, ConnectionSubscriber
 {
     constructor(protected connectionService: ConnectionService) {
