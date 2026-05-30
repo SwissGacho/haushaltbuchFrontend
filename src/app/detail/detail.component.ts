@@ -69,10 +69,16 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         );
     }
 
-    fetchSchema(objectType: string) {
+    fetchSchema() {
+        let objectType = this.selectedObject?.type;
         console.log('Fetching schema for type', objectType);
         this.schemaUpdating = true;
 
+        if (objectType == undefined) {
+            console.error('No object type available to fetch schema for');
+            this.schemaUpdating = false;
+            return;
+        }
         // First unsubscribe from any previous schema request
         this.schemaSubscription.unsubscribe();
         this.schemaSubscription = new Subscription();
@@ -289,7 +295,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         const shouldFetchSchema = !!object?.type && (!sameTypeSelection || !this.objectSchema);
         if (shouldFetchSchema) {
             this.objectSchema = null;
-            this.fetchSchema(object.type);
+            this.fetchSchema();
         }
 
         this.selectedType = object?.type || null;
