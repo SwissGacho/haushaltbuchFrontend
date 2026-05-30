@@ -2,7 +2,7 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { IdentifiedComponent } from '../base.component';
+import { IdentifiedComponent } from '../identified.component';
 import { ConnectionService, ConnectionSubscriber } from '../connection.service';
 import { Message, IncomingBaseMessage } from '../messages/Message';
 import { LoginCredentials } from '../messages/admin.messages';

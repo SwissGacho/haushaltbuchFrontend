@@ -6,7 +6,7 @@ import { ConnectionService, ConnectionSubscriber } from './connection.service';
 import { IncomingBaseMessage, Message, MessageType } from './messages/Message';
 import { FetchSchemaMessage, ObjectSchemaMessage } from './messages/data.messages';
 import { WelcomeMessage, ByeMessage } from './messages/admin.messages';
-import { IdentifiedComponent } from './base.component';
+import { IdentifiedComponent } from './identified.component';
 
 class SchemaConnectionClient extends IdentifiedComponent implements ConnectionSubscriber {
     constructor(

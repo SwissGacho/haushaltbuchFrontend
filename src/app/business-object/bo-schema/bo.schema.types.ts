@@ -7,6 +7,7 @@ export const ATTRIBUTE_TYPE = [
     'list',
     'flag',
     'relation',
+    'decimal',
 ] as const;
 export type AttributeType = (typeof ATTRIBUTE_TYPE)[number];
 
