@@ -1,4 +1,4 @@
-<div class="app-container">
+<div class="app-container" [style.--sidebar-width.px]="sidebarWidth">
     <header class="app-container__header">
         <h1>Haushaltbuch</h1>
     </header>
@@ -6,6 +6,15 @@
     <aside class="app-container__sidebar">
         <app-list-component></app-list-component>
     </aside>
+
+    <div
+        class="app-container__resizer"
+        role="separator"
+        aria-label="Resize sidebar"
+        aria-orientation="vertical"
+        tabindex="0"
+        (mousedown)="startSidebarResize($event)"
+    ></div>
 
     <main class="app-container__main">
         <app-detail-component></app-detail-component>

@@ -19,6 +19,9 @@ export class AppComponent extends ConnectedComponent implements OnInit {
     activateSetupConfigComponent = false;
     frontendVersion = environment.appVersion;
     backendVersion?: string;
+    sidebarWidth = 280;
+    readonly minSidebarWidth = 180;
+    readonly maxSidebarWidth = 700;
 
     constructor(private specificService: ConnectionService) {
         super(specificService);
@@ -64,5 +67,21 @@ export class AppComponent extends ConnectedComponent implements OnInit {
         const observeHandshake = true;
         const isPrimary = true;
         this.getConnection(observeHandshake, isPrimary);
+    }
+
+    startSidebarResize(event: MouseEvent): void {
+        event.preventDefault();
+        const onMouseMove = (moveEvent: MouseEvent) => {
+            const nextWidth = moveEvent.clientX;
+            this.sidebarWidth = Math.min(this.maxSidebarWidth, Math.max(this.minSidebarWidth, nextWidth));
+        };
+
+        const onMouseUp = () => {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
     }
 }

@@ -11,12 +11,12 @@
 
 .app-container {
     display: grid;
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: var(--sidebar-width, 280px) 8px 1fr;
     grid-template-rows: 64px 1fr 40px;
     grid-template-areas:
-        'header header'
-        'sidebar main'
-        'footer footer';
+        'header header header'
+        'sidebar resizer main'
+        'footer footer footer';
     height: 100vh;
     overflow: hidden;
 }
@@ -36,6 +36,20 @@
     border-right: 1px solid #dcdcdc;
     padding: 0.5rem;
     background: #f8f9fa;
+}
+
+.app-container__resizer {
+    grid-area: resizer;
+    cursor: col-resize;
+    background: #ececec;
+    border-left: 1px solid #dcdcdc;
+    border-right: 1px solid #dcdcdc;
+}
+
+.app-container__resizer:hover,
+.app-container__resizer:focus {
+    background: #d9d9d9;
+    outline: none;
 }
 
 .app-container__main {
