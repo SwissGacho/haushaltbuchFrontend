@@ -13,6 +13,7 @@ import { MessageType } from '../messages/Message';
 class HeaderSublistStubComponent {
     @Input() header: string | null = null;
     @Input() parentObject: unknown;
+    @Input() visibleItemCount: number | null = null;
 }
 
 describe('ListComponent', () => {

@@ -42,6 +42,7 @@ export class ListComponent extends ConnectedComponent implements OnInit {
     private readonly expandedHeaders = new Set<string>();
 
     @Input() parentObject: BoIdentifier | null = null;
+    @Input() sublistVisibleItemCount = 7;
     @Output() empty = new EventEmitter<void>();
 
     override OBSERVE_HANDSHAKE = true;

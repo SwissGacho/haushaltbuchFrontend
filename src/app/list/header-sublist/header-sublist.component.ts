@@ -14,6 +14,8 @@ import { SelectedObjectService } from 'src/app/selected-object.service';
     standalone: false,
 })
 export class HeaderSublistComponent extends ConnectedComponent implements OnInit {
+    private static readonly DEFAULT_VISIBLE_ITEM_COUNT = 7;
+
     constructor(
         protected override connectionService: ConnectionService,
         private selectedObjectService: SelectedObjectService
@@ -153,6 +155,15 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
     // An input property to receive the headers from the parent component
     @Input() header: string = '';
     @Input() parentObject: BoIdentifier | null = null;
+    @Input() visibleItemCount = HeaderSublistComponent.DEFAULT_VISIBLE_ITEM_COUNT;
+
+    get normalizedVisibleItemCount(): number {
+        if (!Number.isFinite(this.visibleItemCount)) {
+            return HeaderSublistComponent.DEFAULT_VISIBLE_ITEM_COUNT;
+        }
+
+        return Math.max(1, Math.floor(this.visibleItemCount));
+    }
 
     private parseHeader(header: string): { objectType: string; referenceAttribute?: string } {
         const separatorIndex = header.indexOf('.');

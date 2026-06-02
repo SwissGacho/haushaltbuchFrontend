@@ -1,29 +1,35 @@
-<ul>
-    @for (object of objects; track object.id) {
-        <div>
-            <li
-                [class.expanded]="expandedObject?.id === object.id"
-                [class.known-empty]="knownEmptyIds.has(object.id)"
-                class="object-item toggle-marker"
-                (click)="onObjectClick(object.id)"
-                (dblclick)="onObjectDoubleClick(object.id)"
-                style="cursor: pointer"
-            >
-                <app-boname-renderer [value]="object.display_name"></app-boname-renderer>
-            </li>
-            @if (expandedObject?.id === object.id) {
-                <app-list-component
-                    [parentObject]="expandedObject"
-                    (empty)="onSublistEmpty(object.id)"
-                ></app-list-component>
-            }
+<div class="sublist" [style.--sublist-visible-item-count]="normalizedVisibleItemCount">
+    <div class="sublist__items" role="list">
+        @for (object of objects; track object.id) {
+            <div class="sublist__entry" role="listitem">
+                <div
+                    [class.expanded]="expandedObject?.id === object.id"
+                    [class.known-empty]="knownEmptyIds.has(object.id)"
+                    class="object-item toggle-marker"
+                    (click)="onObjectClick(object.id)"
+                    (dblclick)="onObjectDoubleClick(object.id)"
+                    style="cursor: pointer"
+                >
+                    <app-boname-renderer [value]="object.display_name"></app-boname-renderer>
+                </div>
+                @if (expandedObject?.id === object.id) {
+                    <app-list-component
+                        [parentObject]="expandedObject"
+                        [sublistVisibleItemCount]="visibleItemCount"
+                        (empty)="onSublistEmpty(object.id)"
+                    ></app-list-component>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="sublist__actions">
+        <div
+            class="add-new toggle-marker"
+            (click)="onCreateNew()"
+            style="cursor: pointer; font-style: italic; color: blue"
+        >
+            <app-boname-renderer [value]="'Add new ' + header"></app-boname-renderer>
         </div>
-    }
-    <li
-        class="add-new toggle-marker"
-        (click)="onCreateNew()"
-        style="cursor: pointer; font-style: italic; color: blue"
-    >
-        <app-boname-renderer [value]="'Add new ' + header"></app-boname-renderer>
-    </li>
-</ul>
+    </div>
+</div>
