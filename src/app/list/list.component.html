@@ -1,11 +1,18 @@
 @for (header of headers; track header.name) {
-    <div>
-        <div class="header">
-            {{ header.displayName }}
+    <section class="header-group">
+        <button
+            class="header-toggle toggle-marker"
+            type="button"
+            [attr.aria-expanded]="isHeaderExpanded(header.name)"
+            (click)="toggleHeader(header.name)"
+        >
+            <span>{{ header.displayName }}</span>
+        </button>
+        @if (isHeaderExpanded(header.name)) {
             <app-header-sublist
                 [header]="header.name"
                 [parentObject]="parentObject"
             ></app-header-sublist>
-        </div>
-    </div>
+        }
+    </section>
 }

@@ -1,19 +1,6 @@
 .object-item {
     list-style-type: none;
-    position: relative;
-}
-
-.object-item::before {
-    content: '►';
-    position: absolute;
-    left: -1.3em;
-    top: 2pt;
-    color: #555;
-    font-size: 70%;
-}
-
-.object-item.expanded::before {
-    content: '▼';
+    --toggle-icon-size: 70%;
 }
 
 .object-item.known-empty::before {
@@ -23,14 +10,6 @@
 
 .add-new {
     list-style-type: none;
-    position: relative;
-}
-
-.add-new::before {
-    content: '►';
-    position: absolute;
-    left: -1.3em;
-    top: 2pt;
-    color: blue;
-    font-size: 70%;
+    --toggle-icon-size: 70%;
+    --toggle-icon-color: blue;
 }

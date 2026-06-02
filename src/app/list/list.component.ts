@@ -39,6 +39,7 @@ export class ListComponent extends ConnectedComponent implements OnInit {
 
     // A list of headers with machine-readable and display values.
     headers: NavigationHeader[] = [];
+    private readonly expandedHeaders = new Set<string>();
 
     @Input() parentObject: BoIdentifier | null = null;
     @Output() empty = new EventEmitter<void>();
@@ -97,6 +98,8 @@ export class ListComponent extends ConnectedComponent implements OnInit {
                 })
                 .filter((header): header is NavigationHeader => header !== null);
 
+            this.syncExpandedHeaders();
+
             console.log('Extracted headers:', this.headers);
             if (this.headers.length === 0) {
                 this.empty.emit();
@@ -131,5 +134,34 @@ export class ListComponent extends ConnectedComponent implements OnInit {
         }
 
         this.fetchNavigationHeaders();
+    }
+
+    isHeaderExpanded(headerName: string): boolean {
+        return this.expandedHeaders.has(headerName);
+    }
+
+    toggleHeader(headerName: string): void {
+        if (this.expandedHeaders.has(headerName)) {
+            this.expandedHeaders.delete(headerName);
+            return;
+        }
+
+        this.expandedHeaders.add(headerName);
+    }
+
+    private syncExpandedHeaders(): void {
+        const knownHeaderNames = new Set(this.headers.map((header) => header.name));
+
+        for (const expandedHeader of this.expandedHeaders) {
+            if (!knownHeaderNames.has(expandedHeader)) {
+                this.expandedHeaders.delete(expandedHeader);
+            }
+        }
+
+        for (const header of this.headers) {
+            if (!this.expandedHeaders.has(header.name)) {
+                this.expandedHeaders.add(header.name);
+            }
+        }
     }
 }
