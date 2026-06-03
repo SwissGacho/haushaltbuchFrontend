@@ -6,6 +6,8 @@ import { FetchMessage, ObjectMessage } from 'src/app/messages/data.messages';
 import { ListObject } from 'src/app/messages/Message';
 import { IncomingMessage, MessageType } from 'src/app/messages/Message';
 import { SelectedObjectService } from 'src/app/selected-object.service';
+import { ConfigurationStateService } from 'src/app/configuration-state.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-header-sublist',
@@ -21,7 +23,8 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
 
     constructor(
         protected override connectionService: ConnectionService,
-        private selectedObjectService: SelectedObjectService
+        private selectedObjectService: SelectedObjectService,
+        private configurationStateService: ConfigurationStateService
     ) {
         super(connectionService);
         this.setComponentID('Sublist');
@@ -33,7 +36,14 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
     private clickTimeoutId: number | null = null;
     private resizeMouseMoveHandler: ((event: MouseEvent) => void) | null = null;
     private resizeMouseUpHandler: (() => void) | null = null;
+    private visibleItemCountSubscription: Subscription | null = null;
+    private subscribedSublistSizeKey = '';
     private currentVisibleItemCount = HeaderSublistComponent.DEFAULT_VISIBLE_ITEM_COUNT;
+
+    override ngOnInit(): void {
+        super.ngOnInit();
+        this.syncVisibleItemCountSubscription();
+    }
 
     override OBSERVE_HANDSHAKE = true;
 
@@ -126,14 +136,15 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['visibleItemCount']) {
-            this.currentVisibleItemCount = this.clampVisibleItemCount(this.visibleItemCount);
+        if (changes['header'] || changes['parentObject'] || changes['visibleItemCount']) {
+            this.syncVisibleItemCountSubscription();
         }
     }
 
     override ngOnDestroy(): void {
         this.clearPendingClick();
         this.clearResizeHandlers();
+        this.clearVisibleItemCountSubscription();
         super.ngOnDestroy();
     }
 
@@ -184,6 +195,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
             const deltaY = moveEvent.clientY - startY;
             const deltaRows = Math.round(deltaY / HeaderSublistComponent.SUBLIST_ROW_HEIGHT_PX);
             this.currentVisibleItemCount = this.clampVisibleItemCount(startCount + deltaRows);
+            this.persistCurrentVisibleItemCount();
         };
 
         this.resizeMouseUpHandler = () => {
@@ -198,12 +210,14 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
         this.currentVisibleItemCount = this.clampVisibleItemCount(
             this.normalizedVisibleItemCount + 1
         );
+        this.persistCurrentVisibleItemCount();
     }
 
     decreaseVisibleItems(): void {
         this.currentVisibleItemCount = this.clampVisibleItemCount(
             this.normalizedVisibleItemCount - 1
         );
+        this.persistCurrentVisibleItemCount();
     }
 
     onResizeHandleKeydown(event: KeyboardEvent): void {
@@ -241,6 +255,73 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
             window.removeEventListener('mouseup', this.resizeMouseUpHandler);
             this.resizeMouseUpHandler = null;
         }
+    }
+
+    private persistCurrentVisibleItemCount(): void {
+        this.configurationStateService.setItem(
+            this.getSublistSizeKey(),
+            this.normalizedVisibleItemCount,
+            this.standardVisibleItemCount
+        );
+    }
+
+    private syncVisibleItemCountSubscription(): void {
+        const sublistSizeKey = this.getSublistSizeKey();
+
+        if (!sublistSizeKey) {
+            this.clearVisibleItemCountSubscription();
+            this.currentVisibleItemCount = this.standardVisibleItemCount;
+            return;
+        }
+
+        if (
+            this.subscribedSublistSizeKey === sublistSizeKey &&
+            this.visibleItemCountSubscription !== null
+        ) {
+            this.currentVisibleItemCount = this.resolveCountFromStoredValue(
+                this.configurationStateService.getItem<number>(sublistSizeKey)
+            );
+            return;
+        }
+
+        this.clearVisibleItemCountSubscription();
+        this.subscribedSublistSizeKey = sublistSizeKey;
+        this.visibleItemCountSubscription = this.configurationStateService
+            .observeItem<number>(sublistSizeKey)
+            .subscribe((storedSize) => {
+                this.currentVisibleItemCount = this.resolveCountFromStoredValue(storedSize);
+            });
+    }
+
+    private clearVisibleItemCountSubscription(): void {
+        if (this.visibleItemCountSubscription !== null) {
+            this.visibleItemCountSubscription.unsubscribe();
+            this.visibleItemCountSubscription = null;
+        }
+
+        this.subscribedSublistSizeKey = '';
+    }
+
+    private resolveCountFromStoredValue(storedSize: number | undefined): number {
+        if (Number.isFinite(storedSize)) {
+            return this.clampVisibleItemCount(storedSize as number);
+        }
+
+        return this.standardVisibleItemCount;
+    }
+
+    private get standardVisibleItemCount(): number {
+        return this.clampVisibleItemCount(this.visibleItemCount);
+    }
+
+    private getSublistSizeKey(): string {
+        if (!this.header) {
+            return '';
+        }
+
+        const parentType = this.parentObject?.type || 'root';
+        const parentId = this.parentObject?.id ?? 'none';
+        return `sublist.size|${parentType}:${String(parentId)}|${this.header}`;
     }
 
     private parseHeader(header: string): { objectType: string; referenceAttribute?: string } {
