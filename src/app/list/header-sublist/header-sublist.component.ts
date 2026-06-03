@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { BoIdentifier } from 'src/app/business-object/bo.identifier';
 import { ConnectedComponent } from 'src/app/connected-component/connected.component';
 import { ConnectionService } from 'src/app/connection.service';
@@ -13,8 +13,11 @@ import { SelectedObjectService } from 'src/app/selected-object.service';
     styleUrls: ['./header-sublist.component.css'],
     standalone: false,
 })
-export class HeaderSublistComponent extends ConnectedComponent implements OnInit {
+export class HeaderSublistComponent extends ConnectedComponent implements OnInit, OnChanges {
     private static readonly DEFAULT_VISIBLE_ITEM_COUNT = 7;
+    private static readonly MIN_VISIBLE_ITEM_COUNT = 2;
+    private static readonly MAX_VISIBLE_ITEM_COUNT = 30;
+    private static readonly SUBLIST_ROW_HEIGHT_PX = 30;
 
     constructor(
         protected override connectionService: ConnectionService,
@@ -28,6 +31,9 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
     expandedObject: BoIdentifier | null = null;
     knownEmptyIds = new Set<number>();
     private clickTimeoutId: number | null = null;
+    private resizeMouseMoveHandler: ((event: MouseEvent) => void) | null = null;
+    private resizeMouseUpHandler: (() => void) | null = null;
+    private currentVisibleItemCount = HeaderSublistComponent.DEFAULT_VISIBLE_ITEM_COUNT;
 
     override OBSERVE_HANDSHAKE = true;
 
@@ -119,8 +125,15 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
         this.selectedObjectService.selectObject(blankObject);
     }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['visibleItemCount']) {
+            this.currentVisibleItemCount = this.clampVisibleItemCount(this.visibleItemCount);
+        }
+    }
+
     override ngOnDestroy(): void {
         this.clearPendingClick();
+        this.clearResizeHandlers();
         super.ngOnDestroy();
     }
 
@@ -158,11 +171,76 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
     @Input() visibleItemCount = HeaderSublistComponent.DEFAULT_VISIBLE_ITEM_COUNT;
 
     get normalizedVisibleItemCount(): number {
-        if (!Number.isFinite(this.visibleItemCount)) {
+        return this.clampVisibleItemCount(this.currentVisibleItemCount);
+    }
+
+    startResize(event: MouseEvent): void {
+        event.preventDefault();
+        this.clearResizeHandlers();
+        const startY = event.clientY;
+        const startCount = this.normalizedVisibleItemCount;
+
+        this.resizeMouseMoveHandler = (moveEvent: MouseEvent) => {
+            const deltaY = moveEvent.clientY - startY;
+            const deltaRows = Math.round(deltaY / HeaderSublistComponent.SUBLIST_ROW_HEIGHT_PX);
+            this.currentVisibleItemCount = this.clampVisibleItemCount(startCount + deltaRows);
+        };
+
+        this.resizeMouseUpHandler = () => {
+            this.clearResizeHandlers();
+        };
+
+        window.addEventListener('mousemove', this.resizeMouseMoveHandler);
+        window.addEventListener('mouseup', this.resizeMouseUpHandler);
+    }
+
+    increaseVisibleItems(): void {
+        this.currentVisibleItemCount = this.clampVisibleItemCount(
+            this.normalizedVisibleItemCount + 1
+        );
+    }
+
+    decreaseVisibleItems(): void {
+        this.currentVisibleItemCount = this.clampVisibleItemCount(
+            this.normalizedVisibleItemCount - 1
+        );
+    }
+
+    onResizeHandleKeydown(event: KeyboardEvent): void {
+        if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            this.decreaseVisibleItems();
+            return;
+        }
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            this.increaseVisibleItems();
+        }
+    }
+
+    private clampVisibleItemCount(count: number): number {
+        if (!Number.isFinite(count)) {
             return HeaderSublistComponent.DEFAULT_VISIBLE_ITEM_COUNT;
         }
 
-        return Math.max(1, Math.floor(this.visibleItemCount));
+        const roundedCount = Math.floor(count);
+        return Math.max(
+            HeaderSublistComponent.MIN_VISIBLE_ITEM_COUNT,
+            Math.min(HeaderSublistComponent.MAX_VISIBLE_ITEM_COUNT, roundedCount)
+        );
+    }
+
+    private clearResizeHandlers(): void {
+        if (this.resizeMouseMoveHandler !== null) {
+            window.removeEventListener('mousemove', this.resizeMouseMoveHandler);
+            this.resizeMouseMoveHandler = null;
+        }
+
+        if (this.resizeMouseUpHandler !== null) {
+            window.removeEventListener('mouseup', this.resizeMouseUpHandler);
+            this.resizeMouseUpHandler = null;
+        }
     }
 
     private parseHeader(header: string): { objectType: string; referenceAttribute?: string } {

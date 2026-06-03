@@ -32,4 +32,14 @@
             <app-boname-renderer [value]="'Add new ' + header"></app-boname-renderer>
         </div>
     </div>
+
+    <div
+        class="sublist__resize-handle"
+        role="separator"
+        aria-label="Resize sublist"
+        aria-orientation="horizontal"
+        tabindex="0"
+        (mousedown)="startResize($event)"
+        (keydown)="onResizeHandleKeydown($event)"
+    ></div>
 </div>
