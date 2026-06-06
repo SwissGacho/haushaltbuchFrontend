@@ -5,7 +5,7 @@ import { parseObjectSchema } from './business-object/bo-schema/bo.schema.parse';
 import { ConnectionService, ConnectionSubscriber } from './connection.service';
 import { IncomingBaseMessage, Message, MessageType } from './messages/Message';
 import { FetchSchemaMessage, ObjectSchemaMessage } from './messages/data.messages';
-import { WelcomeMessage, ByeMessage } from './messages/admin.messages';
+import { WelcomeMessage, ByeMessage, HelloMessage } from './messages/admin.messages';
 import { IdentifiedComponent } from './identified.component';
 
 class SchemaConnectionClient extends IdentifiedComponent implements ConnectionSubscriber {
@@ -37,6 +37,10 @@ class SchemaConnectionClient extends IdentifiedComponent implements ConnectionSu
     }
 
     handleMessages(message: IncomingBaseMessage): void {
+        if (message instanceof HelloMessage) {
+            return;
+        }
+
         if (message instanceof WelcomeMessage) {
             // Connection fully authenticated, now safe to flush queued requests
             this.schemaService.onConnectionReady();
@@ -163,6 +167,10 @@ class SchemaRequest {
             return { ok: false, error };
         }
     }
+
+    asObservable(): Observable<ObjectSchema> {
+        return this.stream.asObservable();
+    }
 }
 
 @Injectable({
@@ -183,7 +191,7 @@ export class SchemaService {
 
         const existingRequest = this.requests.get(normalizedType);
         if (existingRequest) {
-            return existingRequest.stream.asObservable();
+            return existingRequest.asObservable();
         }
 
         const request = new SchemaRequest(normalizedType);
@@ -192,7 +200,7 @@ export class SchemaService {
         this.ensureConnection();
         this.tryFlushQueuedRequests();
 
-        return request.stream.asObservable();
+        return request.asObservable();
     }
 
     onConnectionReady(): void {
