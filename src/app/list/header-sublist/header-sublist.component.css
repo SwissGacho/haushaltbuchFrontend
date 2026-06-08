@@ -5,12 +5,37 @@
 }
 
 .sublist__items {
-    overflow-y: auto;
-    max-height: calc(var(--sublist-visible-item-count, 7) * var(--sublist-row-height, 1.9rem));
+    overflow: visible;
+    max-height: none;
 }
 
 .sublist__entry {
     display: block;
+}
+
+.sublist__nested {
+    margin-left: 0.9rem;
+    padding-left: 0.6rem;
+    border-left: 1px solid #d8d8d8;
+}
+
+.sublist__show-more {
+    border: 0;
+    background: transparent;
+    color: #0f4f8a;
+    padding: 0.2rem 0 0.2rem 1.2rem;
+    text-align: left;
+    cursor: pointer;
+    min-height: var(--sublist-row-height, 1.9rem);
+    font-style: italic;
+    --toggle-icon-left: 0.2rem;
+    --toggle-icon-top: 0.35rem;
+    --toggle-icon-size: 70%;
+}
+
+.sublist__show-more:hover {
+    color: #0a3b68;
+    text-decoration: underline;
 }
 
 .sublist__resize-handle {

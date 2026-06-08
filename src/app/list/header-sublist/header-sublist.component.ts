@@ -39,6 +39,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
     private visibleItemCountSubscription: Subscription | null = null;
     private subscribedSublistSizeKey = '';
     private currentVisibleItemCount = HeaderSublistComponent.DEFAULT_VISIBLE_ITEM_COUNT;
+    private showAllItems = false;
 
     override ngOnInit(): void {
         super.ngOnInit();
@@ -137,6 +138,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['header'] || changes['parentObject'] || changes['visibleItemCount']) {
+            this.showAllItems = false;
             this.syncVisibleItemCountSubscription();
         }
     }
@@ -183,6 +185,30 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
 
     get normalizedVisibleItemCount(): number {
         return this.clampVisibleItemCount(this.currentVisibleItemCount);
+    }
+
+    get visibleObjects(): ListObject[] {
+        if (this.showAllItems || !this.hasOverflowingItems) {
+            return this.objects;
+        }
+
+        return this.objects.slice(0, this.normalizedVisibleItemCount);
+    }
+
+    get hasOverflowingItems(): boolean {
+        return this.objects.length > this.normalizedVisibleItemCount;
+    }
+
+    get hiddenObjectCount(): number {
+        return Math.max(0, this.objects.length - this.visibleObjects.length);
+    }
+
+    showAllObjects(): void {
+        this.showAllItems = true;
+    }
+
+    showFewerObjects(): void {
+        this.showAllItems = false;
     }
 
     startResize(event: MouseEvent): void {

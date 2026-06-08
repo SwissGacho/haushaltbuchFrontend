@@ -1,6 +1,6 @@
 <div class="sublist" [style.--sublist-visible-item-count]="normalizedVisibleItemCount">
     <div class="sublist__items" role="list">
-        @for (object of objects; track object.id) {
+        @for (object of visibleObjects; track object.id) {
             <div class="sublist__entry" role="listitem">
                 <div
                     [class.expanded]="expandedObject?.id === object.id"
@@ -13,13 +13,35 @@
                     <app-boname-renderer [value]="object.display_name"></app-boname-renderer>
                 </div>
                 @if (expandedObject?.id === object.id) {
-                    <app-list-component
-                        [parentObject]="expandedObject"
-                        [sublistVisibleItemCount]="visibleItemCount"
-                        (empty)="onSublistEmpty(object.id)"
-                    ></app-list-component>
+                    <div class="sublist__nested">
+                        <app-list-component
+                            [parentObject]="expandedObject"
+                            [sublistVisibleItemCount]="visibleItemCount"
+                            (empty)="onSublistEmpty(object.id)"
+                        ></app-list-component>
+                    </div>
                 }
             </div>
+        }
+
+        @if (hasOverflowingItems && hiddenObjectCount > 0) {
+            <button
+                class="sublist__show-more toggle-marker"
+                type="button"
+                (click)="showAllObjects()"
+            >
+                Show {{ hiddenObjectCount }} more
+            </button>
+        }
+
+        @if (hasOverflowingItems && hiddenObjectCount === 0) {
+            <button
+                class="sublist__show-more toggle-marker"
+                type="button"
+                (click)="showFewerObjects()"
+            >
+                Show fewer
+            </button>
         }
     </div>
 
