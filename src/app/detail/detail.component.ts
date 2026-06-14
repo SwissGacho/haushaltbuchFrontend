@@ -2,18 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { ConnectedComponent } from '../connected-component/connected.component';
 import { ConnectionService } from '../connection.service';
 import { IncomingMessage, MessageType } from '../messages/Message';
-import {
-    FetchMessage,
-    FetchSchemaMessage,
-    ObjectMessage,
-    ObjectSchemaMessage,
-    StoreMessage,
-} from '../messages/data.messages';
+import { FetchMessage, ObjectMessage, StoreMessage } from '../messages/data.messages';
 import { SelectedObjectService } from '../selected-object.service';
 import { BoIdentifier } from '../business-object/bo.identifier';
 import { Subscription } from 'rxjs';
-import { parseObjectSchema } from '../business-object/bo-schema/bo.schema.parse';
 import { ObjectSchema } from '../business-object/bo-schema/bo.schema.types';
+import { SchemaService } from '../schema.service';
 
 @Component({
     selector: 'app-detail-component',
@@ -23,11 +17,11 @@ import { ObjectSchema } from '../business-object/bo-schema/bo.schema.types';
 })
 export class DetailComponent extends ConnectedComponent implements OnInit {
     selectedObject: BoIdentifier | null = null;
-    private subscription = new Subscription();
 
     constructor(
         protected override connectionService: ConnectionService,
-        private selectedObjectService: SelectedObjectService
+        private selectedObjectService: SelectedObjectService,
+        private schemaService: SchemaService
     ) {
         super(connectionService);
         this.setComponentID('DetailComponent');
@@ -42,6 +36,8 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     objectSchema: ObjectSchema | null = null;
     objectUpdating: boolean = false;
     schemaUpdating: boolean = false;
+    private schemaSubscription = new Subscription();
+    private selectedObjectSubscription = new Subscription();
 
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, 'received', message.type, 'message');
@@ -55,11 +51,6 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
             console.log(`${this.componentID} handling object message`, message);
             let cast = message as ObjectMessage;
             this.updateObjectInfo(cast.payload, cast.object);
-        } else if (message.type === MessageType.ObjectSchema) {
-            console.log(`${this.componentID} handling object schema message`, message);
-            let cast = message as ObjectSchemaMessage;
-            console.log('Received schema', cast.schema);
-            this.updateSchemaInfo(cast.schema, cast.object);
         } else {
             // We received an unexpected or unknown message
             console.error(
@@ -71,7 +62,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     }
 
     subscribeToSelectedObject() {
-        this.subscription.add(
+        this.selectedObjectSubscription.add(
             this.selectedObjectService.selectedObject$.subscribe((object) => {
                 this.onSelectedObjectChange(object);
             })
@@ -79,14 +70,34 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
     }
 
     fetchSchema() {
-        if (this.token === null) {
-            console.error('No token available');
+        let objectType = this.selectedObject?.type;
+        console.log('Fetching schema for type', objectType);
+        this.schemaUpdating = true;
+
+        if (objectType == undefined) {
+            console.error('No object type available to fetch schema for');
+            this.schemaUpdating = false;
             return;
         }
-        console.log('Fetching schema');
-        this.schemaUpdating = true;
-        let message = new FetchSchemaMessage(this.selectedObject!.type, this.token);
-        this.sendMessage(message);
+        // First unsubscribe from any previous schema request
+        this.schemaSubscription.unsubscribe();
+        this.schemaSubscription = new Subscription();
+
+        this.schemaSubscription.add(
+            this.schemaService.getSchema(objectType).subscribe({
+                next: (schema: ObjectSchema) => {
+                    this.updateSchemaInfo(schema, objectType);
+                },
+                error: (error: unknown) => {
+                    if (this.selectedObject?.type !== objectType) {
+                        return;
+                    }
+
+                    console.error('Failed to fetch schema for type', objectType, error);
+                    this.schemaUpdating = false;
+                },
+            })
+        );
     }
 
     fetchObject() {
@@ -104,7 +115,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         this.sendMessage(message);
     }
 
-    updateSchemaInfo(schema: any, object: string) {
+    updateSchemaInfo(schema: ObjectSchema, object: string) {
         // Check whether the schema is for the currently selected object
         if (object !== this.selectedObject?.type) {
             console.warn(
@@ -115,7 +126,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
             );
             return;
         }
-        this.objectSchema = parseObjectSchema(schema);
+        this.objectSchema = schema;
         this.objectFields = Object.keys(this.objectSchema || {});
         this.schemaUpdating = false;
         console.info('Schema updated', this.objectSchema);
@@ -146,7 +157,10 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         );
         if (this.selectedObject?.id === undefined && this.selectedObject?.type === object) {
             // console.info('Received object info for new object of type', object, 'with data', objectInfo);
-            this.selectedObjectService.selectObject({ type: object, id: objectInfo.id });
+            this.selectedObjectService.selectObject({
+                type: object,
+                id: objectInfo.id,
+            });
             return;
         }
 
@@ -271,7 +285,10 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
         } else if (sameTypeSelection && this.objectSchema) {
             // no need to fetch schema or object for new objects when the type is unchanged
             // restore any configured initial values and re-render
-            this.objectInfoCache =  this.normalizeInitialValues(object?.initialValues || {}, this.objectSchema);
+            this.objectInfoCache = this.normalizeInitialValues(
+                object?.initialValues || {},
+                this.objectSchema
+            );
             this.updateObjectFrontend();
         }
 
@@ -286,6 +303,7 @@ export class DetailComponent extends ConnectedComponent implements OnInit {
 
     override ngOnDestroy(): void {
         super.ngOnDestroy();
-        this.subscription.unsubscribe();
+        this.schemaSubscription.unsubscribe();
+        this.selectedObjectSubscription.unsubscribe();
     }
 }

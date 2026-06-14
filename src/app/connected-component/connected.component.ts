@@ -2,8 +2,8 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BaseComponent } from '../base.component';
-import { ConnectionService } from '../connection.service';
+import { IdentifiedComponent } from '../identified.component';
+import { ConnectionService, ConnectionSubscriber } from '../connection.service';
 import { Message, IncomingBaseMessage } from '../messages/Message';
 import { LoginCredentials } from '../messages/admin.messages';
 
@@ -19,7 +19,10 @@ import { LoginCredentials } from '../messages/admin.messages';
 /// Subclasses should implement the handleMessages method to handle incoming messages, and the handleError method to handle errors.
 /// If necessary, they can also implement the handleComplete method to handle the connection closing.
 /// They can also call the sendMessage method to send messages.
-export class ConnectedComponent extends BaseComponent implements OnInit, OnDestroy {
+export class ConnectedComponent
+    extends IdentifiedComponent
+    implements OnInit, OnDestroy, ConnectionSubscriber
+{
     constructor(protected connectionService: ConnectionService) {
         super();
     }

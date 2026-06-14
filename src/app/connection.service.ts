@@ -15,7 +15,15 @@ import {
 } from './messages/admin.messages';
 import { Message, IncomingBaseMessage } from './messages/Message';
 import { MessageFactory } from './messages/deserialize_message';
-import { ConnectedComponent } from './connected-component/connected.component';
+
+export interface ConnectionSubscriber {
+    componentID: string;
+    setToken(to: string): void;
+    sendMessage(message: Message): void;
+    handleMessages(message: IncomingBaseMessage): void;
+    handleError(error: any): void;
+    handleComplete(): void;
+}
 
 export class RXJS {
     static take(n: number): rxjs.MonoTypeOperatorFunction<any> {
@@ -27,7 +35,7 @@ export class RXJS {
 }
 
 export class Logger {
-    static takeOverConsole(component: ConnectedComponent) {
+    static takeOverConsole(component: ConnectionSubscriber) {
         var console: any = window.console;
         if (!console) return;
         function intercept(method: string, level: LogLevel) {
@@ -87,7 +95,7 @@ export class ConnectionService {
     static connections: {
         [componentId: string]: {
             subject: rxws.WebSocketSubject<Message>;
-            subscriber: ConnectedComponent;
+            subscriber: ConnectionSubscriber;
         };
     } = {};
 
@@ -108,22 +116,22 @@ export class ConnectionService {
     // will be used for accessing the session token as login credential
     // If the secon parameter is truthy the handshake messages (first 2 messages) will be delivered to the subscriber
     getNewConnection(
-        subscriber: ConnectedComponent,
+        subscriber: ConnectionSubscriber,
         loginSubject?: rxjs.Subject<LoginCredentials>,
         isPrimary?: boolean
     ): void;
     getNewConnection(
-        subscriber: ConnectedComponent,
+        subscriber: ConnectionSubscriber,
         observeHandshake?: boolean,
         isPrimary?: boolean
     ): void;
     getNewConnection(
-        subscriber: ConnectedComponent,
+        subscriber: ConnectionSubscriber,
         loginSubjectOrObserveHandshake?: rxjs.Subject<LoginCredentials> | boolean,
         isPrimary?: boolean
     ): void;
     getNewConnection(
-        subscriber: ConnectedComponent,
+        subscriber: ConnectionSubscriber,
         loginSubjectOrObserveHandshake?: rxjs.Subject<LoginCredentials> | boolean,
         isPrimary?: boolean
     ): void {
@@ -171,7 +179,7 @@ export class ConnectionService {
         that?: {
             service: ConnectionService;
             connection: rxws.WebSocketSubject<Message>;
-            subscriber: ConnectedComponent;
+            subscriber: ConnectionSubscriber;
             loginSubject: LoginSubject;
             isPrimary: boolean;
             // ,rxjsTake: (n: number) => rxjs.MonoTypeOperatorFunction<LoginCredentials>
@@ -249,7 +257,10 @@ export class ConnectionService {
     }
 
     // Associate a connection token to the WS connection und the subscribing component
-    static addConnection(subject: rxws.WebSocketSubject<Message>, subscriber: ConnectedComponent) {
+    static addConnection(
+        subject: rxws.WebSocketSubject<Message>,
+        subscriber: ConnectionSubscriber
+    ) {
         console.groupCollapsed('Adding connection', subscriber.componentID);
         console.log('subject:', subject);
         console.log('subscriber:', subscriber);
