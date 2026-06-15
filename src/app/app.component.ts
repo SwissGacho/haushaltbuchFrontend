@@ -5,6 +5,7 @@ import { ConnectionService } from './connection.service';
 import { ConnectedComponent } from './connected-component/connected.component';
 import { IncomingMessage, MessageType, WelcomeMessageType } from './messages/Message';
 import { environment } from '../environments/environment';
+import { ConfigurationStateService } from './configuration-state.service';
 
 @Component({
     selector: 'app-root',
@@ -13,17 +14,23 @@ import { environment } from '../environments/environment';
     standalone: false,
 })
 export class AppComponent extends ConnectedComponent implements OnInit {
+    private static readonly SIDEBAR_WIDTH_CONFIG_KEY = 'navigation.sidebar.width';
+    private static readonly DEFAULT_SIDEBAR_WIDTH = 280;
+
     title = 'haushaltbuchFrontend';
     activateAnyComponent = true;
     activateLoginComponent = false;
     activateSetupConfigComponent = false;
     frontendVersion = environment.appVersion;
     backendVersion?: string;
-    sidebarWidth = 280;
+    sidebarWidth = AppComponent.DEFAULT_SIDEBAR_WIDTH;
     readonly minSidebarWidth = 180;
     readonly maxSidebarWidth = 700;
 
-    constructor(private specificService: ConnectionService) {
+    constructor(
+        private specificService: ConnectionService,
+        private readonly configurationStateService: ConfigurationStateService
+    ) {
         super(specificService);
         this.setComponentID('AppComponent');
         console.groupCollapsed(this.componentID, 'constructed');
@@ -64,6 +71,7 @@ export class AppComponent extends ConnectedComponent implements OnInit {
     // The App Component ownes the 'promary connection' that is used by the backend
     // to request actions
     override ngOnInit() {
+        this.restoreSidebarWidth();
         const observeHandshake = true;
         const isPrimary = true;
         this.getConnection(observeHandshake, isPrimary);
@@ -72,8 +80,7 @@ export class AppComponent extends ConnectedComponent implements OnInit {
     startSidebarResize(event: MouseEvent): void {
         event.preventDefault();
         const onMouseMove = (moveEvent: MouseEvent) => {
-            const nextWidth = moveEvent.clientX;
-            this.sidebarWidth = Math.min(this.maxSidebarWidth, Math.max(this.minSidebarWidth, nextWidth));
+            this.setSidebarWidth(moveEvent.clientX);
         };
 
         const onMouseUp = () => {
@@ -83,5 +90,30 @@ export class AppComponent extends ConnectedComponent implements OnInit {
 
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('mouseup', onMouseUp);
+    }
+
+    private restoreSidebarWidth(): void {
+        const storedWidth = this.configurationStateService.getItem<unknown>(
+            AppComponent.SIDEBAR_WIDTH_CONFIG_KEY
+        );
+
+        if (typeof storedWidth !== 'number' || !Number.isFinite(storedWidth)) {
+            return;
+        }
+
+        this.setSidebarWidth(storedWidth);
+    }
+
+    private setSidebarWidth(nextWidth: number): void {
+        const clampedWidth = Math.min(
+            this.maxSidebarWidth,
+            Math.max(this.minSidebarWidth, nextWidth)
+        );
+        this.sidebarWidth = clampedWidth;
+        this.configurationStateService.setItem(
+            AppComponent.SIDEBAR_WIDTH_CONFIG_KEY,
+            clampedWidth,
+            AppComponent.DEFAULT_SIDEBAR_WIDTH
+        );
     }
 }

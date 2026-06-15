@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { Message, MessageType } from './messages/Message';
 import { WelcomeMessage, ByeMessage, HelloMessage } from './messages/admin.messages';
 import { ConnectionService } from './connection.service';
+import { ConfigurationStateService } from './configuration-state.service';
 
 class MockConnectionService {
     getNewConnection(
@@ -13,6 +14,18 @@ class MockConnectionService {
         isPrimary?: boolean
     ) {}
     removeConnection(componentId: string): void {}
+}
+
+class MockConfigurationStateService {
+    private readonly values = new Map<string, unknown>();
+
+    getItem<T>(key: string): T | undefined {
+        return this.values.get(key) as T | undefined;
+    }
+
+    setItem(key: string, value: unknown): void {
+        this.values.set(key, value);
+    }
 }
 
 describe('AppComponent', () => {
@@ -26,6 +39,7 @@ describe('AppComponent', () => {
             providers: [
                 // AppComponent,
                 { provide: ConnectionService, useClass: MockConnectionService },
+                { provide: ConfigurationStateService, useClass: MockConfigurationStateService },
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(AppComponent);
@@ -59,6 +73,44 @@ describe('AppComponent', () => {
         expect(spyOnGetNewConn).toHaveBeenCalledWith(appComponent, true, true);
         expect(appComponent.connected).toBe(true);
         expect(spyOnRemoveConn).not.toHaveBeenCalled();
+    });
+
+    it('should restore sidebar width from configuration state on init', () => {
+        const configSrv = fixture.debugElement.injector.get(ConfigurationStateService);
+        const setItemSpy = jest.spyOn(configSrv, 'setItem');
+        jest.spyOn(configSrv, 'getItem').mockReturnValue(360);
+
+        appComponent.ngOnInit();
+
+        expect(appComponent.sidebarWidth).toBe(360);
+        expect(setItemSpy).toHaveBeenCalledWith('navigation.sidebar.width', 360, 280);
+    });
+
+    it('should persist clamped sidebar width while resizing', () => {
+        const configSrv = fixture.debugElement.injector.get(ConfigurationStateService);
+        const setItemSpy = jest.spyOn(configSrv, 'setItem');
+        const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+        const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+
+        appComponent.startSidebarResize(new MouseEvent('mousedown', { clientX: 300 }));
+
+        const mouseMoveHandler = addEventListenerSpy.mock.calls.find(
+            ([eventName]) => eventName === 'mousemove'
+        )?.[1] as EventListener;
+        const mouseUpHandler = addEventListenerSpy.mock.calls.find(
+            ([eventName]) => eventName === 'mouseup'
+        )?.[1] as EventListener;
+
+        expect(mouseMoveHandler).toBeDefined();
+        expect(mouseUpHandler).toBeDefined();
+
+        mouseMoveHandler(new MouseEvent('mousemove', { clientX: 900 }));
+
+        expect(appComponent.sidebarWidth).toBe(700);
+        expect(setItemSpy).toHaveBeenCalledWith('navigation.sidebar.width', 700, 280);
+
+        mouseUpHandler(new MouseEvent('mouseup'));
+        expect(removeEventListenerSpy).toHaveBeenCalled();
     });
 
     it('should remove connection on destroy', () => {
