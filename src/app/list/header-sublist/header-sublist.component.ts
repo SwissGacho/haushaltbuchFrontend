@@ -345,9 +345,18 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
             return '';
         }
 
-        const parentType = this.parentObject?.type || 'root';
-        const parentId = this.parentObject?.id ?? 'none';
-        return `sublist.size|${parentType}:${String(parentId)}|${this.header}`;
+        const { objectType, referenceAttribute } = this.parseHeader(this.header);
+        const parentBo = this.parentObject?.type || 'root';
+        const parentId = String(this.parentObject?.id ?? 'none');
+        const bo = objectType;
+        const ref = referenceAttribute || 'none';
+
+        const encodedParentBo = encodeURIComponent(parentBo);
+        const encodedParentId = encodeURIComponent(parentId);
+        const encodedBo = encodeURIComponent(bo);
+        const encodedRef = encodeURIComponent(ref);
+
+        return `navigation.sublists(bo=${encodedBo},parent_bo=${encodedParentBo},parent_id=${encodedParentId},ref=${encodedRef}).size`;
     }
 
     private parseHeader(header: string): { objectType: string; referenceAttribute?: string } {
