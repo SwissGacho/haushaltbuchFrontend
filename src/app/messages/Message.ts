@@ -21,7 +21,7 @@ export enum MessageType {
     ObjectSchema = 'ObjectSchema',
 }
 
-export type ListObject = { id: number; display_name: string };
+export type ListObject = { id: number; display_name: string; object?: string };
 
 // Type unions for polymorphic message classes
 export type FetchLikeType = MessageType.Fetch | MessageType.FetchSetup;

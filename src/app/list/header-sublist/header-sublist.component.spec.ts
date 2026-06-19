@@ -94,6 +94,18 @@ describe('HeaderSublistComponent', () => {
         );
     });
 
+    it('uses item object attribute for double click selection when available', () => {
+        component.header = 'Invoice.customer';
+        component.objects = [{ id: 7, display_name: 'Entry 7', object: 'SpecialInvoice' }];
+
+        component.onObjectDoubleClick(7);
+
+        expect(selectedObjectService.selectObject).toHaveBeenCalledTimes(1);
+        expect(selectedObjectService.selectObject).toHaveBeenCalledWith(
+            expect.objectContaining({ type: 'SpecialInvoice', id: 7 })
+        );
+    });
+
     it('creates a blank object on add-new click when no parent reference is available', () => {
         component.header = 'Invoice.customer';
         component.parentObject = null;
