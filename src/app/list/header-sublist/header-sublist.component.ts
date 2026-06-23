@@ -112,7 +112,7 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
 
     onObjectDoubleClick(objectId: number): void {
         this.clearPendingClick();
-        const { objectType } = this.parseHeader(this.header);
+        const objectType = this.findObjectType(objectId);
         const objectDisplayName = this.findObjectDisplayName(objectId);
         let id: BoIdentifier = new BoIdentifier(objectType, objectId, undefined, objectDisplayName);
         this.selectedObjectService.selectObject(id);
@@ -167,6 +167,15 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
 
     private findObjectDisplayName(objectId: number): string | undefined {
         return this.objects.find((object) => object.id === objectId)?.display_name;
+    }
+
+    private findObjectType(objectId: number): string {
+        const objectTypeFromItem = this.objects.find((object) => object.id === objectId)?.object;
+        if (objectTypeFromItem) {
+            return objectTypeFromItem;
+        }
+
+        return this.parseHeader(this.header).objectType;
     }
 
     private clearPendingClick(): void {
