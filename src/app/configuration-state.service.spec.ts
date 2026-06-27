@@ -1,13 +1,20 @@
 import { ConfigurationStateService } from './configuration-state.service';
+import { ConnectionService } from './connection.service';
 
 describe('ConfigurationStateService', () => {
     const SUBLIST_SIZE_KEY =
         'navigation.sublists(bo=Invoice,parent_bo=Customer,parent_id=42,ref=customer).size';
 
     let service: ConfigurationStateService;
+    let mockConnectionService: jasmine.SpyObj<ConnectionService>;
 
     beforeEach(() => {
-        service = new ConfigurationStateService();
+        mockConnectionService = jasmine.createSpyObj('ConnectionService', [
+            'getNewConnection',
+            'sendMessage',
+            'removeConnection',
+        ]);
+        service = new ConfigurationStateService(mockConnectionService);
     });
 
     it('stores and returns arbitrary configuration values', () => {
