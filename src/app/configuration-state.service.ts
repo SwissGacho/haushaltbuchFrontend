@@ -194,7 +194,6 @@ class ConfigurationConnectionClient extends IdentifiedComponent implements Conne
                 ? (this.receivedPayload['configuration'] as Record<string, unknown>)
                 : {};
         const payload = {
-            ...this.receivedPayload,
             configuration: {
                 ...configurationPayload,
                 frontend: currentFrontend,
