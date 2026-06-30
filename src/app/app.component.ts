@@ -6,6 +6,7 @@ import { ConnectedComponent } from './connected-component/connected.component';
 import { IncomingMessage, MessageType, WelcomeMessageType } from './messages/Message';
 import { environment } from '../environments/environment';
 import { ConfigurationStateService } from './configuration-state.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-root',
@@ -38,6 +39,7 @@ export class AppComponent extends ConnectedComponent implements OnInit {
         console.log('App Version:', environment.appVersion);
         console.groupEnd();
     }
+    private sidebarWidthSubscription: Subscription | null = null;
 
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, 'received', message.type, 'message');
@@ -71,7 +73,7 @@ export class AppComponent extends ConnectedComponent implements OnInit {
     // The App Component ownes the 'promary connection' that is used by the backend
     // to request actions
     override ngOnInit() {
-        this.restoreSidebarWidth();
+        this.synchSidebarWidth();
         const observeHandshake = true;
         const isPrimary = true;
         this.getConnection(observeHandshake, isPrimary);
@@ -92,18 +94,23 @@ export class AppComponent extends ConnectedComponent implements OnInit {
         window.addEventListener('mouseup', onMouseUp);
     }
 
-    private restoreSidebarWidth(): void {
-        const storedWidth = this.configurationStateService.getItem<unknown>(
-            AppComponent.SIDEBAR_WIDTH_CONFIG_KEY
-        );
-
-        if (typeof storedWidth !== 'number' || !Number.isFinite(storedWidth)) {
-            return;
+    private synchSidebarWidth(): void {
+        if (this.sidebarWidthSubscription) {
+            this.sidebarWidthSubscription.unsubscribe();
         }
 
-        this.setSidebarWidth(storedWidth);
+        this.sidebarWidthSubscription = this.configurationStateService
+            .observeItem<number>(AppComponent.SIDEBAR_WIDTH_CONFIG_KEY)
+            .subscribe((storedWidth) => {
+                this.setSidebarWidth(this.resolveSidebarWidth(storedWidth));
+            });
     }
-
+    private resolveSidebarWidth(width: number | undefined): number {
+        if (typeof width !== 'number' || !Number.isFinite(width)) {
+            return AppComponent.DEFAULT_SIDEBAR_WIDTH;
+        }
+        return width;
+    }
     private setSidebarWidth(nextWidth: number): void {
         const clampedWidth = Math.min(
             this.maxSidebarWidth,
