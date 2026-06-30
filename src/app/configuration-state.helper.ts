@@ -155,7 +155,6 @@ function collectEntries(
     pathSegments: string[],
     result: Map<string, ConfigValue>
 ): void {
-    console.log('collectEntries', pathSegments.join('.'), node);
     // Leaf value
     if (node === null || typeof node !== 'object') {
         result.set(pathSegments.join('.'), node as ConfigValue);
@@ -187,33 +186,3 @@ function collectEntries(
         collectEntries(child as JsonRecord | ConfigValue, [...pathSegments, key], result);
     }
 }
-
-// ─── Demo ─────────────────────────────────────────────────────────────────────
-
-// const config = new Map<string, ConfigValue>([
-//     ['navigation.sublists(bo=testobject,parent_bo=root,parent_id=none,ref=none).size', 6],
-//     ['navigation.sublists(bo=testobject,parent_bo=root,parent_id=none,ref=none).visible', true],
-//     ['navigation.sublists(bo=otherobject,parent_bo=root,parent_id=none,ref=none).size', 3],
-//     ['navigation.title', 'Main Nav'],
-//     ['sidebar.width', 240],
-// ]);
-
-// const record = mapToRecord(config);
-// console.log('── mapToRecord ──────────────────────────────');
-// console.log(JSON.stringify(record, null, 2));
-
-// const restored = recordToMap(record);
-// console.log('\n── recordToMap (round-trip) ─────────────────');
-// for (const [k, v] of restored) {
-//     console.log(`  ${k} = ${JSON.stringify(v)}`);
-// }
-
-// // Verify round-trip integrity
-// const originalKeys = [...config.keys()].sort();
-// const restoredKeys = [...restored.keys()].sort();
-// console.log('\n── Round-trip check ─────────────────────────');
-// console.log('Keys match:', JSON.stringify(originalKeys) === JSON.stringify(restoredKeys));
-// console.log(
-//     'Values match:',
-//     originalKeys.every((k) => config.get(k) === restored.get(k))
-// );
