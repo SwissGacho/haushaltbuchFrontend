@@ -1,0 +1,110 @@
+<div class="sidebar-config">
+    <div class="sidebar-config__header">
+        <span class="sidebar-config__title">Sidebar Configuration</span>
+        <button class="sidebar-config__close" type="button" title="Close" (click)="onClose()">
+            ✕
+        </button>
+    </div>
+
+    <div class="sidebar-config__section">
+        <h3 class="sidebar-config__section-title">Visible</h3>
+        @if (visibleEntries.length === 0) {
+            <p class="sidebar-config__empty">No visible headers.</p>
+        }
+        @for (entry of visibleEntries; track entry.name; let i = $index) {
+            <div
+                class="sidebar-config__entry"
+                [class.sidebar-config__entry--inactive]="!entry.isCurrentlyActive"
+            >
+                <div class="sidebar-config__reorder">
+                    <button
+                        type="button"
+                        class="sidebar-config__btn sidebar-config__btn--arrow"
+                        [disabled]="i === 0"
+                        (click)="moveUp(i)"
+                        title="Move up"
+                    >
+                        ▲
+                    </button>
+                    <button
+                        type="button"
+                        class="sidebar-config__btn sidebar-config__btn--arrow"
+                        [disabled]="i === visibleEntries.length - 1"
+                        (click)="moveDown(i)"
+                        title="Move down"
+                    >
+                        ▼
+                    </button>
+                </div>
+                <span
+                    class="sidebar-config__name"
+                    [title]="
+                        entry.isCurrentlyActive
+                            ? entry.name
+                            : entry.name + ' (not currently available)'
+                    "
+                >
+                    {{ entry.displayName }}
+                    @if (!entry.isCurrentlyActive) {
+                        <em class="sidebar-config__unavailable"> (unavailable)</em>
+                    }
+                </span>
+                <button
+                    class="sidebar-config__btn sidebar-config__btn--expand"
+                    type="button"
+                    [title]="
+                        entry.expanded
+                            ? 'Initially expanded — click to set collapsed'
+                            : 'Initially collapsed — click to set expanded'
+                    "
+                    (click)="toggleExpanded(entry)"
+                >
+                    {{ entry.expanded ? '▼' : '▶' }}
+                </button>
+                <button
+                    class="sidebar-config__btn sidebar-config__btn--hide"
+                    type="button"
+                    title="Move to hidden"
+                    (click)="makeHidden(i)"
+                >
+                    ⊝
+                </button>
+            </div>
+        }
+    </div>
+
+    <div class="sidebar-config__section sidebar-config__section--hidden-area">
+        <h3 class="sidebar-config__section-title">Hidden</h3>
+        @if (hiddenEntries.length === 0) {
+            <p class="sidebar-config__empty">No hidden headers.</p>
+        }
+        @for (entry of hiddenEntries; track entry.name; let i = $index) {
+            <div
+                class="sidebar-config__entry sidebar-config__entry--hidden"
+                [class.sidebar-config__entry--inactive]="!entry.isCurrentlyActive"
+            >
+                <span
+                    class="sidebar-config__name"
+                    [title]="
+                        entry.isCurrentlyActive
+                            ? entry.name
+                            : entry.name + ' (not currently available)'
+                    "
+                >
+                    {{ entry.displayName }}
+                    @if (!entry.isCurrentlyActive) {
+                        <em class="sidebar-config__unavailable"> (unavailable)</em>
+                    }
+                </span>
+                <button
+                    class="sidebar-config__btn sidebar-config__btn--show"
+                    type="button"
+                    title="Move to visible"
+                    (click)="makeVisible(i)"
+                >
+                    ⊕
+                </button>
+            </div>
+        }
+    </div>
+</div>

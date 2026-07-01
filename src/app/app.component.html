@@ -4,7 +4,24 @@
     </header>
 
     <aside class="app-container__sidebar">
-        <app-list-component></app-list-component>
+        <div class="sidebar__toolbar">
+            <button
+                class="sidebar__config-btn"
+                type="button"
+                [title]="showSidebarConfig ? 'Back to list' : 'Configure sidebar'"
+                [class.sidebar__config-btn--active]="showSidebarConfig"
+                (click)="toggleSidebarConfig()"
+            >
+                ⚙
+            </button>
+        </div>
+        @if (showSidebarConfig) {
+            <app-sidebar-configuration
+                (close)="showSidebarConfig = false"
+            ></app-sidebar-configuration>
+        } @else {
+            <app-list-component></app-list-component>
+        }
     </aside>
 
     <div

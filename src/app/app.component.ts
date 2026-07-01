@@ -22,6 +22,7 @@ export class AppComponent extends ConnectedComponent implements OnInit {
     activateAnyComponent = true;
     activateLoginComponent = false;
     activateSetupConfigComponent = false;
+    showSidebarConfig = false;
     frontendVersion = environment.appVersion;
     backendVersion?: string;
     sidebarWidth = AppComponent.DEFAULT_SIDEBAR_WIDTH;
@@ -127,5 +128,9 @@ export class AppComponent extends ConnectedComponent implements OnInit {
             clampedWidth,
             AppComponent.DEFAULT_SIDEBAR_WIDTH
         );
+    }
+
+    toggleSidebarConfig(): void {
+        this.showSidebarConfig = !this.showSidebarConfig;
     }
 }

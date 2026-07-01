@@ -15,6 +15,7 @@ import { HeaderSublistComponent } from './list/header-sublist/header-sublist.com
 import { DetailComponent } from './detail/detail.component';
 import { DynamicFieldComponent } from './field/dynamic-field.component';
 import { BoNameRendererComponent } from './renderer/boname-renderer/boname-renderer.component';
+import { SidebarConfigurationComponent } from './sidebar-configuration/sidebar-configuration.component';
 
 @NgModule({
     declarations: [
@@ -28,6 +29,7 @@ import { BoNameRendererComponent } from './renderer/boname-renderer/boname-rende
         ListComponent,
         HeaderSublistComponent,
         DetailComponent,
+        SidebarConfigurationComponent,
     ],
     imports: [
         BrowserModule,
