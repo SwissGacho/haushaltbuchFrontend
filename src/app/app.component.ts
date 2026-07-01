@@ -79,6 +79,11 @@ export class AppComponent extends ConnectedComponent implements OnInit {
         this.getConnection(observeHandshake, isPrimary);
     }
 
+    override ngOnDestroy(): void {
+        this.sidebarWidthSubscription?.unsubscribe();
+        super.ngOnDestroy();
+    }
+
     startSidebarResize(event: MouseEvent): void {
         event.preventDefault();
         const onMouseMove = (moveEvent: MouseEvent) => {

@@ -6,15 +6,21 @@ describe('ConfigurationStateService', () => {
         'navigation.sublists(bo=Invoice,parent_bo=Customer,parent_id=42,ref=customer).size';
 
     let service: ConfigurationStateService;
-    let mockConnectionService: jasmine.SpyObj<ConnectionService>;
+    let mockConnectionService: {
+        getNewConnection: jest.Mock;
+        sendMessage: jest.Mock;
+        removeConnection: jest.Mock;
+    };
 
     beforeEach(() => {
-        mockConnectionService = jasmine.createSpyObj('ConnectionService', [
-            'getNewConnection',
-            'sendMessage',
-            'removeConnection',
-        ]);
-        service = new ConfigurationStateService(mockConnectionService);
+        mockConnectionService = {
+            getNewConnection: jest.fn(),
+            sendMessage: jest.fn(),
+            removeConnection: jest.fn(),
+        };
+        service = new ConfigurationStateService(
+            mockConnectionService as unknown as ConnectionService
+        );
     });
 
     it('stores and returns arbitrary configuration values', () => {
@@ -44,22 +50,24 @@ describe('ConfigurationStateService', () => {
         const payload = service.serializeForBackend();
         expect(payload).toEqual({
             navigation: {
-                sidebar: {
-                    width: 280,
-                },
                 sublists: [
                     {
-                        bo: 'ultimate_bo',
-                        parent_bo: 'root',
-                        parent_id: 'none',
-                        ref: 'none',
-                        size: 11,
+                        selector: {
+                            bo: 'ultimate_bo',
+                            parent_bo: 'root',
+                            parent_id: 'none',
+                            ref: 'none',
+                        },
+                        value: { size: 11 },
                     },
                 ],
+                sidebar: { width: 280 },
             },
         });
 
-        const reloadedService = new ConfigurationStateService();
+        const reloadedService = new ConfigurationStateService(
+            mockConnectionService as unknown as ConnectionService
+        );
         reloadedService.loadFromBackend(payload);
 
         expect(
@@ -116,11 +124,13 @@ describe('ConfigurationStateService', () => {
             navigation: {
                 sublists: [
                     {
-                        bo: 'Invoice',
-                        ref: 'customer',
-                        parent_bo: 'Customer',
-                        parent_id: '42',
-                        size: 15,
+                        selector: {
+                            bo: 'Invoice',
+                            parent_bo: 'Customer',
+                            parent_id: '42',
+                            ref: 'customer',
+                        },
+                        value: { size: 15 },
                     },
                 ],
             },
@@ -140,19 +150,42 @@ describe('ConfigurationStateService', () => {
         service.setItem('a', 1);
         service.setItem('a', 1);
         service.removeItem('missing');
-        service.loadFromBackend([{ key: 'a', value: 1 }]);
+        service.loadFromBackend({ a: 1 }); // same state — must not emit
 
         expect(mapSnapshots).toEqual([[], [['a', 1]]]);
         subscription.unsubscribe();
     });
 
-    it('loads legacy key-value array payloads for backward compatibility', () => {
-        service.loadFromBackend([
-            { key: 'navigation.sidebar.width', value: 320 },
-            { key: SUBLIST_SIZE_KEY, value: 9 },
-        ]);
+    it('loads configuration with multiple selector entries', () => {
+        const secondKey =
+            'navigation.sublists(bo=Customer,parent_bo=root,parent_id=none,ref=none).size';
 
-        expect(service.getItem<number>('navigation.sidebar.width')).toBe(320);
+        service.loadFromBackend({
+            navigation: {
+                sublists: [
+                    {
+                        selector: {
+                            bo: 'Invoice',
+                            parent_bo: 'Customer',
+                            parent_id: '42',
+                            ref: 'customer',
+                        },
+                        value: { size: 9 },
+                    },
+                    {
+                        selector: {
+                            bo: 'Customer',
+                            parent_bo: 'root',
+                            parent_id: 'none',
+                            ref: 'none',
+                        },
+                        value: { size: 5 },
+                    },
+                ],
+            },
+        });
+
         expect(service.getItem<number>(SUBLIST_SIZE_KEY)).toBe(9);
+        expect(service.getItem<number>(secondKey)).toBe(5);
     });
 });

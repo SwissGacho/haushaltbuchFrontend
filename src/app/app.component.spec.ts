@@ -23,8 +23,14 @@ class MockConfigurationStateService {
         return this.values.get(key) as T | undefined;
     }
 
-    setItem(key: string, value: unknown): void {
+    setItem(key: string, value: unknown, _defaultValue?: unknown): void {
         this.values.set(key, value);
+    }
+
+    observeItem<T>(key: string): rxjs.Observable<T | undefined> {
+        return new rxjs.BehaviorSubject<T | undefined>(
+            this.values.get(key) as T | undefined
+        ).asObservable();
     }
 }
 
@@ -78,12 +84,27 @@ describe('AppComponent', () => {
     it('should restore sidebar width from configuration state on init', () => {
         const configSrv = fixture.debugElement.injector.get(ConfigurationStateService);
         const setItemSpy = jest.spyOn(configSrv, 'setItem');
-        jest.spyOn(configSrv, 'getItem').mockReturnValue(360);
+        jest.spyOn(configSrv, 'observeItem').mockReturnValue(
+            new rxjs.BehaviorSubject<number | undefined>(360).asObservable()
+        );
 
         appComponent.ngOnInit();
 
         expect(appComponent.sidebarWidth).toBe(360);
         expect(setItemSpy).toHaveBeenCalledWith('navigation.sidebar.width', 360, 280);
+    });
+
+    it('should use default sidebar width when no stored value is present', () => {
+        const configSrv = fixture.debugElement.injector.get(ConfigurationStateService);
+        const setItemSpy = jest.spyOn(configSrv, 'setItem');
+        jest.spyOn(configSrv, 'observeItem').mockReturnValue(
+            new rxjs.BehaviorSubject<number | undefined>(undefined).asObservable()
+        );
+
+        appComponent.ngOnInit();
+
+        expect(appComponent.sidebarWidth).toBe(280);
+        expect(setItemSpy).toHaveBeenCalledWith('navigation.sidebar.width', 280, 280);
     });
 
     it('should persist clamped sidebar width while resizing', () => {
@@ -113,13 +134,21 @@ describe('AppComponent', () => {
         expect(removeEventListenerSpy).toHaveBeenCalled();
     });
 
-    it('should remove connection on destroy', () => {
+    it('should remove connection and unsubscribe sidebar subscription on destroy', () => {
         const conSrv = fixture.debugElement.injector.get(ConnectionService);
+        const configSrv = fixture.debugElement.injector.get(ConfigurationStateService);
         const spyOnRemoveConn = jest.spyOn(conSrv, 'removeConnection');
+        const subject = new rxjs.BehaviorSubject<number | undefined>(300);
+        jest.spyOn(configSrv, 'observeItem').mockReturnValue(subject.asObservable());
+
         appComponent.ngOnInit();
-        expect(spyOnRemoveConn).not.toHaveBeenCalled();
+        expect(appComponent.sidebarWidth).toBe(300);
+
         appComponent.ngOnDestroy();
         expect(spyOnRemoveConn).toHaveBeenCalled();
+
+        subject.next(500);
+        expect(appComponent.sidebarWidth).toBe(300); // subscription was unsubscribed; no update
     });
 
     it('should activate Login when receiving Hello message', () => {
