@@ -6,8 +6,12 @@
                     [class.expanded]="expandedObject?.id === object.id"
                     [class.known-empty]="knownEmptyIds.has(object.id)"
                     class="object-item toggle-marker"
+                    role="button"
+                    tabindex="0"
                     (click)="onObjectClick(object.id)"
                     (dblclick)="onObjectDoubleClick(object.id)"
+                    (keydown.enter)="onObjectClick(object.id)"
+                    (keydown.space)="$event.preventDefault(); onObjectClick(object.id)"
                     style="cursor: pointer"
                 >
                     <app-boname-renderer [value]="object.display_name"></app-boname-renderer>
@@ -48,7 +52,11 @@
     <div class="sublist__actions">
         <div
             class="add-new toggle-marker"
+            role="button"
+            tabindex="0"
             (click)="onCreateNew()"
+            (keydown.enter)="onCreateNew()"
+            (keydown.space)="$event.preventDefault(); onCreateNew()"
             style="cursor: pointer; font-style: italic; color: blue"
         >
             <app-boname-renderer [value]="'Add new ' + header"></app-boname-renderer>

@@ -284,7 +284,9 @@ export class ConfigurationStateService {
 
         const nextMap = new Map(currentMap);
         nextMap.set(key, value);
-        console.log('Setting config item', { key, value, defaultValue }, 'next map', nextMap);
+        if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+            console.debug('Setting config item', { key, value, defaultValue });
+        }
         this.configItemsSubject.next(nextMap);
         this.emitItemValue(key, value);
     }
@@ -313,8 +315,6 @@ export class ConfigurationStateService {
      * expanded into nested objects / selector-matched arrays.
      */
     serializeForBackend(): BackendConfigurationPayload {
-        const payload: BackendConfigurationPayload = {};
-
         return mapToRecord(this.configItemsSubject.value);
     }
 
@@ -336,8 +336,9 @@ export class ConfigurationStateService {
 
         // const nextMap = this.flattenPayload(entries as BackendConfigurationPayload);
         const nextMap = recordToMap(entries as BackendConfigurationPayload);
-        console.log('Loading configuration from backend', { entries }, 'next map', nextMap);
-        console.log('Current map', this.configItemsSubject.value);
+        if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+            console.debug('Loading configuration from backend', { entries });
+        }
 
         if (this.areMapsEqual(this.configItemsSubject.value, nextMap)) {
             console.log('No changes detected in backend configuration, skipping update');

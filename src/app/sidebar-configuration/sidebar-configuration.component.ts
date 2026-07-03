@@ -100,7 +100,10 @@ export class SidebarConfigurationComponent implements OnInit, OnDestroy {
             entries.push({ name, displayName, isCurrentlyActive, expanded, hidden, order });
         }
 
-        entries.sort((a, b) => a.order - b.order);
+        entries.sort((a, b) => {
+            if (a.order === b.order) return 0;
+            return a.order - b.order;
+        });
 
         this.visibleEntries = entries.filter((e) => !e.hidden);
         this.hiddenEntries = entries.filter((e) => e.hidden);
