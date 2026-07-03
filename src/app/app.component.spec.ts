@@ -134,6 +134,47 @@ describe('AppComponent', () => {
         expect(removeEventListenerSpy).toHaveBeenCalled();
     });
 
+    it('should resize sidebar with arrow keys', () => {
+        const configSrv = fixture.debugElement.injector.get(ConfigurationStateService);
+        const setItemSpy = jest.spyOn(configSrv, 'setItem');
+        appComponent.sidebarWidth = 280;
+
+        appComponent.onSidebarResizerKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+        expect(appComponent.sidebarWidth).toBe(296);
+
+        appComponent.onSidebarResizerKeydown(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+        expect(appComponent.sidebarWidth).toBe(280);
+        expect(setItemSpy).toHaveBeenCalledWith('navigation.sidebar.width', 296, 280);
+        expect(setItemSpy).toHaveBeenCalledWith('navigation.sidebar.width', 280, 280);
+    });
+
+    it('should move sidebar width to min and max with Home and End keys', () => {
+        const configSrv = fixture.debugElement.injector.get(ConfigurationStateService);
+        const setItemSpy = jest.spyOn(configSrv, 'setItem');
+        appComponent.sidebarWidth = 350;
+
+        appComponent.onSidebarResizerKeydown(new KeyboardEvent('keydown', { key: 'Home' }));
+        expect(appComponent.sidebarWidth).toBe(180);
+
+        appComponent.onSidebarResizerKeydown(new KeyboardEvent('keydown', { key: 'End' }));
+        expect(appComponent.sidebarWidth).toBe(700);
+        expect(setItemSpy).toHaveBeenCalledWith('navigation.sidebar.width', 180, 280);
+        expect(setItemSpy).toHaveBeenCalledWith('navigation.sidebar.width', 700, 280);
+    });
+
+    it('should clamp keyboard resize to configured bounds', () => {
+        const configSrv = fixture.debugElement.injector.get(ConfigurationStateService);
+        jest.spyOn(configSrv, 'setItem');
+
+        appComponent.sidebarWidth = appComponent.minSidebarWidth;
+        appComponent.onSidebarResizerKeydown(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+        expect(appComponent.sidebarWidth).toBe(appComponent.minSidebarWidth);
+
+        appComponent.sidebarWidth = appComponent.maxSidebarWidth;
+        appComponent.onSidebarResizerKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+        expect(appComponent.sidebarWidth).toBe(appComponent.maxSidebarWidth);
+    });
+
     it('should remove connection and unsubscribe sidebar subscription on destroy', () => {
         const conSrv = fixture.debugElement.injector.get(ConnectionService);
         const configSrv = fixture.debugElement.injector.get(ConfigurationStateService);

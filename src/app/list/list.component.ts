@@ -198,6 +198,7 @@ export class ListComponent extends ConnectedComponent implements OnInit, OnDestr
             const numB = typeof orderB === 'number' ? orderB : Infinity;
             if (numA === numB) return 0;
             return numA - numB;
+        });
     }
 
     private syncExpandedHeaders(): void {

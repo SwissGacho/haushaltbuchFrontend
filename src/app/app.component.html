@@ -29,8 +29,12 @@
         role="separator"
         aria-label="Resize sidebar"
         aria-orientation="vertical"
+        [attr.aria-valuemin]="minSidebarWidth"
+        [attr.aria-valuemax]="maxSidebarWidth"
+        [attr.aria-valuenow]="sidebarWidth"
         tabindex="0"
         (mousedown)="startSidebarResize($event)"
+        (keydown)="onSidebarResizerKeydown($event)"
     ></div>
 
     <main class="app-container__main">

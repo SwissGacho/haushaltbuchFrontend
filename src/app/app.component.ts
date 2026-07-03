@@ -17,6 +17,7 @@ import { Subscription } from 'rxjs';
 export class AppComponent extends ConnectedComponent implements OnInit {
     private static readonly SIDEBAR_WIDTH_CONFIG_KEY = 'navigation.sidebar.width';
     private static readonly DEFAULT_SIDEBAR_WIDTH = 280;
+    private static readonly SIDEBAR_KEYBOARD_STEP = 16;
 
     title = 'haushaltbuchFrontend';
     activateAnyComponent = true;
@@ -98,6 +99,31 @@ export class AppComponent extends ConnectedComponent implements OnInit {
 
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('mouseup', onMouseUp);
+    }
+
+    onSidebarResizerKeydown(event: KeyboardEvent): void {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            this.setSidebarWidth(this.sidebarWidth - AppComponent.SIDEBAR_KEYBOARD_STEP);
+            return;
+        }
+
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+            event.preventDefault();
+            this.setSidebarWidth(this.sidebarWidth + AppComponent.SIDEBAR_KEYBOARD_STEP);
+            return;
+        }
+
+        if (event.key === 'Home') {
+            event.preventDefault();
+            this.setSidebarWidth(this.minSidebarWidth);
+            return;
+        }
+
+        if (event.key === 'End') {
+            event.preventDefault();
+            this.setSidebarWidth(this.maxSidebarWidth);
+        }
     }
 
     private synchSidebarWidth(): void {
