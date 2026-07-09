@@ -194,6 +194,7 @@ class ConfigurationConnectionClient extends IdentifiedComponent implements Conne
                 ? (this.receivedPayload['configuration'] as Record<string, unknown>)
                 : {};
         const payload = {
+            user_id: this.receivedPayload['user_id'],
             configuration: {
                 ...configurationPayload,
                 frontend: currentFrontend,
@@ -284,9 +285,6 @@ export class ConfigurationStateService {
 
         const nextMap = new Map(currentMap);
         nextMap.set(key, value);
-        if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-            console.debug('Setting config item', { key, value, defaultValue });
-        }
         this.configItemsSubject.next(nextMap);
         this.emitItemValue(key, value);
     }
@@ -325,20 +323,11 @@ export class ConfigurationStateService {
      * differs from the current state.
      */
     loadFromBackend(entries: unknown): void {
-        // if (Array.isArray(entries)) {
-        //     this.loadFromLegacyEntries(entries);
-        //     return;
-        // }
-
         if (!entries || typeof entries !== 'object') {
             return;
         }
 
-        // const nextMap = this.flattenPayload(entries as BackendConfigurationPayload);
         const nextMap = recordToMap(entries as BackendConfigurationPayload);
-        if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-            console.debug('Loading configuration from backend', { entries });
-        }
 
         if (this.areMapsEqual(this.configItemsSubject.value, nextMap)) {
             console.log('No changes detected in backend configuration, skipping update');
