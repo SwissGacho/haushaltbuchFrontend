@@ -1,7 +1,10 @@
 {
     "angular-schematics.schematicsDefaultOptions": {
-        "angular-*": {
-            "externalTemplate": true
-        }
-    }
+        "angular-*": { "externalTemplate": true }
+    },
+    "jest.rootPath": ".",
+    "jest.runMode": "on-demand",
+
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": false
 }
