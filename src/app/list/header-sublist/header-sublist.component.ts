@@ -230,10 +230,10 @@ export class HeaderSublistComponent extends ConnectedComponent implements OnInit
             const deltaY = moveEvent.clientY - startY;
             const deltaRows = Math.round(deltaY / HeaderSublistComponent.SUBLIST_ROW_HEIGHT_PX);
             this.currentVisibleItemCount = this.clampVisibleItemCount(startCount + deltaRows);
-            this.persistCurrentVisibleItemCount();
         };
 
         this.resizeMouseUpHandler = () => {
+            this.persistCurrentVisibleItemCount();
             this.clearResizeHandlers();
         };
 

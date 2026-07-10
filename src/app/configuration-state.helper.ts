@@ -165,6 +165,7 @@ function collectEntries(
     if (Array.isArray(node)) {
         for (const entry of node as SelectorEntry[]) {
             const selectorStr = Object.entries(entry.selector)
+                .sort(([a], [b]) => a.localeCompare(b))
                 .map(([k, v]) => `${k}=${v}`)
                 .join(',');
             // Re-attach the selector to the last pushed segment
