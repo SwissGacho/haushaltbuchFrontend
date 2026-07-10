@@ -72,7 +72,7 @@ export class AppComponent extends ConnectedComponent implements OnInit {
     }
 
     // Creates the connection to the backend when the component is initialized.
-    // The App Component ownes the 'promary connection' that is used by the backend
+    // The App Component owns the 'primary connection' that is used by the backend
     // to request actions
     override ngOnInit() {
         this.synchSidebarWidth();

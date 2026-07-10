@@ -9,6 +9,7 @@
                 class="sidebar__config-btn"
                 type="button"
                 [title]="showSidebarConfig ? 'Back to list' : 'Configure sidebar'"
+                [attr.aria-label]="showSidebarConfig ? 'Back to list' : 'Configure sidebar'"
                 [class.sidebar__config-btn--active]="showSidebarConfig"
                 (click)="toggleSidebarConfig()"
             >

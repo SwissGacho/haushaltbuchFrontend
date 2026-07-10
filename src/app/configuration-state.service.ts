@@ -330,11 +330,9 @@ export class ConfigurationStateService {
         const nextMap = recordToMap(entries as BackendConfigurationPayload);
 
         if (this.areMapsEqual(this.configItemsSubject.value, nextMap)) {
-            console.log('No changes detected in backend configuration, skipping update');
             return;
         }
 
-        console.log('Updating configuration', { nextMap });
         this.configItemsSubject.next(nextMap);
         this.syncItemSubjects(nextMap);
     }
