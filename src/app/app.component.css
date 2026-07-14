@@ -45,6 +45,17 @@
     background: #bf2f2f;
 }
 
+.backend-unavailable-message {
+    grid-column: 1 / -1;
+    margin: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid #d4a017;
+    border-radius: 6px;
+    background: #fff4cc;
+    color: #6b4f00;
+    font-weight: 600;
+}
+
 .app-container__sidebar {
     grid-area: sidebar;
     overflow: auto;

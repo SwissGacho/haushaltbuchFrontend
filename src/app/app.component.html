@@ -1,16 +1,26 @@
 <div class="app-container">
     <header class="app-container__header">
         <h1>Haushaltbuch</h1>
-        <button class="logout-button" type="button" (click)="logout()">Logout</button>
+        @if (shouldShowLogout()) {
+            <button class="logout-button" type="button" (click)="logout()">Logout</button>
+        }
     </header>
 
-    <aside class="app-container__sidebar">
-        <app-list-component></app-list-component>
-    </aside>
+    @if (activateAnyComponent) {
+        <aside class="app-container__sidebar">
+            <app-list-component></app-list-component>
+        </aside>
 
-    <main class="app-container__main">
-        <app-detail-component></app-detail-component>
-    </main>
+        <main class="app-container__main">
+            <app-detail-component></app-detail-component>
+        </main>
+    }
+
+    @if (backendUnavailable) {
+        <div class="backend-unavailable-message">
+            Backend unavailable. Retrying connection in {{ retryInSeconds }}s...
+        </div>
+    }
 
     @if (activateLoginComponent) {
         <div class="box"><app-login-component></app-login-component></div>
