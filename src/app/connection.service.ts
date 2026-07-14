@@ -308,7 +308,10 @@ export class ConnectionService {
             }
         });
         ConnectionService.connections = {};
-        ConnectionService._sessionToken = '';
         ConnectionService.loginBySessionTokenSubject = new rxjs.ReplaySubject<LoginCredentials>();
-    }
+        const storedToken = sessionStorage.getItem('SessionToken');
+        ConnectionService._sessionToken = storedToken ?? '';
+        if (storedToken) {
+            ConnectionService.loginBySessionTokenSubject.next({ ses_token: storedToken });
+        }
 }

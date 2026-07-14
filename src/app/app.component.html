@@ -17,7 +17,7 @@
     }
 
     @if (backendUnavailable) {
-        <div class="backend-unavailable-message">
+        <div class="backend-unavailable-message" role="status" aria-live="polite">
             Backend unavailable. Retrying connection in {{ retryInSeconds }}s...
         </div>
     }
