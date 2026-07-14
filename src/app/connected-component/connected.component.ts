@@ -65,7 +65,7 @@ export class ConnectedComponent
         if (this.componentID == null) {
             return;
         }
-        console.info(this.componentID, 'is shutting down');
+        console.log(this.componentID, 'is shutting down');
         if (this.connected) {
             this.connectionService.removeConnection(this.componentID);
             this.connected = false;
@@ -91,7 +91,9 @@ export class ConnectedComponent
 
     // Abstract method for components to implement their connection closing handling.
     handleComplete(): void {
-        console.warn(`Connection closed for component ${this.componentID}.`);
+        if (this.connected) {
+            console.warn(`Connection closed for component ${this.componentID}.`);
+        }
     }
 
     // Creates the connection to the backend when the component is initialized.
