@@ -287,4 +287,18 @@ export class ConnectionService {
         // evreything is already closed cleanly
         delete ConnectionService.connections[componentId];
     }
+
+    // Close all known websocket connections and reset session-related service state.
+    closeAllConnections(): void {
+        Object.keys(ConnectionService.connections).forEach((componentId: string) => {
+            try {
+                ConnectionService.connections[componentId].subject.complete();
+            } catch (error) {
+                console.error('Failed to close connection for', componentId, error);
+            }
+        });
+        ConnectionService.connections = {};
+        ConnectionService._sessionToken = '';
+        ConnectionService.loginBySessionTokenSubject = new rxjs.ReplaySubject<LoginCredentials>();
+    }
 }

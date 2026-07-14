@@ -65,4 +65,10 @@ export class AppComponent extends ConnectedComponent implements OnInit {
         const isPrimary = true;
         this.getConnection(observeHandshake, isPrimary);
     }
+
+    logout(): void {
+        sessionStorage.clear();
+        this.specificService.closeAllConnections();
+        window.location.reload();
+    }
 }
