@@ -24,6 +24,19 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
     username: string = '';
     loginSubject = new rxjs.ReplaySubject<LoginCredentials>();
 
+    private reopenConnectionForLogin(): void {
+        sessionStorage.removeItem('SessionToken');
+        this.getLoginCredentials = true;
+
+        if (ConnectionService.connections[this.componentID]) {
+            this.specificService.removeConnection(this.componentID);
+            this.connected = false;
+        }
+
+        this.loginSubject = new rxjs.ReplaySubject<LoginCredentials>();
+        this.getConnection(this.loginSubject);
+    }
+
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, 'received', message.type, 'message');
         console.log(message);
@@ -35,12 +48,16 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
             } else {
                 this.getLoginCredentials = true;
             }
+        } else if (message.type == MessageType.Bye) {
+            // Automatic or manual login failed; reopen a fresh login connection.
+            this.reopenConnectionForLogin();
         }
     }
 
     override handleError(error: any): void {
         console.error('Login Component received error');
-        throw new Error(error);
+        console.error(error);
+        this.reopenConnectionForLogin();
     }
 
     override handleComplete(): void {
@@ -55,6 +72,10 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
     // Creates the connection to the backend when the component is initialized.
     // The LoginComponent
     override ngOnInit() {
+        const sessionToken = sessionStorage.getItem('SessionToken');
+        if (sessionToken) {
+            this.loginSubject.next({ ses_token: sessionToken });
+        }
         this.getConnection(this.loginSubject);
     }
 }
