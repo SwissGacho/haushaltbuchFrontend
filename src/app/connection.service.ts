@@ -260,7 +260,7 @@ export class ConnectionService {
                 'Sending',
                 message.type,
                 'for',
-                message instanceof LogMessage ? message.caller : componentId
+                componentId
             );
             console.log('Message:', message);
             console.log('Connection:', connection);
