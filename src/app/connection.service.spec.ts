@@ -82,6 +82,7 @@ describe('ConnectionService', () => {
     afterEach(() => {
         jest.clearAllMocks();
         jest.restoreAllMocks();
+        sessionStorage.clear();
     });
 
     it('should be created', () => {
@@ -289,6 +290,7 @@ describe('ConnectionService', () => {
         });
         ConnectionService._sessionToken = '';
         testHandleHandshakeMessage(mockWelcomeMessage, true);
+        expect(sessionStorage.getItem('SessionToken')).toBe('mockSession');
     });
 
     it('should handle later WelcomeMessages', () => {
@@ -389,5 +391,34 @@ describe('ConnectionService', () => {
             // mockComponent_1: {subject: mockSubject1, subscriber: mockSubscriber1},
             mockComponent_2: { subject: mockSubject2, subscriber: mockSubscriber2 },
         });
+    });
+
+    it('should close all connections and reset static state', () => {
+        const mockId1 = 'mockComponent_1';
+        const mockSubject1 = new MockWebSocketSubject() as unknown as rxws.WebSocketSubject<any>;
+        const mockSubscriber1 = new MockConnectedComponent(connectionService);
+        mockSubscriber1.componentID = mockId1;
+        const mockId2 = 'mockComponent_2';
+        const mockSubject2 = new MockWebSocketSubject() as unknown as rxws.WebSocketSubject<any>;
+        const mockSubscriber2 = new MockConnectedComponent(connectionService);
+        mockSubscriber2.componentID = mockId2;
+        const oldSubject = ConnectionService.loginBySessionTokenSubject;
+
+        ConnectionService.connections = {
+            mockComponent_1: { subject: mockSubject1, subscriber: mockSubscriber1 },
+            mockComponent_2: { subject: mockSubject2, subscriber: mockSubscriber2 },
+        };
+        ConnectionService._sessionToken = 'some-session';
+
+        const complete1Spy = jest.spyOn(mockSubject1, 'complete');
+        const complete2Spy = jest.spyOn(mockSubject2, 'complete');
+
+        connectionService.closeAllConnections();
+
+        expect(complete1Spy).toHaveBeenCalledTimes(1);
+        expect(complete2Spy).toHaveBeenCalledTimes(1);
+        expect(ConnectionService.connections).toEqual({});
+        expect(ConnectionService._sessionToken).toBe('');
+        expect(ConnectionService.loginBySessionTokenSubject).not.toBe(oldSubject);
     });
 });
