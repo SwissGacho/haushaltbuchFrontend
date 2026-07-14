@@ -239,6 +239,16 @@ export class ConnectionService {
             }
         } else if (message instanceof ByeMessage) {
             console.error('Logon failed (', message.reason, ') for', that?.subscriber.componentID);
+            if (message.reason == 'Session expired') {
+                console.warn(
+                    'Session expired, clearing session token, closing all connections and reloading page'
+                );
+                ConnectionService._sessionToken = '';
+                sessionStorage.removeItem('SessionToken');
+                this.closeAllConnections();
+                // Reload the page
+                location.reload();
+            }
         }
     }
 
