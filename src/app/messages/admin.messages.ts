@@ -46,6 +46,7 @@ export class ByeMessage extends IncomingMessage implements ByeMessageType {
 }
 
 export enum LogLevel {
+    VerboseDebug = 'verbose_debug',
     Debug = 'debug',
     Info = 'info',
     Warning = 'warning',

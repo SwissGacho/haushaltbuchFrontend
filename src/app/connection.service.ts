@@ -58,10 +58,11 @@ export class Logger {
                 }
             };
         }
-        var methods = ['debug', /*'log',*/ 'info', 'warn', 'error'];
+        var methods = ['debug', 'log', 'info', 'warn', 'error'];
         var levels = [
+            LogLevel.VerboseDebug,
             LogLevel.Debug,
-            /*LogLevel.Info,*/ LogLevel.Info,
+            LogLevel.Info,
             LogLevel.Warning,
             LogLevel.Error,
         ];
@@ -227,32 +228,35 @@ export class ConnectionService {
             // if the session token is not set yet provide it for other connections
             if (message.ses_token && !ConnectionService._sessionToken) {
                 ConnectionService._sessionToken = message.ses_token;
+                sessionStorage.setItem('SessionToken', message.ses_token);
                 ConnectionService.loginBySessionTokenSubject.next({ ses_token: message.ses_token });
             }
             if (that) {
                 if (that && that.isPrimary) {
                     Logger.takeOverConsole(that.subscriber);
                 }
-                console.info('Connection established for', that.subscriber.componentID);
+                console.log('Connection established for', that.subscriber.componentID);
             }
         } else if (message instanceof ByeMessage) {
-            console.error('Logon failed');
+            console.error('Logon failed (', message.reason, ') for', that?.subscriber.componentID);
         }
     }
 
     // Send a message to the backend.
     sendMessage(message: Message, componentId: string) {
         let connection = ConnectionService.connections[componentId].subject;
-        console.groupCollapsed(
-            'Sending',
-            message.type,
-            'for',
-            message instanceof LogMessage ? message.caller : componentId
-        );
-        console.log('Message:', message);
-        console.log('Connection:', connection);
-        console.log('Component:', ConnectionService.connections[componentId].subscriber);
-        console.groupEnd();
+        if (!(message instanceof LogMessage)) {
+            console.groupCollapsed(
+                'Sending',
+                message.type,
+                'for',
+                message instanceof LogMessage ? message.caller : componentId
+            );
+            console.log('Message:', message);
+            console.log('Connection:', connection);
+            console.log('Component:', ConnectionService.connections[componentId].subscriber);
+            console.groupEnd();
+        }
         connection.next(message);
     }
 
