@@ -63,19 +63,41 @@ export class Logger {
                 const message = args.join(' ');
                 // determine caller of console message
                 let caller = '';
+                let fileName: string | undefined;
                 let lineNumber: number | undefined;
+                let columnNumber: number | undefined;
                 const stack = new Error().stack;
                 if (stack) {
                     const stackLine = stack.split('\n')[2]?.trim() ?? '';
-                    caller = stackLine.split(' ')[1] ?? '';
-                    const lineMatch = stackLine.match(/:(\d+):\d+\)?$/);
-                    if (lineMatch) {
-                        lineNumber = Number(lineMatch[1]);
+                    const match = stackLine.match(
+                        /(?:at\s+(.+?)\s+\()?(https?:\/\/.+?):(\d+):(\d+)\)?/
+                    );
+                    if (match) {
+                        caller = match[1] || 'anonymous'; // Methodenname
+                        fileName = match[2].substring(match[2].lastIndexOf('/') + 1); // z.B. "main.js"
+                        lineNumber = Number(match[3]); // Zeilennummer im kompilierten Code
+                        columnNumber = Number(match[4]); // Spaltennummer im kompilierten Code
+                    } else {
+                        // Fallback für einfachere Zeilen ohne Methodennamen
+                        const simpleMatch = stackLine.match(/(https?:\/\/.+?):(\d+):(\d+)/);
+                        if (simpleMatch) {
+                            fileName = simpleMatch[1].substring(
+                                simpleMatch[1].lastIndexOf('/') + 1
+                            );
+                            lineNumber = Number(simpleMatch[2]);
+                            columnNumber = Number(simpleMatch[3]);
+                        }
                     }
                 }
                 const logMessage = new LogMessage(level, message, caller);
+                if (typeof fileName !== 'undefined') {
+                    logMessage.file_name = fileName;
+                }
                 if (lineNumber !== undefined) {
                     logMessage.line_number = lineNumber;
+                }
+                if (columnNumber !== undefined) {
+                    logMessage.column_number = columnNumber;
                 }
                 component.sendMessage(logMessage);
                 // output to console

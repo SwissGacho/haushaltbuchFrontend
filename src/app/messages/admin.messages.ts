@@ -59,7 +59,9 @@ export class LogMessage extends OutgoingMessage implements LogMessageType {
     log_level: LogLevel;
     message: string;
     caller?: string;
+    file_name?: string;
     line_number?: number;
+    column_number?: number;
 
     constructor(level: LogLevel, msg: string, caller?: string, token?: string) {
         super(token);
