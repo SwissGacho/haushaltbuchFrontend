@@ -15,6 +15,7 @@ import { LoginCredentials } from '../messages/admin.messages';
 })
 export class LoginComponent extends ConnectedComponent implements OnInit {
     getLoginCredentials = false;
+    loginFailureReason: string | null = null;
 
     constructor(private specificService: ConnectionService) {
         super(specificService);
@@ -24,9 +25,10 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
     username: string = '';
     loginSubject = new rxjs.ReplaySubject<LoginCredentials>();
 
-    private reopenConnectionForLogin(): void {
+    private reopenConnectionForLogin(reason?: string): void {
         sessionStorage.removeItem('SessionToken');
         this.getLoginCredentials = true;
+        this.loginFailureReason = reason ?? null;
 
         if (ConnectionService.connections[this.componentID]) {
             this.specificService.removeConnection(this.componentID);
@@ -44,13 +46,20 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
         if (message.type == MessageType.Hello) {
             let status = message.status;
             if (status == 'singleUser') {
+                this.loginFailureReason = null;
                 this.loginSubject.next({});
             } else {
                 this.getLoginCredentials = true;
             }
         } else if (message.type == MessageType.Bye) {
+            this.username = '';
+            const reason =
+                'reason' in message && typeof message.reason === 'string'
+                    ? message.reason
+                    : undefined;
             // Automatic or manual login failed; reopen a fresh login connection.
-            this.reopenConnectionForLogin();
+            console.log('Login failed, reopening connection for login; reason:', reason);
+            this.reopenConnectionForLogin(reason);
         }
     }
 
@@ -65,6 +74,7 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
 
     logIn(): void {
         console.log('Login button pressed (', this.username, ')');
+        this.loginFailureReason = null;
         this.loginSubject.next({ user: this.username });
     }
 

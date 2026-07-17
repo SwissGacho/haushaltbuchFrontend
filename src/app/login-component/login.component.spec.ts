@@ -88,10 +88,15 @@ describe('LoginComponent', () => {
             subscriber: component,
         };
 
-        component.handleMessages({ type: MessageType.Bye, token: 'token-1' } as IncomingMessage);
+        component.handleMessages({
+            type: MessageType.Bye,
+            token: 'token-1',
+            reason: 'Invalid username',
+        } as IncomingMessage);
 
         expect(sessionStorage.getItem('SessionToken')).toBeNull();
         expect(component.getLoginCredentials).toBe(true);
+        expect(component.loginFailureReason).toBe('Invalid username');
         expect(connectionService.removeConnection).toHaveBeenCalledWith(component.componentID);
         expect(component.loginSubject).not.toBe(previousSubject);
         expect(connectionService.getNewConnection).toHaveBeenCalledWith(
@@ -99,5 +104,14 @@ describe('LoginComponent', () => {
             component.loginSubject,
             undefined
         );
+    });
+
+    it('should clear login failure reason on a new logIn attempt', () => {
+        component.loginFailureReason = 'Session expired';
+        component.username = 'alice';
+
+        component.logIn();
+
+        expect(component.loginFailureReason).toBeNull();
     });
 });
