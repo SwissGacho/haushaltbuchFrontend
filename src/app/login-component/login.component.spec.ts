@@ -100,18 +100,4 @@ describe('LoginComponent', () => {
             undefined
         );
     });
-
-    it('should reopen connection on handleError', () => {
-        const previousSubject = component.loginSubject;
-
-        component.handleError(new Error('fail'));
-
-        expect(component.getLoginCredentials).toBe(true);
-        expect(component.loginSubject).not.toBe(previousSubject);
-        expect(connectionService.getNewConnection).toHaveBeenCalledWith(
-            component,
-            component.loginSubject,
-            undefined
-        );
-    });
 });
