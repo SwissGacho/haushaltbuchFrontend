@@ -84,9 +84,28 @@ export class ConnectedComponent
         throw new Error('Subclasses must implement the handleMessages method.');
     }
 
-    // Abstract method for components to implement their error handling.
+    // Fallback method for components to implement their error handling.
     handleError(error: any): void {
-        throw new Error('Subclasses must implement the handleError method.');
+        if (error && typeof error === 'object' && 'type' in error && 'reason' in error) {
+            if (error.type === 'close') {
+                console.warn(
+                    'Connection closed for component',
+                    this.componentID,
+                    error.reason ? '; Reason: ' + error.reason : ''
+                );
+                return;
+            }
+            console.error(
+                'Error received in component',
+                this.componentID,
+                ', Type:',
+                error.type,
+                ', Reason:',
+                error.reason
+            );
+            return;
+        }
+        console.error('Error received in component', this.componentID, error);
     }
 
     // Abstract method for components to implement their connection closing handling.

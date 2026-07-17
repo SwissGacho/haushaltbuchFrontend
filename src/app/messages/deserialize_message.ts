@@ -6,7 +6,7 @@ import { ObjectSetupMessage } from './setup.messages';
 export class MessageFactory {
     static deserialize(event: MessageEvent): IncomingBaseMessage {
         let data = JSON.parse(event.data);
-        console.log('Deserializing message', data);
+        console.debug('Deserializing message', data);
         switch (data.type) {
             case MessageType.Object:
                 return new ObjectMessage(data);

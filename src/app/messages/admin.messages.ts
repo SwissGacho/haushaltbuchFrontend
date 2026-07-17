@@ -46,8 +46,8 @@ export class ByeMessage extends IncomingMessage implements ByeMessageType {
 }
 
 export enum LogLevel {
-    VerboseDebug = 'verbose_debug',
     Debug = 'debug',
+    Log = 'log',
     Info = 'info',
     Warning = 'warning',
     Error = 'error',
@@ -59,6 +59,7 @@ export class LogMessage extends OutgoingMessage implements LogMessageType {
     log_level: LogLevel;
     message: string;
     caller?: string;
+    line_number?: number;
 
     constructor(level: LogLevel, msg: string, caller?: string, token?: string) {
         super(token);

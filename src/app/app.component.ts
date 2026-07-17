@@ -27,6 +27,8 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
     frontendVersion = environment.appVersion;
     backendVersion?: string;
 
+    RETRY_INTERVAL = 5; // seconds
+
     constructor(private specificService: ConnectionService) {
         super(specificService);
         this.setComponentID('AppComponent');
@@ -38,7 +40,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
 
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, 'received', message.type, 'message');
-        console.log(message);
+        console.debug(message);
         console.groupEnd();
         this.clearReconnectState();
         if (message.type == MessageType.Hello) {
@@ -66,7 +68,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
                 }
             }
         }
-        console.log('App logged in:', this);
+        console.log('App logged in:', this.componentID);
     }
 
     // Creates the connection to the backend when the component is initialized.
@@ -80,14 +82,16 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
 
     override handleError(error: any): void {
         console.error(
-            'The App Component received a connection error, retrying in 5 seconds.',
+            `The App Component received a connection error, retrying in ${this.RETRY_INTERVAL} seconds.`,
             error
         );
         this.recoverFromConnectionLoss();
     }
 
     override handleComplete(): void {
-        console.warn('The App Component connection closed, retrying in 5 seconds.');
+        console.warn(
+            `The App Component connection closed, retrying in ${this.RETRY_INTERVAL} seconds.`
+        );
         this.recoverFromConnectionLoss();
     }
 
@@ -114,11 +118,12 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
         }
         this.isRecoveringFromDisconnect = true;
         this.backendUnavailable = true;
-        this.retryInSeconds = 5;
+        this.retryInSeconds = this.RETRY_INTERVAL;
         this.activateAnyComponent = false;
         this.activateLoginComponent = false;
         this.activateSetupConfigComponent = false;
         this.isLoggedIn = false;
+        sessionStorage.clear();
         this.specificService.closeAllConnections();
         this.connected = false;
 
@@ -131,7 +136,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
             const observeHandshake = true;
             const isPrimary = true;
             this.getConnection(observeHandshake, isPrimary);
-        }, 5000);
+        }, this.RETRY_INTERVAL * 1000);
     }
 
     private clearReconnectState(): void {

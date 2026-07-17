@@ -85,6 +85,7 @@ export interface LogMessageType extends OutgoingBaseMessage {
     log_level: string;
     message: string;
     caller?: string;
+    line_number?: number;
 }
 
 export interface LoginMessageType extends OutgoingBaseMessage {

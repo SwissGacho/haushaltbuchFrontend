@@ -39,7 +39,7 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
 
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, 'received', message.type, 'message');
-        console.log(message);
+        console.debug(message);
         console.groupEnd();
         if (message.type == MessageType.Hello) {
             let status = message.status;
@@ -56,8 +56,7 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
 
     override handleError(error: any): void {
         console.error('Login Component received error');
-        console.error(error);
-        this.reopenConnectionForLogin();
+        throw new Error(error);
     }
 
     override handleComplete(): void {
@@ -72,6 +71,7 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
     // Creates the connection to the backend when the component is initialized.
     // The LoginComponent
     override ngOnInit() {
+        console.debug('LoginComponent initialized:', this.componentID);
         const sessionToken = sessionStorage.getItem('SessionToken');
         if (sessionToken) {
             this.loginSubject.next({ ses_token: sessionToken });
