@@ -5,6 +5,8 @@ import { ConnectionService } from './connection.service';
 import { ConnectedComponent } from './connected-component/connected.component';
 import { IncomingMessage, MessageType, WelcomeMessageType } from './messages/Message';
 import { environment } from '../environments/environment';
+import { ConfigurationStateService } from './configuration-state.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-root',
@@ -13,14 +15,25 @@ import { environment } from '../environments/environment';
     standalone: false,
 })
 export class AppComponent extends ConnectedComponent implements OnInit {
+    private static readonly SIDEBAR_WIDTH_CONFIG_KEY = 'navigation.sidebar.width';
+    private static readonly DEFAULT_SIDEBAR_WIDTH = 280;
+    private static readonly SIDEBAR_KEYBOARD_STEP = 16;
+
     title = 'haushaltbuchFrontend';
     activateAnyComponent = true;
     activateLoginComponent = false;
     activateSetupConfigComponent = false;
+    showSidebarConfig = false;
     frontendVersion = environment.appVersion;
     backendVersion?: string;
+    sidebarWidth = AppComponent.DEFAULT_SIDEBAR_WIDTH;
+    readonly minSidebarWidth = 180;
+    readonly maxSidebarWidth = 700;
 
-    constructor(private specificService: ConnectionService) {
+    constructor(
+        private specificService: ConnectionService,
+        private readonly configurationStateService: ConfigurationStateService
+    ) {
         super(specificService);
         this.setComponentID('AppComponent');
         console.groupCollapsed(this.componentID, 'constructed');
@@ -28,6 +41,7 @@ export class AppComponent extends ConnectedComponent implements OnInit {
         console.log('App Version:', environment.appVersion);
         console.groupEnd();
     }
+    private sidebarWidthSubscription: Subscription | null = null;
 
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, 'received', message.type, 'message');
@@ -58,11 +72,91 @@ export class AppComponent extends ConnectedComponent implements OnInit {
     }
 
     // Creates the connection to the backend when the component is initialized.
-    // The App Component ownes the 'promary connection' that is used by the backend
+    // The App Component owns the 'primary connection' that is used by the backend
     // to request actions
     override ngOnInit() {
+        this.synchSidebarWidth();
         const observeHandshake = true;
         const isPrimary = true;
         this.getConnection(observeHandshake, isPrimary);
+    }
+
+    override ngOnDestroy(): void {
+        this.sidebarWidthSubscription?.unsubscribe();
+        super.ngOnDestroy();
+    }
+
+    startSidebarResize(event: MouseEvent): void {
+        event.preventDefault();
+        const onMouseMove = (moveEvent: MouseEvent) => {
+            this.setSidebarWidth(moveEvent.clientX);
+        };
+
+        const onMouseUp = () => {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    }
+
+    onSidebarResizerKeydown(event: KeyboardEvent): void {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            this.setSidebarWidth(this.sidebarWidth - AppComponent.SIDEBAR_KEYBOARD_STEP);
+            return;
+        }
+
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+            event.preventDefault();
+            this.setSidebarWidth(this.sidebarWidth + AppComponent.SIDEBAR_KEYBOARD_STEP);
+            return;
+        }
+
+        if (event.key === 'Home') {
+            event.preventDefault();
+            this.setSidebarWidth(this.minSidebarWidth);
+            return;
+        }
+
+        if (event.key === 'End') {
+            event.preventDefault();
+            this.setSidebarWidth(this.maxSidebarWidth);
+        }
+    }
+
+    private synchSidebarWidth(): void {
+        if (this.sidebarWidthSubscription) {
+            this.sidebarWidthSubscription.unsubscribe();
+        }
+
+        this.sidebarWidthSubscription = this.configurationStateService
+            .observeItem<number>(AppComponent.SIDEBAR_WIDTH_CONFIG_KEY)
+            .subscribe((storedWidth) => {
+                this.setSidebarWidth(this.resolveSidebarWidth(storedWidth));
+            });
+    }
+    private resolveSidebarWidth(width: number | undefined): number {
+        if (typeof width !== 'number' || !Number.isFinite(width)) {
+            return AppComponent.DEFAULT_SIDEBAR_WIDTH;
+        }
+        return width;
+    }
+    private setSidebarWidth(nextWidth: number): void {
+        const clampedWidth = Math.min(
+            this.maxSidebarWidth,
+            Math.max(this.minSidebarWidth, nextWidth)
+        );
+        this.sidebarWidth = clampedWidth;
+        this.configurationStateService.setItem(
+            AppComponent.SIDEBAR_WIDTH_CONFIG_KEY,
+            clampedWidth,
+            AppComponent.DEFAULT_SIDEBAR_WIDTH
+        );
+    }
+
+    toggleSidebarConfig(): void {
+        this.showSidebarConfig = !this.showSidebarConfig;
     }
 }

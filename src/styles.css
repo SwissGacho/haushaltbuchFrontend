@@ -4,3 +4,22 @@ body {
     margin: 0;
     font-family: Arial, sans-serif;
 }
+
+.toggle-marker {
+    position: relative;
+}
+
+.toggle-marker::before {
+    content: var(--toggle-icon-collapsed, '►');
+    position: absolute;
+    left: var(--toggle-icon-left, -1.3em);
+    top: var(--toggle-icon-top, 2pt);
+    color: var(--toggle-icon-color, #555);
+    font-size: var(--toggle-icon-size, 80%);
+}
+
+.toggle-marker.is-expanded::before,
+.toggle-marker.expanded::before,
+.toggle-marker[aria-expanded='true']::before {
+    content: var(--toggle-icon-expanded, '▼');
+}
