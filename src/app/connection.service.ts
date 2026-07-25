@@ -35,38 +35,100 @@ export class RXJS {
 }
 
 export class Logger {
+    private static readonly interceptedMethods = [
+        // 'debug',
+        'log',
+        'info',
+        'warn',
+        'error',
+    ];
+    private static originalConsoleMethods: {
+        [method: string]: ((...args: any[]) => void) | undefined;
+    } = {};
+
     static takeOverConsole(component: ConnectionSubscriber) {
-        var console: any = window.console;
-        if (!console) return;
+        const consoleObj: any = window.console;
+        if (!consoleObj) return;
+
+        // Ensure reconnects do not create nested wrappers.
+        Logger.restoreConsole();
+
         function intercept(method: string, level: LogLevel) {
-            var original = console[method];
-            console[method] = function () {
+            if (!Logger.originalConsoleMethods[method]) {
+                Logger.originalConsoleMethods[method] = consoleObj[method];
+            }
+            const original = Logger.originalConsoleMethods[method];
+            consoleObj[method] = function (...args: any[]) {
                 // join arguments to one string
-                var message = Array.prototype.slice.apply(arguments).join(' ');
+                const message = args.join(' ');
                 // determine caller of console message
-                var caller = '';
+                let caller = '';
+                let fileName: string | undefined;
+                let lineNumber: number | undefined;
+                let columnNumber: number | undefined;
                 const stack = new Error().stack;
-                if (stack) caller = stack.split('\n')[2].trim().split(' ')[1];
-                component.sendMessage(new LogMessage(level, message, caller));
+                if (stack) {
+                    const stackLine = stack.split('\n')[2]?.trim() ?? '';
+                    const match = stackLine.match(
+                        /(?:at\s+(.+?)\s+\()?(https?:\/\/.+?):(\d+):(\d+)\)?/
+                    );
+                    if (match) {
+                        caller = match[1] || 'anonymous'; // Methodenname
+                        fileName = match[2].substring(match[2].lastIndexOf('/') + 1); // z.B. "main.js"
+                        lineNumber = Number(match[3]); // Zeilennummer im kompilierten Code
+                        columnNumber = Number(match[4]); // Spaltennummer im kompilierten Code
+                    } else {
+                        // Fallback für einfachere Zeilen ohne Methodennamen
+                        const simpleMatch = stackLine.match(/(https?:\/\/.+?):(\d+):(\d+)/);
+                        if (simpleMatch) {
+                            fileName = simpleMatch[1].substring(
+                                simpleMatch[1].lastIndexOf('/') + 1
+                            );
+                            lineNumber = Number(simpleMatch[2]);
+                            columnNumber = Number(simpleMatch[3]);
+                        }
+                    }
+                }
+                const logMessage = new LogMessage(level, message, caller);
+                if (typeof fileName !== 'undefined') {
+                    logMessage.file_name = fileName;
+                }
+                if (lineNumber !== undefined) {
+                    logMessage.line_number = lineNumber;
+                }
+                if (columnNumber !== undefined) {
+                    logMessage.column_number = columnNumber;
+                }
+                component.sendMessage(logMessage);
                 // output to console
-                if (original.apply) {
-                    // Do this for normal browsers
-                    original.apply(console, arguments);
-                } else {
-                    // Do this for IE
-                    original(message);
+                if (typeof original === 'function') {
+                    original.apply(consoleObj, args);
                 }
             };
         }
-        var methods = ['debug', /*'log',*/ 'info', 'warn', 'error'];
-        var levels = [
-            LogLevel.Debug,
-            /*LogLevel.Info,*/ LogLevel.Info,
+
+        const methods = Logger.interceptedMethods;
+        const levels = [
+            // LogLevel.Debug,
+            LogLevel.Log,
+            LogLevel.Info,
             LogLevel.Warning,
             LogLevel.Error,
         ];
-        for (var i = 0; i < methods.length; i++) {
+        for (let i = 0; i < methods.length; i++) {
             intercept(methods[i], levels[i]);
+        }
+    }
+
+    static restoreConsole() {
+        const consoleObj: any = window.console;
+        if (!consoleObj) return;
+
+        for (const method of Logger.interceptedMethods) {
+            const original = Logger.originalConsoleMethods[method];
+            if (typeof original === 'function') {
+                consoleObj[method] = original;
+            }
         }
     }
 }
@@ -136,10 +198,10 @@ export class ConnectionService {
         isPrimary?: boolean
     ): void {
         console.groupCollapsed('Creating connection for component ', subscriber.componentID);
-        console.log('Subscriber: ', subscriber);
-        console.log('LoginSubjectOrObserveHandshake: ', loginSubjectOrObserveHandshake);
-        console.log('is primary: ', isPrimary);
-        console.log('Backend address: ', this.BACKEND_ADDRESS);
+        console.debug('Subscriber: ', subscriber);
+        console.debug('LoginSubjectOrObserveHandshake: ', loginSubjectOrObserveHandshake);
+        console.debug('is primary: ', isPrimary);
+        console.debug('Backend address: ', this.BACKEND_ADDRESS);
         let connection = this.webSocket({
             url: this.BACKEND_ADDRESS,
             deserializer: (event) => MessageFactory.deserialize(event) as Message,
@@ -191,16 +253,19 @@ export class ConnectionService {
             'to',
             that?.subscriber.componentID
         );
-        console.log(message);
-        console.log('that:', that);
+        console.debug(message);
+        console.debug('that:', that);
         console.groupEnd();
         if (message instanceof HelloMessage) {
             if (that && message.token) {
-                console.log(that.subscriber.componentID, 'awaits credentials');
+                console.debug(that.subscriber.componentID, 'awaits credentials');
                 that.subscriber.setToken(message.token);
+                if (that.isPrimary) {
+                    Logger.takeOverConsole(that.subscriber);
+                }
                 that.loginSubject.pipe(RXJS.take(1)).subscribe({
                     next: (credentials: LoginCredentials) => {
-                        console.log(that.subscriber.componentID, 'got credentials:', credentials);
+                        console.debug(that.subscriber.componentID, 'got credentials:', credentials);
                         that.service.sendMessage(
                             new LoginMessage(
                                 credentials,
@@ -227,32 +292,41 @@ export class ConnectionService {
             // if the session token is not set yet provide it for other connections
             if (message.ses_token && !ConnectionService._sessionToken) {
                 ConnectionService._sessionToken = message.ses_token;
+                sessionStorage.setItem('SessionToken', message.ses_token);
                 ConnectionService.loginBySessionTokenSubject.next({ ses_token: message.ses_token });
             }
             if (that) {
-                if (that && that.isPrimary) {
-                    Logger.takeOverConsole(that.subscriber);
-                }
-                console.info('Connection established for', that.subscriber.componentID);
+                console.log('Connection established for', that.subscriber.componentID);
             }
         } else if (message instanceof ByeMessage) {
-            console.error('Logon failed');
+            console.error('Logon failed (', message.reason, ') for', that?.subscriber.componentID);
+            if (message.reason == 'Session expired') {
+                console.warn(
+                    'Session expired, clearing session token, closing all connections and reloading page'
+                );
+                ConnectionService._sessionToken = '';
+                sessionStorage.removeItem('SessionToken');
+                this.closeAllConnections();
+                // Reload the page
+                location.reload();
+            }
         }
     }
 
     // Send a message to the backend.
     sendMessage(message: Message, componentId: string) {
-        let connection = ConnectionService.connections[componentId].subject;
-        console.groupCollapsed(
-            'Sending',
-            message.type,
-            'for',
-            message instanceof LogMessage ? message.caller : componentId
-        );
-        console.log('Message:', message);
-        console.log('Connection:', connection);
-        console.log('Component:', ConnectionService.connections[componentId].subscriber);
-        console.groupEnd();
+        const connectionData = ConnectionService.connections[componentId];
+        if (!connectionData || !connectionData.subject) {
+            return;
+        }
+        const connection = connectionData.subject;
+        if (!(message instanceof LogMessage)) {
+            console.groupCollapsed('Sending', message.type, 'for', componentId);
+            console.debug('Message:', message);
+            console.debug('Connection:', connection);
+            console.debug('Component:', connectionData.subscriber);
+            console.groupEnd();
+        }
         connection.next(message);
     }
 
@@ -262,13 +336,13 @@ export class ConnectionService {
         subscriber: ConnectionSubscriber
     ) {
         console.groupCollapsed('Adding connection', subscriber.componentID);
-        console.log('subject:', subject);
-        console.log('subscriber:', subscriber);
+        console.debug('subject:', subject);
+        console.debug('subscriber:', subscriber);
         ConnectionService.connections[subscriber.componentID] = {
             subject: subject,
             subscriber: subscriber,
         };
-        console.log('Known connections:', ConnectionService.connections);
+        console.debug('Known connections:', ConnectionService.connections);
         console.groupEnd();
     }
 
@@ -282,5 +356,25 @@ export class ConnectionService {
         // according to ChatGPT we don't need to unsubscribe after .complete()
         // evreything is already closed cleanly
         delete ConnectionService.connections[componentId];
+    }
+
+    // Close all known websocket connections and reset session-related service state.
+    closeAllConnections(): void {
+        Logger.restoreConsole();
+        Object.keys(ConnectionService.connections).forEach((componentId: string) => {
+            // try {
+            //     ConnectionService.connections[componentId].subject.complete();
+            // } catch (error) {
+            //     console.error('Failed to close connection for', componentId, error);
+            // }
+            this.removeConnection(componentId);
+        });
+        // ConnectionService.connections = {};
+        ConnectionService.loginBySessionTokenSubject = new rxjs.ReplaySubject<LoginCredentials>();
+        const storedToken = sessionStorage.getItem('SessionToken');
+        ConnectionService._sessionToken = storedToken ?? '';
+        if (storedToken) {
+            ConnectionService.loginBySessionTokenSubject.next({ ses_token: storedToken });
+        }
     }
 }

@@ -1,7 +1,10 @@
 @if (getLoginCredentials) {
     <div>
+        @if (loginFailureReason) {
+            <p class="login-error-reason" role="alert">Login failed: {{ loginFailureReason }}</p>
+        }
         <!-- Here, the grand transformation takes place, from a verbose messenger to a silent guardian of entry -->
-        <label for="username">Benutzername:</label>
+        <label for="username">Username:</label>
         <input
             type="text"
             [(ngModel)]="username"

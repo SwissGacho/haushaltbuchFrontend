@@ -1,46 +1,57 @@
 <div class="app-container" [style.--sidebar-width.px]="sidebarWidth">
     <header class="app-container__header">
         <h1>Haushaltbuch</h1>
+        @if (shouldShowLogout()) {
+            <button class="logout-button" type="button" (click)="logout()">Logout</button>
+        }
     </header>
 
-    <aside class="app-container__sidebar">
-        <div class="sidebar__toolbar">
-            <button
-                class="sidebar__config-btn"
-                type="button"
-                [title]="showSidebarConfig ? 'Back to list' : 'Configure sidebar'"
-                [attr.aria-label]="showSidebarConfig ? 'Back to list' : 'Configure sidebar'"
-                [class.sidebar__config-btn--active]="showSidebarConfig"
-                (click)="toggleSidebarConfig()"
-            >
-                ⚙
-            </button>
+    @if (activateAnyComponent) {
+        <aside class="app-container__sidebar">
+            <div class="sidebar__toolbar">
+                <button
+                    class="sidebar__config-btn"
+                    type="button"
+                    [title]="showSidebarConfig ? 'Back to list' : 'Configure sidebar'"
+                    [attr.aria-label]="showSidebarConfig ? 'Back to list' : 'Configure sidebar'"
+                    [class.sidebar__config-btn--active]="showSidebarConfig"
+                    (click)="toggleSidebarConfig()"
+                >
+                    ⚙
+                </button>
+            </div>
+            @if (showSidebarConfig) {
+                <app-sidebar-configuration
+                    (close)="showSidebarConfig = false"
+                ></app-sidebar-configuration>
+            } @else {
+                <app-list-component></app-list-component>
+            }
+        </aside>
+
+        <div
+            class="app-container__resizer"
+            role="separator"
+            aria-label="Resize sidebar"
+            aria-orientation="vertical"
+            [attr.aria-valuemin]="minSidebarWidth"
+            [attr.aria-valuemax]="maxSidebarWidth"
+            [attr.aria-valuenow]="sidebarWidth"
+            tabindex="0"
+            (mousedown)="startSidebarResize($event)"
+            (keydown)="onSidebarResizerKeydown($event)"
+        ></div>
+
+        <main class="app-container__main">
+            <app-detail-component></app-detail-component>
+        </main>
+    }
+
+    @if (backendUnavailable) {
+        <div class="backend-unavailable-message" role="status" aria-live="polite">
+            Backend unavailable. Retrying connection in {{ retryInSeconds }}s...
         </div>
-        @if (showSidebarConfig) {
-            <app-sidebar-configuration
-                (close)="showSidebarConfig = false"
-            ></app-sidebar-configuration>
-        } @else {
-            <app-list-component></app-list-component>
-        }
-    </aside>
-
-    <div
-        class="app-container__resizer"
-        role="separator"
-        aria-label="Resize sidebar"
-        aria-orientation="vertical"
-        [attr.aria-valuemin]="minSidebarWidth"
-        [attr.aria-valuemax]="maxSidebarWidth"
-        [attr.aria-valuenow]="sidebarWidth"
-        tabindex="0"
-        (mousedown)="startSidebarResize($event)"
-        (keydown)="onSidebarResizerKeydown($event)"
-    ></div>
-
-    <main class="app-container__main">
-        <app-detail-component></app-detail-component>
-    </main>
+    }
 
     @if (activateLoginComponent) {
         <div class="box"><app-login-component></app-login-component></div>

@@ -15,6 +15,7 @@ import { LoginCredentials } from '../messages/admin.messages';
 })
 export class LoginComponent extends ConnectedComponent implements OnInit {
     getLoginCredentials = false;
+    loginFailureReason: string | null = null;
 
     constructor(private specificService: ConnectionService) {
         super(specificService);
@@ -24,17 +25,41 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
     username: string = '';
     loginSubject = new rxjs.ReplaySubject<LoginCredentials>();
 
+    private reopenConnectionForLogin(reason?: string): void {
+        sessionStorage.removeItem('SessionToken');
+        this.getLoginCredentials = true;
+        this.loginFailureReason = reason ?? null;
+
+        if (ConnectionService.connections[this.componentID]) {
+            this.specificService.removeConnection(this.componentID);
+            this.connected = false;
+        }
+
+        this.loginSubject = new rxjs.ReplaySubject<LoginCredentials>();
+        this.getConnection(this.loginSubject);
+    }
+
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, 'received', message.type, 'message');
-        console.log(message);
+        console.debug(message);
         console.groupEnd();
         if (message.type == MessageType.Hello) {
             let status = message.status;
             if (status == 'singleUser') {
+                this.loginFailureReason = null;
                 this.loginSubject.next({});
             } else {
                 this.getLoginCredentials = true;
             }
+        } else if (message.type == MessageType.Bye) {
+            this.username = '';
+            const reason =
+                'reason' in message && typeof message.reason === 'string'
+                    ? message.reason
+                    : undefined;
+            // Automatic or manual login failed; reopen a fresh login connection.
+            console.log('Login failed, reopening connection for login; reason:', reason);
+            this.reopenConnectionForLogin(reason);
         }
     }
 
@@ -49,12 +74,18 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
 
     logIn(): void {
         console.log('Login button pressed (', this.username, ')');
+        this.loginFailureReason = null;
         this.loginSubject.next({ user: this.username });
     }
 
     // Creates the connection to the backend when the component is initialized.
     // The LoginComponent
     override ngOnInit() {
+        console.debug('LoginComponent initialized:', this.componentID);
+        const sessionToken = sessionStorage.getItem('SessionToken');
+        if (sessionToken) {
+            this.loginSubject.next({ ses_token: sessionToken });
+        }
         this.getConnection(this.loginSubject);
     }
 }

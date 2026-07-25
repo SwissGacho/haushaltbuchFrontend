@@ -65,7 +65,7 @@ export class ConnectedComponent
         if (this.componentID == null) {
             return;
         }
-        console.info(this.componentID, 'is shutting down');
+        console.log(this.componentID, 'is shutting down');
         if (this.connected) {
             this.connectionService.removeConnection(this.componentID);
             this.connected = false;
@@ -84,14 +84,35 @@ export class ConnectedComponent
         throw new Error('Subclasses must implement the handleMessages method.');
     }
 
-    // Abstract method for components to implement their error handling.
+    // Fallback method for components to implement their error handling.
     handleError(error: any): void {
-        throw new Error('Subclasses must implement the handleError method.');
+        if (error && typeof error === 'object' && 'type' in error && 'reason' in error) {
+            if (error.type === 'close') {
+                console.warn(
+                    'Connection closed for component',
+                    this.componentID,
+                    error.reason ? '; Reason: ' + error.reason : ''
+                );
+                return;
+            }
+            console.error(
+                'Error received in component',
+                this.componentID,
+                ', Type:',
+                error.type,
+                ', Reason:',
+                error.reason
+            );
+            return;
+        }
+        console.error('Error received in component', this.componentID, error);
     }
 
     // Abstract method for components to implement their connection closing handling.
     handleComplete(): void {
-        console.warn(`Connection closed for component ${this.componentID}.`);
+        if (this.connected) {
+            console.warn(`Connection closed for component ${this.componentID}.`);
+        }
     }
 
     // Creates the connection to the backend when the component is initialized.

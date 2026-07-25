@@ -82,6 +82,7 @@ describe('ConnectionService', () => {
     afterEach(() => {
         jest.clearAllMocks();
         jest.restoreAllMocks();
+        sessionStorage.clear();
     });
 
     it('should be created', () => {
@@ -242,7 +243,11 @@ describe('ConnectionService', () => {
                 ]);
             }
             expect(spyOnNext).not.toHaveBeenCalled();
-            expect(spyOnTakeOverConsole).not.toHaveBeenCalled();
+            if (primary) {
+                expect(spyOnTakeOverConsole.mock.calls).toEqual([[mockSubscriber]]);
+            } else {
+                expect(spyOnTakeOverConsole).not.toHaveBeenCalled();
+            }
             expect(ConnectionService._sessionToken).toBe('mockSes1');
         } else if (msg.type == MessageType.Welcome && msg.ses_token) {
             expect(spyOnSetToken).not.toHaveBeenCalled();
@@ -252,7 +257,7 @@ describe('ConnectionService', () => {
             expect(spyOnSubscribe).not.toHaveBeenCalled();
             if (primary) {
                 expect(spyOnNext.mock.calls).toEqual([[{ ses_token: msg.ses_token }]]);
-                expect(spyOnTakeOverConsole.mock.calls).toEqual([[mockSubscriber]]);
+                expect(spyOnTakeOverConsole).not.toHaveBeenCalled();
                 expect(ConnectionService._sessionToken).toBe(msg.ses_token);
             } else {
                 expect(spyOnNext).not.toHaveBeenCalled();
@@ -289,6 +294,7 @@ describe('ConnectionService', () => {
         });
         ConnectionService._sessionToken = '';
         testHandleHandshakeMessage(mockWelcomeMessage, true);
+        expect(sessionStorage.getItem('SessionToken')).toBe('mockSession');
     });
 
     it('should handle later WelcomeMessages', () => {
@@ -329,6 +335,12 @@ describe('ConnectionService', () => {
         connectionService.sendMessage(mockMessage, mockComponentId);
 
         expect(spyOnNext.mock.calls).toEqual([[mockMessage]]);
+    });
+
+    it('should ignore sendMessage when component has no active connection', () => {
+        const mockMessage = new MockOutMessage();
+
+        expect(() => connectionService.sendMessage(mockMessage, 'missing_component')).not.toThrow();
     });
 
     it('should add a connection to connections list', () => {
@@ -389,5 +401,54 @@ describe('ConnectionService', () => {
             // mockComponent_1: {subject: mockSubject1, subscriber: mockSubscriber1},
             mockComponent_2: { subject: mockSubject2, subscriber: mockSubscriber2 },
         });
+    });
+
+    it('should not stack console interception on repeated logger takeover', () => {
+        const sendSpy = jest.spyOn(mockSubscriber, 'sendMessage').mockReturnValue();
+        const originalLog = window.console.log;
+
+        try {
+            Logger.takeOverConsole(mockSubscriber);
+            Logger.takeOverConsole(mockSubscriber);
+
+            window.console.log('single-message');
+
+            expect(sendSpy).toHaveBeenCalledTimes(1);
+        } finally {
+            Logger.restoreConsole();
+        }
+
+        expect(window.console.log).toBe(originalLog);
+    });
+
+    it('should close all connections and reset static state', () => {
+        const mockId1 = 'mockComponent_1';
+        const mockSubject1 = new MockWebSocketSubject() as unknown as rxws.WebSocketSubject<any>;
+        const mockSubscriber1 = new MockConnectedComponent(connectionService);
+        mockSubscriber1.componentID = mockId1;
+        const mockId2 = 'mockComponent_2';
+        const mockSubject2 = new MockWebSocketSubject() as unknown as rxws.WebSocketSubject<any>;
+        const mockSubscriber2 = new MockConnectedComponent(connectionService);
+        mockSubscriber2.componentID = mockId2;
+        const oldSubject = ConnectionService.loginBySessionTokenSubject;
+
+        ConnectionService.connections = {
+            mockComponent_1: { subject: mockSubject1, subscriber: mockSubscriber1 },
+            mockComponent_2: { subject: mockSubject2, subscriber: mockSubscriber2 },
+        };
+        ConnectionService._sessionToken = 'some-session';
+
+        const complete1Spy = jest.spyOn(mockSubject1, 'complete');
+        const complete2Spy = jest.spyOn(mockSubject2, 'complete');
+        const restoreConsoleSpy = jest.spyOn(Logger, 'restoreConsole').mockReturnValue();
+
+        connectionService.closeAllConnections();
+
+        expect(restoreConsoleSpy).toHaveBeenCalledTimes(1);
+        expect(complete1Spy).toHaveBeenCalledTimes(1);
+        expect(complete2Spy).toHaveBeenCalledTimes(1);
+        expect(ConnectionService.connections).toEqual({});
+        expect(ConnectionService._sessionToken).toBe('');
+        expect(ConnectionService.loginBySessionTokenSubject).not.toBe(oldSubject);
     });
 });

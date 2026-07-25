@@ -2,18 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import * as rxjs from 'rxjs';
 import { AppComponent } from './app.component';
-import { Message, MessageType } from './messages/Message';
+import { IncomingMessage, MessageType } from './messages/Message';
 import { WelcomeMessage, ByeMessage, HelloMessage } from './messages/admin.messages';
 import { ConnectionService } from './connection.service';
 import { ConfigurationStateService } from './configuration-state.service';
 
 class MockConnectionService {
-    getNewConnection(
-        subscriber: AppComponent,
-        loginSubjectOrObserveHandshake?: rxjs.Subject<any> | boolean,
-        isPrimary?: boolean
-    ) {}
-    removeConnection(componentId: string): void {}
+    getNewConnection = jest.fn();
+    removeConnection = jest.fn();
+    closeAllConnections = jest.fn();
 }
 
 class MockConfigurationStateService {
@@ -35,21 +32,32 @@ class MockConfigurationStateService {
 }
 
 describe('AppComponent', () => {
-    let fixture: ComponentFixture<any>;
+    let fixture: ComponentFixture<AppComponent>;
     let appComponent: AppComponent;
+    let connectionService: MockConnectionService;
 
     beforeEach(async () => {
+        jest.useFakeTimers();
+        sessionStorage.clear();
         await TestBed.configureTestingModule({
             imports: [RouterTestingModule],
             declarations: [AppComponent],
             providers: [
-                // AppComponent,
                 { provide: ConnectionService, useClass: MockConnectionService },
                 { provide: ConfigurationStateService, useClass: MockConfigurationStateService },
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(AppComponent);
         appComponent = fixture.componentInstance;
+        connectionService = fixture.debugElement.injector.get(
+            ConnectionService
+        ) as unknown as MockConnectionService;
+    });
+
+    afterEach(() => {
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+        jest.clearAllMocks();
     });
 
     it('should create the app', () => {
@@ -57,30 +65,29 @@ describe('AppComponent', () => {
         expect(appComponent.componentID).toContain('AppComponent_');
     });
 
-    it(`should have as title 'haushaltbuchFrontend'`, () => {
+    it("should have as title 'haushaltbuchFrontend'", () => {
         expect(appComponent.title).toEqual('haushaltbuchFrontend');
     });
 
-    /*
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('haushaltbuchFrontend app is running!');
-  });
-  */
-
-    it('should create connection on init', () => {
-        const conSrv = fixture.debugElement.injector.get(ConnectionService);
-        const spyOnGetNewConn = jest.spyOn(conSrv, 'getNewConnection');
-        const spyOnRemoveConn = jest.spyOn(conSrv, 'removeConnection');
-        expect(appComponent.connected).toBe(false);
+    it('should create primary connection on init', () => {
         appComponent.ngOnInit();
-        expect(spyOnGetNewConn).toHaveBeenCalledWith(appComponent, true, true);
-        expect(appComponent.connected).toBe(true);
-        expect(spyOnRemoveConn).not.toHaveBeenCalled();
-    });
 
+        expect(connectionService.getNewConnection).toHaveBeenCalledWith(appComponent, true, true);
+        expect(appComponent.connected).toBe(true);
+    });
+    it('should disable regular UI and show setup for noDB hello', () => {
+        const message = {
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'noDB',
+        } as IncomingMessage;
+
+        appComponent.handleMessages(message);
+
+        expect(appComponent.activateAnyComponent).toBe(false);
+        expect(appComponent.activateSetupConfigComponent).toBe(true);
+        expect(appComponent.activateLoginComponent).toBe(false);
+    });
     it('should restore sidebar width from configuration state on init', () => {
         const configSrv = fixture.debugElement.injector.get(ConfigurationStateService);
         const setItemSpy = jest.spyOn(configSrv, 'setItem');
@@ -195,21 +202,99 @@ describe('AppComponent', () => {
     it('should activate Login when receiving Hello message', () => {
         const mockHelloMessage = new HelloMessage({ type: MessageType.Hello, token: 'mockToken' });
         expect(appComponent.activateLoginComponent).toBe(false);
-        appComponent.handleMessages(mockHelloMessage);
+    });
+
+    it('should enable login and regular UI for available backend hello', () => {
+        const message = {
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'multiUser',
+        } as IncomingMessage;
+
+        appComponent.handleMessages(message);
+
+        expect(appComponent.isMultiUserMode).toBe(true);
+        expect(appComponent.activateAnyComponent).toBe(true);
+        expect(appComponent.activateSetupConfigComponent).toBe(false);
         expect(appComponent.activateLoginComponent).toBe(true);
     });
 
-    it('should deactivate Login when receiving Welcome message', () => {
-        const mockHelloMessage = new HelloMessage({ type: MessageType.Hello, token: 'mockToken' });
-        const mockWelcomeMessage = new WelcomeMessage({
+    it('should mark logged in and capture backend version on welcome', () => {
+        const welcome = new WelcomeMessage({
             type: MessageType.Welcome,
-            token: 'mockToken',
-            ses_token: 'mockSession',
-        });
+            token: 'token-1',
+            version_info: { version: '2.5.1' },
+        } as any);
+        appComponent.activateLoginComponent = true;
+
+        appComponent.handleMessages(welcome);
+
+        expect(appComponent.isLoggedIn).toBe(true);
         expect(appComponent.activateLoginComponent).toBe(false);
-        appComponent.handleMessages(mockHelloMessage);
-        expect(appComponent.activateLoginComponent).toBe(true);
-        appComponent.handleMessages(mockWelcomeMessage);
+        expect(appComponent.backendVersion).toBe('2.5.1');
+    });
+
+    it('should show logout only when logged in and in multi user mode', () => {
+        appComponent.isLoggedIn = false;
+        appComponent.isMultiUserMode = true;
+        expect(appComponent.shouldShowLogout()).toBe(false);
+
+        appComponent.isLoggedIn = true;
+        appComponent.isMultiUserMode = false;
+        expect(appComponent.shouldShowLogout()).toBe(false);
+
+        appComponent.isLoggedIn = true;
+        appComponent.isMultiUserMode = true;
+        expect(appComponent.shouldShowLogout()).toBe(true);
+    });
+
+    it('should start retry countdown and reconnect after 5 seconds on error', () => {
+        appComponent.activateAnyComponent = true;
+        appComponent.activateLoginComponent = true;
+        appComponent.isLoggedIn = true;
+
+        appComponent.handleError(new Error('offline'));
+
+        expect(connectionService.closeAllConnections).toHaveBeenCalledTimes(1);
+        expect(appComponent.backendUnavailable).toBe(true);
+        expect(appComponent.retryInSeconds).toBe(5);
+        expect(appComponent.activateAnyComponent).toBe(false);
         expect(appComponent.activateLoginComponent).toBe(false);
+        expect(appComponent.isLoggedIn).toBe(false);
+
+        jest.advanceTimersByTime(2000);
+        expect(appComponent.retryInSeconds).toBe(3);
+
+        jest.advanceTimersByTime(3000);
+        expect(connectionService.getNewConnection).toHaveBeenCalledWith(appComponent, true, true);
+        expect(appComponent.backendUnavailable).toBe(false);
+        expect(appComponent.retryInSeconds).toBe(0);
+    });
+
+    it('should not start duplicate recovery cycles while already recovering', () => {
+        appComponent.handleError(new Error('offline'));
+        appComponent.handleError(new Error('still offline'));
+
+        expect(connectionService.closeAllConnections).toHaveBeenCalledTimes(1);
+        jest.advanceTimersByTime(5000);
+        expect(connectionService.getNewConnection).toHaveBeenCalledTimes(1);
+    });
+
+    it('should clear reconnect timers on destroy', () => {
+        appComponent.handleError(new Error('offline'));
+
+        appComponent.ngOnDestroy();
+        jest.advanceTimersByTime(5000);
+
+        expect(connectionService.getNewConnection).toHaveBeenCalledTimes(0);
+        expect(connectionService.removeConnection).toHaveBeenCalledTimes(0);
+    });
+
+    it('should remove connection on destroy when currently connected', () => {
+        appComponent.ngOnInit();
+
+        appComponent.ngOnDestroy();
+
+        expect(connectionService.removeConnection).toHaveBeenCalledWith(appComponent.componentID);
     });
 });

@@ -25,9 +25,35 @@
     grid-area: header;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 0 1rem;
     border-bottom: 1px solid #dcdcdc;
     background: #ffffff;
+}
+
+.logout-button {
+    border: 1px solid #b52a2a;
+    background: #d43b3b;
+    color: #fff;
+    border-radius: 4px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    background: #bf2f2f;
+}
+
+.backend-unavailable-message {
+    grid-column: 1 / -1;
+    margin: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid #d4a017;
+    border-radius: 6px;
+    background: #fff4cc;
+    color: #6b4f00;
+    font-weight: 600;
 }
 
 .app-container__sidebar {
