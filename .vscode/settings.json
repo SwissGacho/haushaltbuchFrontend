@@ -5,6 +5,4 @@
     "jest.rootPath": ".",
     "jest.runMode": "on-demand",
 
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": false
 }
