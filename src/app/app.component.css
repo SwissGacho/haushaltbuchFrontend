@@ -11,12 +11,12 @@
 
 .app-container {
     display: grid;
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: var(--sidebar-width, 280px) 8px 1fr;
     grid-template-rows: 64px 1fr 40px;
     grid-template-areas:
-        'header header'
-        'sidebar main'
-        'footer footer';
+        'header header header'
+        'sidebar resizer main'
+        'footer footer footer';
     height: 100vh;
     overflow: hidden;
 }
@@ -60,8 +60,61 @@
     grid-area: sidebar;
     overflow: auto;
     border-right: 1px solid #dcdcdc;
-    padding: 0.5rem;
     background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar__toolbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.2rem 0.3rem;
+    border-bottom: 1px solid #dcdcdc;
+    flex-shrink: 0;
+    background: #f8f9fa;
+}
+
+.sidebar__config-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    color: #777;
+    line-height: 1;
+}
+
+.sidebar__config-btn:hover {
+    background: #eef2f5;
+    color: #333;
+}
+
+.sidebar__config-btn--active {
+    color: #4c83af;
+    background: #e8f0f7;
+}
+
+.app-container__sidebar app-list-component,
+.app-container__sidebar app-sidebar-configuration {
+    flex: 1;
+    overflow: auto;
+    padding: 0.5rem;
+    min-height: 0;
+}
+
+.app-container__resizer {
+    grid-area: resizer;
+    cursor: col-resize;
+    background: #ececec;
+    border-left: 1px solid #dcdcdc;
+    border-right: 1px solid #dcdcdc;
+}
+
+.app-container__resizer:hover,
+.app-container__resizer:focus {
+    background: #d9d9d9;
+    outline: none;
 }
 
 .app-container__main {

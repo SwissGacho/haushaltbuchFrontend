@@ -1,29 +1,75 @@
-<ul>
-    @for (object of objects; track object.id) {
-        <div>
-            <li
-                [class.expanded]="expandedObject?.id === object.id"
-                [class.known-empty]="knownEmptyIds.has(object.id)"
-                class="object-item"
-                (click)="onObjectClick(object.id)"
-                (dblclick)="onObjectDoubleClick(object.id)"
-                style="cursor: pointer"
+<div class="sublist" [style.--sublist-visible-item-count]="normalizedVisibleItemCount">
+    <div class="sublist__items" role="list">
+        @for (object of visibleObjects; track object.id) {
+            <div class="sublist__entry" role="listitem">
+                <div
+                    [class.expanded]="expandedObject?.id === object.id"
+                    [class.known-empty]="knownEmptyIds.has(object.id)"
+                    class="object-item toggle-marker"
+                    role="button"
+                    tabindex="0"
+                    (click)="onObjectClick(object.id)"
+                    (dblclick)="onObjectDoubleClick(object.id)"
+                    (keydown.enter)="onObjectClick(object.id)"
+                    (keydown.space)="$event.preventDefault(); onObjectClick(object.id)"
+                    style="cursor: pointer"
+                >
+                    <app-boname-renderer [value]="object.display_name"></app-boname-renderer>
+                </div>
+                @if (expandedObject?.id === object.id) {
+                    <div class="sublist__nested">
+                        <app-list-component
+                            [parentObject]="expandedObject"
+                            [sublistVisibleItemCount]="visibleItemCount"
+                            (empty)="onSublistEmpty(object.id)"
+                        ></app-list-component>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (hasOverflowingItems && hiddenObjectCount > 0) {
+            <button
+                class="sublist__show-more toggle-marker"
+                type="button"
+                (click)="showAllObjects()"
             >
-                <app-boname-renderer [value]="object.display_name"></app-boname-renderer>
-            </li>
-            @if (expandedObject?.id === object.id) {
-                <app-list-component
-                    [parentObject]="expandedObject"
-                    (empty)="onSublistEmpty(object.id)"
-                ></app-list-component>
-            }
+                Show {{ hiddenObjectCount }} more
+            </button>
+        }
+
+        @if (hasOverflowingItems && hiddenObjectCount === 0) {
+            <button
+                class="sublist__show-more toggle-marker"
+                type="button"
+                (click)="showFewerObjects()"
+            >
+                Show fewer
+            </button>
+        }
+    </div>
+
+    <div class="sublist__actions">
+        <div
+            class="add-new toggle-marker"
+            role="button"
+            tabindex="0"
+            (click)="onCreateNew()"
+            (keydown.enter)="onCreateNew()"
+            (keydown.space)="$event.preventDefault(); onCreateNew()"
+            style="cursor: pointer; font-style: italic; color: blue"
+        >
+            <app-boname-renderer [value]="'Add new ' + header"></app-boname-renderer>
         </div>
-    }
-    <li
-        class="add-new"
-        (click)="onCreateNew()"
-        style="cursor: pointer; font-style: italic; color: blue"
-    >
-        <app-boname-renderer [value]="'Add new ' + header"></app-boname-renderer>
-    </li>
-</ul>
+    </div>
+
+    <div
+        class="sublist__resize-handle"
+        role="separator"
+        aria-label="Resize sublist"
+        aria-orientation="horizontal"
+        tabindex="0"
+        (mousedown)="startResize($event)"
+        (keydown)="onResizeHandleKeydown($event)"
+    ></div>
+</div>

@@ -1,0 +1,158 @@
+.sidebar-config {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    font-size: 0.875rem;
+}
+
+.sidebar-config__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+    border-bottom: 1px solid #dcdcdc;
+    background: #f0f2f4;
+    flex-shrink: 0;
+}
+
+.sidebar-config__title {
+    font-weight: 600;
+    color: #333;
+}
+
+.sidebar-config__close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    color: #666;
+    line-height: 1;
+}
+
+.sidebar-config__close:hover {
+    background: #dde1e6;
+    color: #222;
+}
+
+.sidebar-config__section {
+    padding: 0.5rem;
+    overflow-y: auto;
+}
+
+.sidebar-config__section--hidden-area {
+    border-top: 1px solid #dcdcdc;
+    background: #f8f9fa;
+}
+
+.sidebar-config__section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888;
+    margin: 0 0 0.4rem 0;
+}
+
+.sidebar-config__empty {
+    font-size: 0.8rem;
+    color: #aaa;
+    font-style: italic;
+    margin: 0.25rem 0;
+}
+
+.sidebar-config__entry {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.2rem;
+    border-radius: 4px;
+    min-height: 2rem;
+}
+
+.sidebar-config__entry:hover {
+    background: #eef2f5;
+}
+
+.sidebar-config__entry--hidden {
+    opacity: 0.75;
+}
+
+.sidebar-config__entry--inactive .sidebar-config__name {
+    color: #aaa;
+}
+
+.sidebar-config__reorder {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex-shrink: 0;
+}
+
+.sidebar-config__name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #333;
+}
+
+.sidebar-config__unavailable {
+    font-size: 0.75rem;
+    color: #aaa;
+}
+
+.sidebar-config__btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    color: #666;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    flex-shrink: 0;
+}
+
+.sidebar-config__btn:hover:not(:disabled) {
+    background: #dde1e6;
+    color: #222;
+}
+
+.sidebar-config__btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+
+.sidebar-config__btn--arrow {
+    font-size: 0.6rem;
+    padding: 0.05rem 0.25rem;
+}
+
+.sidebar-config__btn--expand {
+    font-size: 0.65rem;
+    min-width: 1.5rem;
+    text-align: center;
+}
+
+.sidebar-config__btn--hide {
+    color: #999;
+    font-size: 1rem;
+}
+
+.sidebar-config__btn--hide:hover {
+    color: #c0392b;
+    background: #fdecea;
+}
+
+.sidebar-config__btn--show {
+    color: #999;
+    font-size: 1rem;
+}
+
+.sidebar-config__btn--show:hover {
+    color: #27ae60;
+    background: #eafbea;
+}

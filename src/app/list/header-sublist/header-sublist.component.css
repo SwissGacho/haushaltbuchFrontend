@@ -1,19 +1,69 @@
+.sublist {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.sublist__items {
+    overflow: visible;
+    max-height: none;
+}
+
+.sublist__entry {
+    display: block;
+}
+
+.sublist__nested {
+    margin-left: 0.9rem;
+    padding-left: 0.6rem;
+    border-left: 1px solid #d8d8d8;
+}
+
+.sublist__show-more {
+    border: 0;
+    background: transparent;
+    color: #0f4f8a;
+    padding: 0.2rem 0 0.2rem 1.2rem;
+    text-align: left;
+    cursor: pointer;
+    min-height: var(--sublist-row-height, 1.9rem);
+    font-style: italic;
+    --toggle-icon-left: 0.2rem;
+    --toggle-icon-top: 0.35rem;
+    --toggle-icon-size: 70%;
+}
+
+.sublist__show-more:hover {
+    color: #0a3b68;
+    text-decoration: underline;
+}
+
+.sublist__resize-handle {
+    height: 8px;
+    margin-top: 0.1rem;
+    background: #ececec;
+    border-top: 1px solid #dcdcdc;
+    border-bottom: 1px solid #dcdcdc;
+    cursor: ns-resize;
+}
+
+.sublist__resize-handle:hover {
+    background: #d9d9d9;
+}
+
+.sublist__resize-handle:focus-visible {
+    outline: 2px solid #4c83af;
+    outline-offset: 1px;
+}
+
 .object-item {
-    list-style-type: none;
-    position: relative;
-}
-
-.object-item::before {
-    content: '►';
-    position: absolute;
-    left: -1.3em;
-    top: 2pt;
-    color: #555;
-    font-size: 70%;
-}
-
-.object-item.expanded::before {
-    content: '▼';
+    min-height: var(--sublist-row-height, 1.9rem);
+    display: flex;
+    align-items: center;
+    padding-left: 1.2rem;
+    --toggle-icon-left: 0.2rem;
+    --toggle-icon-top: 0.35rem;
+    --toggle-icon-size: 70%;
 }
 
 .object-item.known-empty::before {
@@ -22,15 +72,12 @@
 }
 
 .add-new {
-    list-style-type: none;
-    position: relative;
-}
-
-.add-new::before {
-    content: '►';
-    position: absolute;
-    left: -1.3em;
-    top: 2pt;
-    color: blue;
-    font-size: 70%;
+    min-height: var(--sublist-row-height, 1.9rem);
+    display: flex;
+    align-items: center;
+    padding-left: 1.2rem;
+    --toggle-icon-left: 0.2rem;
+    --toggle-icon-top: 0.35rem;
+    --toggle-icon-size: 70%;
+    --toggle-icon-color: blue;
 }
