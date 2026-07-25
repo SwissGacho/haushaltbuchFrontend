@@ -1,8 +1,17 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import * as rxjs from 'rxjs';
 import { AppComponent } from './app.component';
+import { IncomingMessage, MessageType } from './messages/Message';
+import { WelcomeMessage, ByeMessage, HelloMessage } from './messages/admin.messages';
 import { ConnectionService } from './connection.service';
 import { ConfigurationStateService } from './configuration-state.service';
-import { IncomingMessage, MessageType } from './messages/Message';
-import { WelcomeMessage } from './messages/admin.messages';
+
+class MockConnectionService {
+    getNewConnection = jest.fn();
+    removeConnection = jest.fn();
+    closeAllConnections = jest.fn();
+}
 
 class MockConfigurationStateService {
     private readonly values = new Map<string, unknown>();
@@ -23,22 +32,26 @@ class MockConfigurationStateService {
 }
 
 describe('AppComponent', () => {
+    let fixture: ComponentFixture<AppComponent>;
     let appComponent: AppComponent;
-    let connectionService: {
-        getNewConnection: jest.Mock;
-        removeConnection: jest.Mock;
-        closeAllConnections: jest.Mock;
-    };
+    let connectionService: MockConnectionService;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         jest.useFakeTimers();
-        connectionService = {
-            getNewConnection: jest.fn(),
-            removeConnection: jest.fn(),
-            closeAllConnections: jest.fn(),
-        };
-        appComponent = new AppComponent(connectionService as unknown as ConnectionService);
         sessionStorage.clear();
+        await TestBed.configureTestingModule({
+            imports: [RouterTestingModule],
+            declarations: [AppComponent],
+            providers: [
+                { provide: ConnectionService, useClass: MockConnectionService },
+                { provide: ConfigurationStateService, useClass: MockConfigurationStateService },
+            ],
+        }).compileComponents();
+        fixture = TestBed.createComponent(AppComponent);
+        appComponent = fixture.componentInstance;
+        connectionService = fixture.debugElement.injector.get(
+            ConnectionService
+        ) as unknown as MockConnectionService;
     });
 
     afterEach(() => {
@@ -62,7 +75,19 @@ describe('AppComponent', () => {
         expect(connectionService.getNewConnection).toHaveBeenCalledWith(appComponent, true, true);
         expect(appComponent.connected).toBe(true);
     });
+    it('should disable regular UI and show setup for noDB hello', () => {
+        const message = {
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'noDB',
+        } as IncomingMessage;
 
+        appComponent.handleMessages(message);
+
+        expect(appComponent.activateAnyComponent).toBe(false);
+        expect(appComponent.activateSetupConfigComponent).toBe(true);
+        expect(appComponent.activateLoginComponent).toBe(false);
+    });
     it('should restore sidebar width from configuration state on init', () => {
         const configSrv = fixture.debugElement.injector.get(ConfigurationStateService);
         const setItemSpy = jest.spyOn(configSrv, 'setItem');

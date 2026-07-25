@@ -97,6 +97,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
 
     override ngOnDestroy(): void {
         this.sidebarWidthSubscription?.unsubscribe();
+        this.clearReconnectState();
         super.ngOnDestroy();
     }
 
@@ -187,11 +188,6 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
             `The App Component connection closed, retrying in ${this.RETRY_INTERVAL} seconds.`
         );
         this.recoverFromConnectionLoss();
-    }
-
-    override ngOnDestroy(): void {
-        this.clearReconnectState();
-        super.ngOnDestroy();
     }
 
     logout(): void {
