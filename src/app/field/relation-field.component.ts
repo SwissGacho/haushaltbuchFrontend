@@ -49,6 +49,7 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
     isOpen = false;
     isLoading = false;
     shouldOpenOnLoad = false;
+    optionsLoaded = false;
     dropUp = false;
     selectedIndex = -1;
     currentFilteredOptions: SelectOption[] = [];
@@ -131,6 +132,7 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
 
             const emptyOption: SelectOption = { id: null, display_name: '--- None ---' };
             this.options$.next([emptyOption, ...objectMessage.payload.objects]);
+            this.optionsLoaded = true;
             this.isLoading = false;
 
             if (this.shouldOpenOnLoad) {
@@ -190,7 +192,7 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
         }
 
         // If no options are loaded (except for the initial value)
-        if (this.options$.value.length <= 1) {
+        if (!this.optionsLoaded) {
             this.shouldOpenOnLoad = true;
             this.fetchPossibleValues();
         } else {
@@ -227,14 +229,14 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
         const value = target.value;
         this.filterText$.next(value);
         this.open();
-        if (this.options$.value.length <= 1 && !this.isLoading) {
+        if (!this.optionsLoaded && !this.isLoading) {
             this.fetchPossibleValues();
         }
         this.selectedIndex = this.currentFilteredOptions.length > 0 ? 0 : -1;
     }
 
     onFocus() {
-        if (this.options$.value.length <= 1 && !this.isLoading) {
+        if (!this.optionsLoaded && !this.isLoading) {
             this.shouldOpenOnLoad = false;
             this.fetchPossibleValues();
         }
@@ -256,7 +258,7 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
             (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Enter')
         ) {
             event.preventDefault();
-            if (this.options$.value.length <= 1 && !this.isLoading) {
+            if (!this.optionsLoaded && !this.isLoading) {
                 this.shouldOpenOnLoad = true;
                 this.fetchPossibleValues();
             }

@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { RelationFieldComponent } from './relation-field.component';
+import { MessageType } from '../messages/Message';
+import { ObjectMessage } from '../messages/data.messages';
 
 describe('RelationFieldComponent', () => {
     let component: RelationFieldComponent;
@@ -40,5 +42,37 @@ describe('RelationFieldComponent', () => {
         component.selectOption({ id: null, display_name: '--- None ---' } as any);
 
         expect(emittedValues.length).toBe(0);
+    });
+
+    it('opens from an empty loaded list without fetching again', () => {
+        component.schema = { flags: { relation: { relation: 'example' } } };
+        component.setToken('token');
+        component.connected = true;
+
+        const sendMessageSpy = jest.spyOn(component, 'sendMessage');
+
+        component.fetchPossibleValues();
+
+        expect(sendMessageSpy).toHaveBeenCalledTimes(1);
+
+        component.shouldOpenOnLoad = true;
+        component.handleMessages(
+            new ObjectMessage({
+                type: MessageType.Object,
+                token: null,
+                object: 'bolist',
+                index: 'example',
+                payload: { objects: [] },
+            } as any)
+        );
+
+        expect(component.optionsLoaded).toBe(true);
+        expect(component.isOpen).toBe(true);
+
+        component.close();
+        component.toggleOpen();
+
+        expect(component.isOpen).toBe(true);
+        expect(sendMessageSpy).toHaveBeenCalledTimes(1);
     });
 });
