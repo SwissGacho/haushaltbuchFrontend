@@ -15,15 +15,27 @@ import {
 
 export class HelloMessage extends IncomingMessage implements HelloMessageType {
     override type = MessageType.Hello as const;
+    authenticated_user?: string;
+
+    constructor(data: Message) {
+        super(data);
+        if ('authenticated_user' in data && data.authenticated_user) {
+            this.authenticated_user = data.authenticated_user;
+        }
+    }
 }
 
 export class WelcomeMessage extends IncomingMessage implements WelcomeMessageType {
     override type = MessageType.Welcome as const;
+    authenticated_user?: string;
     ses_token?: string;
     version_info?: { version?: string };
 
     constructor(data: Message) {
         super(data);
+        if ('authenticated_user' in data && data.authenticated_user) {
+            this.authenticated_user = data.authenticated_user;
+        }
         if ('version_info' in data && data.version_info) {
             this.version_info = data.version_info;
         }

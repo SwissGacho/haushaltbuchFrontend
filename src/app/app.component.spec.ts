@@ -209,6 +209,7 @@ describe('AppComponent', () => {
             type: MessageType.Hello,
             token: 'token-1',
             status: 'multiUser',
+            authenticated_user: 'alice',
         } as IncomingMessage;
 
         appComponent.handleMessages(message);
@@ -217,12 +218,14 @@ describe('AppComponent', () => {
         expect(appComponent.activateAnyComponent).toBe(true);
         expect(appComponent.activateSetupConfigComponent).toBe(false);
         expect(appComponent.activateLoginComponent).toBe(true);
+        expect(appComponent.username).toBe('alice');
     });
 
     it('should mark logged in and capture backend version on welcome', () => {
         const welcome = new WelcomeMessage({
             type: MessageType.Welcome,
             token: 'token-1',
+            authenticated_user: 'alice',
             version_info: { version: '2.5.1' },
         } as any);
         appComponent.activateLoginComponent = true;
@@ -231,6 +234,7 @@ describe('AppComponent', () => {
 
         expect(appComponent.isLoggedIn).toBe(true);
         expect(appComponent.activateLoginComponent).toBe(false);
+        expect(appComponent.username).toBe('alice');
         expect(appComponent.backendVersion).toBe('2.5.1');
     });
 

@@ -44,6 +44,16 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
         console.debug(message);
         console.groupEnd();
         if (message.type == MessageType.Hello) {
+            const authenticatedUser =
+                'authenticated_user' in message && typeof message.authenticated_user === 'string'
+                    ? message.authenticated_user
+                    : undefined;
+            if (authenticatedUser) {
+                this.getLoginCredentials = false;
+                this.loginFailureReason = null;
+                this.loginSubject.next({ user: authenticatedUser });
+                return;
+            }
             let status = message.status;
             if (status == 'singleUser') {
                 this.loginFailureReason = null;

@@ -26,6 +26,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
     showSidebarConfig = false;
     isLoggedIn = false;
     isMultiUserMode = false;
+    username: string | null = null;
     backendUnavailable = false;
     retryInSeconds = 0;
     private isRecoveringFromDisconnect = false;
@@ -59,6 +60,10 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
         this.clearReconnectState();
         if (message.type == MessageType.Hello) {
             this.isMultiUserMode = message.status == 'multiUser';
+            this.username =
+                'authenticated_user' in message && typeof message.authenticated_user === 'string'
+                    ? message.authenticated_user
+                    : null;
             // check basic status of backend
             if (message.status == 'noDB') {
                 console.log('Open Setup Dialogue');
@@ -75,6 +80,10 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
             // we are logged in, destroy LoginComponent
             this.isLoggedIn = true;
             this.activateLoginComponent = false;
+            const welcomeMessage = message as WelcomeMessageType;
+            if (welcomeMessage.authenticated_user) {
+                this.username = welcomeMessage.authenticated_user;
+            }
             if ('version_info' in message) {
                 const versionInfo = (message as WelcomeMessageType).version_info;
                 if (versionInfo && typeof versionInfo === 'object' && 'version' in versionInfo) {
@@ -192,6 +201,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
 
     logout(): void {
         this.isLoggedIn = false;
+        this.username = null;
         this.clearReconnectState();
         sessionStorage.clear();
         this.specificService.closeAllConnections();
@@ -213,6 +223,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
         this.activateLoginComponent = false;
         this.activateSetupConfigComponent = false;
         this.isLoggedIn = false;
+        this.username = null;
         sessionStorage.clear();
         this.specificService.closeAllConnections();
         this.connected = false;

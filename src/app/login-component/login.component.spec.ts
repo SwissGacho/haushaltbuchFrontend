@@ -70,6 +70,23 @@ describe('LoginComponent', () => {
         expect(received).toEqual([{}]);
     });
 
+    it('should auto-login with the authenticated user from Hello', () => {
+        const received: any[] = [];
+        component.loginSubject.subscribe((value) => received.push(value));
+        const message = {
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'multiUser',
+            authenticated_user: 'alice',
+        } as IncomingMessage;
+
+        component.handleMessages(message);
+
+        expect(received).toEqual([{ user: 'alice' }]);
+        expect(component.getLoginCredentials).toBe(false);
+        expect(component.loginFailureReason).toBeNull();
+    });
+
     it('should send entered username when logIn is called', () => {
         const received: any[] = [];
         component.loginSubject.subscribe((value) => received.push(value));
