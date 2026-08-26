@@ -16,6 +16,7 @@ import { LoginCredentials } from '../messages/admin.messages';
 export class LoginComponent extends ConnectedComponent implements OnInit {
     getLoginCredentials = false;
     loginFailureReason: string | null = null;
+    private authenticatedUserLoginAttempted = false;
 
     constructor(private specificService: ConnectionService) {
         super(specificService);
@@ -48,10 +49,15 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
                 'authenticated_user' in message && typeof message.authenticated_user === 'string'
                     ? message.authenticated_user
                     : undefined;
-            if (authenticatedUser) {
+            if (authenticatedUser && !this.authenticatedUserLoginAttempted) {
+                this.authenticatedUserLoginAttempted = true;
                 this.getLoginCredentials = false;
                 this.loginFailureReason = null;
                 this.loginSubject.next({ user: authenticatedUser });
+                return;
+            }
+            if (authenticatedUser) {
+                this.getLoginCredentials = true;
                 return;
             }
             let status = message.status;

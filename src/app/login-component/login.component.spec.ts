@@ -87,6 +87,37 @@ describe('LoginComponent', () => {
         expect(component.loginFailureReason).toBeNull();
     });
 
+    it('should show the form after automatic authenticated-user login fails', () => {
+        const initialReceived: any[] = [];
+        component.loginSubject.subscribe((value) => initialReceived.push(value));
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'multiUser',
+            authenticated_user: 'alice',
+        } as IncomingMessage);
+
+        component.handleMessages({
+            type: MessageType.Bye,
+            token: 'token-1',
+            reason: 'Invalid username',
+        } as IncomingMessage);
+
+        const retryReceived: any[] = [];
+        component.loginSubject.subscribe((value) => retryReceived.push(value));
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-2',
+            status: 'multiUser',
+            authenticated_user: 'alice',
+        } as IncomingMessage);
+
+        expect(initialReceived).toEqual([{ user: 'alice' }]);
+        expect(retryReceived).toEqual([]);
+        expect(component.getLoginCredentials).toBe(true);
+        expect(component.loginFailureReason).toBe('Invalid username');
+    });
+
     it('should send entered username when logIn is called', () => {
         const received: any[] = [];
         component.loginSubject.subscribe((value) => received.push(value));
