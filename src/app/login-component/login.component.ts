@@ -17,6 +17,8 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
     getLoginCredentials = false;
     loginFailureReason: string | null = null;
     private authenticatedUserLoginAttempted = false;
+    private suppressAuthenticatedUserLogin =
+        sessionStorage.getItem('SuppressAuthenticatedUserLogin') === 'true';
 
     constructor(private specificService: ConnectionService) {
         super(specificService);
@@ -49,7 +51,11 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
                 'authenticated_user' in message && typeof message.authenticated_user === 'string'
                     ? message.authenticated_user
                     : undefined;
-            if (authenticatedUser && !this.authenticatedUserLoginAttempted) {
+            if (
+                authenticatedUser &&
+                !this.suppressAuthenticatedUserLogin &&
+                !this.authenticatedUserLoginAttempted
+            ) {
                 this.authenticatedUserLoginAttempted = true;
                 this.getLoginCredentials = false;
                 this.loginFailureReason = null;
@@ -90,6 +96,8 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
 
     logIn(): void {
         console.log('Login button pressed (', this.username, ')');
+        this.suppressAuthenticatedUserLogin = false;
+        sessionStorage.removeItem('SuppressAuthenticatedUserLogin');
         this.loginFailureReason = null;
         this.loginSubject.next({ user: this.username });
     }

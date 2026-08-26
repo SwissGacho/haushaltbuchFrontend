@@ -87,6 +87,33 @@ describe('LoginComponent', () => {
         expect(component.loginFailureReason).toBeNull();
     });
 
+    it('should show the form instead of auto-login after explicit logout', () => {
+        sessionStorage.setItem('SuppressAuthenticatedUserLogin', 'true');
+        component = new LoginComponent(connectionService as unknown as ConnectionService);
+        const received: any[] = [];
+        component.loginSubject.subscribe((value) => received.push(value));
+
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'multiUser',
+            authenticated_user: 'alice',
+        } as IncomingMessage);
+
+        expect(received).toEqual([]);
+        expect(component.getLoginCredentials).toBe(true);
+    });
+
+    it('should clear explicit logout suppression when logging in manually', () => {
+        sessionStorage.setItem('SuppressAuthenticatedUserLogin', 'true');
+        component = new LoginComponent(connectionService as unknown as ConnectionService);
+        component.username = 'bob';
+
+        component.logIn();
+
+        expect(sessionStorage.getItem('SuppressAuthenticatedUserLogin')).toBeNull();
+    });
+
     it('should show the form after automatic authenticated-user login fails', () => {
         const initialReceived: any[] = [];
         component.loginSubject.subscribe((value) => initialReceived.push(value));

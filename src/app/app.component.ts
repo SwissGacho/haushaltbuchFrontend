@@ -204,6 +204,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
         this.username = null;
         this.clearReconnectState();
         sessionStorage.clear();
+        sessionStorage.setItem('SuppressAuthenticatedUserLogin', 'true');
         this.specificService.closeAllConnections();
         window.location.reload();
     }
