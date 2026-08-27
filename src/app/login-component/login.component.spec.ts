@@ -114,6 +114,40 @@ describe('LoginComponent', () => {
         expect(sessionStorage.getItem('SuppressAuthenticatedUserLogin')).toBeNull();
     });
 
+    it('should not auto-login the Hello user after a manual login attempt fails', () => {
+        sessionStorage.setItem('SuppressAuthenticatedUserLogin', 'true');
+        component = new LoginComponent(connectionService as unknown as ConnectionService);
+        const received: any[] = [];
+        component.loginSubject.subscribe((value) => received.push(value));
+
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'multiUser',
+            authenticated_user: 'alice',
+        } as IncomingMessage);
+        component.username = 'bob';
+        component.logIn();
+        component.handleMessages({
+            type: MessageType.Bye,
+            token: 'token-1',
+            reason: 'Invalid username',
+        } as IncomingMessage);
+
+        const retryReceived: any[] = [];
+        component.loginSubject.subscribe((value) => retryReceived.push(value));
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-2',
+            status: 'multiUser',
+            authenticated_user: 'alice',
+        } as IncomingMessage);
+
+        expect(received).toEqual([{ user: 'bob' }]);
+        expect(retryReceived).toEqual([]);
+        expect(component.getLoginCredentials).toBe(true);
+    });
+
     it('should show the form after automatic authenticated-user login fails', () => {
         const initialReceived: any[] = [];
         component.loginSubject.subscribe((value) => initialReceived.push(value));

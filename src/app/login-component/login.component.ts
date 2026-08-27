@@ -96,6 +96,7 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
 
     logIn(): void {
         console.log('Login button pressed (', this.username, ')');
+        this.authenticatedUserLoginAttempted = true;
         this.suppressAuthenticatedUserLogin = false;
         sessionStorage.removeItem('SuppressAuthenticatedUserLogin');
         this.loginFailureReason = null;
