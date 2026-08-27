@@ -252,6 +252,18 @@ describe('AppComponent', () => {
         expect(appComponent.shouldShowLogout()).toBe(true);
     });
 
+    it('should preserve logout suppression when closing connections triggers recovery', () => {
+        appComponent.isLoggedIn = true;
+        appComponent.isMultiUserMode = true;
+
+        appComponent.logout();
+        appComponent.handleError(new Error('connection closed during logout'));
+
+        expect(sessionStorage.getItem('SuppressAuthenticatedUserLogin')).toBe('true');
+        expect(appComponent.backendUnavailable).toBe(false);
+        expect(connectionService.closeAllConnections).toHaveBeenCalledTimes(1);
+    });
+
     it('should start retry countdown and reconnect after 5 seconds on error', () => {
         appComponent.activateAnyComponent = true;
         appComponent.activateLoginComponent = true;

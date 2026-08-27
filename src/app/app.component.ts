@@ -30,6 +30,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
     backendUnavailable = false;
     retryInSeconds = 0;
     private isRecoveringFromDisconnect = false;
+    private isLoggingOut = false;
     private reconnectTimeout?: ReturnType<typeof setTimeout>;
     private reconnectInterval?: ReturnType<typeof setInterval>;
     frontendVersion = environment.appVersion;
@@ -200,6 +201,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
     }
 
     logout(): void {
+        this.isLoggingOut = true;
         this.isLoggedIn = false;
         this.username = null;
         this.clearReconnectState();
@@ -214,7 +216,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
     }
 
     private recoverFromConnectionLoss(): void {
-        if (this.isRecoveringFromDisconnect) {
+        if (this.isLoggingOut || this.isRecoveringFromDisconnect) {
             return;
         }
         this.isRecoveringFromDisconnect = true;
