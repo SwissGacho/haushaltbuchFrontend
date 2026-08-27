@@ -256,13 +256,17 @@ describe('AppComponent', () => {
         appComponent.isLoggedIn = true;
         appComponent.isMultiUserMode = true;
 
+        const reloadSpy = jest
+            .spyOn(window.location, 'reload')
+            .mockImplementation(() => undefined);
         appComponent.logout();
         appComponent.handleError(new Error('connection closed during logout'));
 
         expect(sessionStorage.getItem('SuppressAuthenticatedUserLogin')).toBe('true');
         expect(appComponent.backendUnavailable).toBe(false);
         expect(connectionService.closeAllConnections).toHaveBeenCalledTimes(1);
-    });
+
+        reloadSpy.mockRestore();
 
     it('should start retry countdown and reconnect after 5 seconds on error', () => {
         appComponent.activateAnyComponent = true;
