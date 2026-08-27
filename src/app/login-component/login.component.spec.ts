@@ -104,6 +104,23 @@ describe('LoginComponent', () => {
         expect(component.getLoginCredentials).toBe(true);
     });
 
+    it('should log in as the authenticated Hello user when requested', () => {
+        sessionStorage.setItem('SuppressAuthenticatedUserLogin', 'true');
+        component = new LoginComponent(connectionService as unknown as ConnectionService);
+        const received: any[] = [];
+        component.loginSubject.subscribe((value) => received.push(value));
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'multiUser',
+            authenticated_user: 'alice',
+        } as IncomingMessage);
+        component.loginAsAuthenticatedUser();
+
+        expect(received).toEqual([{ user: 'alice' }]);
+        expect(component.getLoginCredentials).toBe(false);
+    });
+
     it('should clear explicit logout suppression when logging in manually', () => {
         sessionStorage.setItem('SuppressAuthenticatedUserLogin', 'true');
         component = new LoginComponent(connectionService as unknown as ConnectionService);

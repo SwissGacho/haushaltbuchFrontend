@@ -16,6 +16,7 @@ import { LoginCredentials } from '../messages/admin.messages';
 export class LoginComponent extends ConnectedComponent implements OnInit {
     getLoginCredentials = false;
     loginFailureReason: string | null = null;
+    authenticatedUser: string | null = null;
     private authenticatedUserLoginAttempted = false;
     private suppressAuthenticatedUserLogin =
         sessionStorage.getItem('SuppressAuthenticatedUserLogin') === 'true';
@@ -51,6 +52,7 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
                 'authenticated_user' in message && typeof message.authenticated_user === 'string'
                     ? message.authenticated_user
                     : undefined;
+            this.authenticatedUser = authenticatedUser ?? null;
             if (
                 authenticatedUser &&
                 !this.suppressAuthenticatedUserLogin &&
@@ -101,6 +103,19 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
         sessionStorage.removeItem('SuppressAuthenticatedUserLogin');
         this.loginFailureReason = null;
         this.loginSubject.next({ user: this.username });
+    }
+
+    loginAsAuthenticatedUser(): void {
+        if (!this.authenticatedUser) {
+            return;
+        }
+        console.log('Login button pressed for authenticated user (', this.authenticatedUser, ')');
+        this.authenticatedUserLoginAttempted = true;
+        this.suppressAuthenticatedUserLogin = false;
+        sessionStorage.removeItem('SuppressAuthenticatedUserLogin');
+        this.getLoginCredentials = false;
+        this.loginFailureReason = null;
+        this.loginSubject.next({ user: this.authenticatedUser });
     }
 
     // Creates the connection to the backend when the component is initialized.
