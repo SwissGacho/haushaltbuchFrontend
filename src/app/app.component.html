@@ -75,6 +75,9 @@
 
     <footer class="app-container__footer">
         <span>Frontend: {{ frontendVersion }}</span>
-        <span>Backend: {{ backendVersion }}</span>
+        <span
+            >Backend: {{ backendVersion
+            }}{{ backendStatus ? ' (' + backendStatus + ')' : '' }}</span
+        >
     </footer>
 </div>

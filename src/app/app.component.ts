@@ -35,6 +35,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
     private reconnectInterval?: ReturnType<typeof setInterval>;
     frontendVersion = environment.appVersion;
     backendVersion?: string;
+    backendStatus?: string;
     sidebarWidth = AppComponent.DEFAULT_SIDEBAR_WIDTH;
     readonly minSidebarWidth = 180;
     readonly maxSidebarWidth = 700;
@@ -87,6 +88,9 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
                 if (versionInfo && typeof versionInfo === 'object' && 'version' in versionInfo) {
                     this.backendVersion = versionInfo.version;
                 }
+            }
+            if (welcomeMessage.status) {
+                this.backendStatus = welcomeMessage.status;
             }
         }
         console.log('App logged in:', this.componentID);
