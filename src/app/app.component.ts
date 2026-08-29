@@ -89,9 +89,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
                     this.backendVersion = versionInfo.version;
                 }
             }
-            if (welcomeMessage.status) {
-                this.backendStatus = welcomeMessage.status;
-            }
+            this.backendStatus = welcomeMessage.status;
         }
         console.log('App logged in:', this.componentID);
     }
