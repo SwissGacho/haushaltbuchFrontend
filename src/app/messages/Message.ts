@@ -46,10 +46,12 @@ export interface OutgoingBaseMessage extends BaseMessage {
 // Discriminated union types for incoming messages
 export interface HelloMessageType extends IncomingBaseMessage {
     type: MessageType.Hello;
+    authenticated_user?: boolean;
 }
 
 export interface WelcomeMessageType extends IncomingBaseMessage {
     type: MessageType.Welcome;
+    authenticated_user?: string;
     ses_token?: string;
     version_info?: { version?: string };
 }

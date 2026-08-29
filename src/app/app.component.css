@@ -31,6 +31,17 @@
     background: #ffffff;
 }
 
+.app-container__account {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.app-container__username {
+    color: #333;
+    font-weight: 600;
+}
+
 .logout-button {
     border: 1px solid #b52a2a;
     background: #d43b3b;

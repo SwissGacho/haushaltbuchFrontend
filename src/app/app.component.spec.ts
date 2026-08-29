@@ -209,6 +209,7 @@ describe('AppComponent', () => {
             type: MessageType.Hello,
             token: 'token-1',
             status: 'multiUser',
+            authenticated_user: true,
         } as IncomingMessage;
 
         appComponent.handleMessages(message);
@@ -217,12 +218,14 @@ describe('AppComponent', () => {
         expect(appComponent.activateAnyComponent).toBe(true);
         expect(appComponent.activateSetupConfigComponent).toBe(false);
         expect(appComponent.activateLoginComponent).toBe(true);
+        expect(appComponent.username).toBeNull();
     });
 
     it('should mark logged in and capture backend version on welcome', () => {
         const welcome = new WelcomeMessage({
             type: MessageType.Welcome,
             token: 'token-1',
+            authenticated_user: 'alice',
             version_info: { version: '2.5.1' },
         } as any);
         appComponent.activateLoginComponent = true;
@@ -231,6 +234,7 @@ describe('AppComponent', () => {
 
         expect(appComponent.isLoggedIn).toBe(true);
         expect(appComponent.activateLoginComponent).toBe(false);
+        expect(appComponent.username).toBe('alice');
         expect(appComponent.backendVersion).toBe('2.5.1');
     });
 
@@ -246,6 +250,18 @@ describe('AppComponent', () => {
         appComponent.isLoggedIn = true;
         appComponent.isMultiUserMode = true;
         expect(appComponent.shouldShowLogout()).toBe(true);
+    });
+
+    it('should preserve logout suppression when closing connections triggers recovery', () => {
+        appComponent.isLoggedIn = true;
+        appComponent.isMultiUserMode = true;
+
+        appComponent.logout();
+        appComponent.handleError(new Error('connection closed during logout'));
+
+        expect(sessionStorage.getItem('SuppressAuthenticatedUserLogin')).toBe('true');
+        expect(appComponent.backendUnavailable).toBe(false);
+        expect(connectionService.closeAllConnections).toHaveBeenCalledTimes(1);
     });
 
     it('should start retry countdown and reconnect after 5 seconds on error', () => {

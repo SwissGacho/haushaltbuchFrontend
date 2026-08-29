@@ -70,6 +70,143 @@ describe('LoginComponent', () => {
         expect(received).toEqual([{}]);
     });
 
+    it('should auto-login without credentials when Hello signals an authenticated user', () => {
+        const received: any[] = [];
+        component.loginSubject.subscribe((value) => received.push(value));
+        const message = {
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'multiUser',
+            authenticated_user: true,
+        } as IncomingMessage;
+
+        component.handleMessages(message);
+
+        expect(received).toEqual([{}]);
+        expect(component.getLoginCredentials).toBe(false);
+        expect(component.loginFailureReason).toBeNull();
+        expect(component.hasAuthenticatedUser).toBe(true);
+    });
+
+    it('should store the authenticated user name from a WelcomeMessage', () => {
+        component.handleMessages({
+            type: MessageType.Welcome,
+            token: 'token-1',
+            authenticated_user: 'alice',
+        } as IncomingMessage);
+
+        expect(component.authenticatedUser).toBe('alice');
+    });
+
+    it('should show the form instead of auto-login after explicit logout', () => {
+        sessionStorage.setItem('SuppressAuthenticatedUserLogin', 'true');
+        component = new LoginComponent(connectionService as unknown as ConnectionService);
+        const received: any[] = [];
+        component.loginSubject.subscribe((value) => received.push(value));
+
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'multiUser',
+            authenticated_user: true,
+        } as IncomingMessage);
+
+        expect(received).toEqual([]);
+        expect(component.getLoginCredentials).toBe(true);
+    });
+
+    it('should log in as the authenticated Hello user when requested', () => {
+        sessionStorage.setItem('SuppressAuthenticatedUserLogin', 'true');
+        component = new LoginComponent(connectionService as unknown as ConnectionService);
+        const received: any[] = [];
+        component.loginSubject.subscribe((value) => received.push(value));
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'multiUser',
+            authenticated_user: true,
+        } as IncomingMessage);
+        component.loginAsAuthenticatedUser();
+
+        expect(received).toEqual([{}]);
+        expect(component.getLoginCredentials).toBe(false);
+    });
+
+    it('should clear explicit logout suppression when logging in manually', () => {
+        sessionStorage.setItem('SuppressAuthenticatedUserLogin', 'true');
+        component = new LoginComponent(connectionService as unknown as ConnectionService);
+        component.username = 'bob';
+
+        component.logIn();
+
+        expect(sessionStorage.getItem('SuppressAuthenticatedUserLogin')).toBeNull();
+    });
+
+    it('should not auto-login the Hello user after a manual login attempt fails', () => {
+        sessionStorage.setItem('SuppressAuthenticatedUserLogin', 'true');
+        component = new LoginComponent(connectionService as unknown as ConnectionService);
+        const received: any[] = [];
+        component.loginSubject.subscribe((value) => received.push(value));
+
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'multiUser',
+            authenticated_user: true,
+        } as IncomingMessage);
+        component.username = 'bob';
+        component.logIn();
+        component.handleMessages({
+            type: MessageType.Bye,
+            token: 'token-1',
+            reason: 'Invalid username',
+        } as IncomingMessage);
+
+        const retryReceived: any[] = [];
+        component.loginSubject.subscribe((value) => retryReceived.push(value));
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-2',
+            status: 'multiUser',
+            authenticated_user: true,
+        } as IncomingMessage);
+
+        expect(received).toEqual([{ user: 'bob' }]);
+        expect(retryReceived).toEqual([]);
+        expect(component.getLoginCredentials).toBe(true);
+    });
+
+    it('should show the form after automatic authenticated-user login fails', () => {
+        const initialReceived: any[] = [];
+        component.loginSubject.subscribe((value) => initialReceived.push(value));
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-1',
+            status: 'multiUser',
+            authenticated_user: true,
+        } as IncomingMessage);
+
+        component.handleMessages({
+            type: MessageType.Bye,
+            token: 'token-1',
+            reason: 'Invalid username',
+        } as IncomingMessage);
+
+        const retryReceived: any[] = [];
+        component.loginSubject.subscribe((value) => retryReceived.push(value));
+        component.handleMessages({
+            type: MessageType.Hello,
+            token: 'token-2',
+            status: 'multiUser',
+            authenticated_user: true,
+        } as IncomingMessage);
+
+        expect(initialReceived).toEqual([{}]);
+        expect(retryReceived).toEqual([]);
+        expect(component.getLoginCredentials).toBe(true);
+        expect(component.loginFailureReason).toBe('Invalid username');
+    });
+
     it('should send entered username when logIn is called', () => {
         const received: any[] = [];
         component.loginSubject.subscribe((value) => received.push(value));
