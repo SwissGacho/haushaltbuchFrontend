@@ -19,7 +19,7 @@ export class HelloMessage extends IncomingMessage implements HelloMessageType {
 
     constructor(data: Message) {
         super(data);
-        if ('authenticated_user' in data && data.authenticated_user) {
+        if ('authenticated_user' in data && data.authenticated_user === true) {
             this.authenticated_user = true;
         }
     }
