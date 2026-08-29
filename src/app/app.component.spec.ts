@@ -209,7 +209,7 @@ describe('AppComponent', () => {
             type: MessageType.Hello,
             token: 'token-1',
             status: 'multiUser',
-            authenticated_user: 'alice',
+            authenticated_user: true,
         } as IncomingMessage;
 
         appComponent.handleMessages(message);
@@ -218,7 +218,7 @@ describe('AppComponent', () => {
         expect(appComponent.activateAnyComponent).toBe(true);
         expect(appComponent.activateSetupConfigComponent).toBe(false);
         expect(appComponent.activateLoginComponent).toBe(true);
-        expect(appComponent.username).toBe('alice');
+        expect(appComponent.username).toBeNull();
     });
 
     it('should mark logged in and capture backend version on welcome', () => {

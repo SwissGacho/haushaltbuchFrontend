@@ -70,21 +70,32 @@ describe('LoginComponent', () => {
         expect(received).toEqual([{}]);
     });
 
-    it('should auto-login with the authenticated user from Hello', () => {
+    it('should auto-login without credentials when Hello signals an authenticated user', () => {
         const received: any[] = [];
         component.loginSubject.subscribe((value) => received.push(value));
         const message = {
             type: MessageType.Hello,
             token: 'token-1',
             status: 'multiUser',
-            authenticated_user: 'alice',
+            authenticated_user: true,
         } as IncomingMessage;
 
         component.handleMessages(message);
 
-        expect(received).toEqual([{ user: 'alice' }]);
+        expect(received).toEqual([{}]);
         expect(component.getLoginCredentials).toBe(false);
         expect(component.loginFailureReason).toBeNull();
+        expect(component.hasAuthenticatedUser).toBe(true);
+    });
+
+    it('should store the authenticated user name from a WelcomeMessage', () => {
+        component.handleMessages({
+            type: MessageType.Welcome,
+            token: 'token-1',
+            authenticated_user: 'alice',
+        } as IncomingMessage);
+
+        expect(component.authenticatedUser).toBe('alice');
     });
 
     it('should show the form instead of auto-login after explicit logout', () => {
@@ -97,7 +108,7 @@ describe('LoginComponent', () => {
             type: MessageType.Hello,
             token: 'token-1',
             status: 'multiUser',
-            authenticated_user: 'alice',
+            authenticated_user: true,
         } as IncomingMessage);
 
         expect(received).toEqual([]);
@@ -113,11 +124,11 @@ describe('LoginComponent', () => {
             type: MessageType.Hello,
             token: 'token-1',
             status: 'multiUser',
-            authenticated_user: 'alice',
+            authenticated_user: true,
         } as IncomingMessage);
         component.loginAsAuthenticatedUser();
 
-        expect(received).toEqual([{ user: 'alice' }]);
+        expect(received).toEqual([{}]);
         expect(component.getLoginCredentials).toBe(false);
     });
 
@@ -141,7 +152,7 @@ describe('LoginComponent', () => {
             type: MessageType.Hello,
             token: 'token-1',
             status: 'multiUser',
-            authenticated_user: 'alice',
+            authenticated_user: true,
         } as IncomingMessage);
         component.username = 'bob';
         component.logIn();
@@ -157,7 +168,7 @@ describe('LoginComponent', () => {
             type: MessageType.Hello,
             token: 'token-2',
             status: 'multiUser',
-            authenticated_user: 'alice',
+            authenticated_user: true,
         } as IncomingMessage);
 
         expect(received).toEqual([{ user: 'bob' }]);
@@ -172,7 +183,7 @@ describe('LoginComponent', () => {
             type: MessageType.Hello,
             token: 'token-1',
             status: 'multiUser',
-            authenticated_user: 'alice',
+            authenticated_user: true,
         } as IncomingMessage);
 
         component.handleMessages({
@@ -187,10 +198,10 @@ describe('LoginComponent', () => {
             type: MessageType.Hello,
             token: 'token-2',
             status: 'multiUser',
-            authenticated_user: 'alice',
+            authenticated_user: true,
         } as IncomingMessage);
 
-        expect(initialReceived).toEqual([{ user: 'alice' }]);
+        expect(initialReceived).toEqual([{}]);
         expect(retryReceived).toEqual([]);
         expect(component.getLoginCredentials).toBe(true);
         expect(component.loginFailureReason).toBe('Invalid username');

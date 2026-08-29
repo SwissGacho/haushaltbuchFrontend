@@ -15,12 +15,12 @@ import {
 
 export class HelloMessage extends IncomingMessage implements HelloMessageType {
     override type = MessageType.Hello as const;
-    authenticated_user?: string;
+    authenticated_user?: boolean;
 
     constructor(data: Message) {
         super(data);
         if ('authenticated_user' in data && data.authenticated_user) {
-            this.authenticated_user = data.authenticated_user;
+            this.authenticated_user = true;
         }
     }
 }
@@ -33,7 +33,7 @@ export class WelcomeMessage extends IncomingMessage implements WelcomeMessageTyp
 
     constructor(data: Message) {
         super(data);
-        if ('authenticated_user' in data && data.authenticated_user) {
+        if ('authenticated_user' in data && typeof data.authenticated_user === 'string') {
             this.authenticated_user = data.authenticated_user;
         }
         if ('version_info' in data && data.version_info) {

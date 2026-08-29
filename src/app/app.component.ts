@@ -61,10 +61,7 @@ export class AppComponent extends ConnectedComponent implements OnInit, OnDestro
         this.clearReconnectState();
         if (message.type == MessageType.Hello) {
             this.isMultiUserMode = message.status == 'multiUser';
-            this.username =
-                'authenticated_user' in message && typeof message.authenticated_user === 'string'
-                    ? message.authenticated_user
-                    : null;
+            this.username = null;
             // check basic status of backend
             if (message.status == 'noDB') {
                 console.log('Open Setup Dialogue');
