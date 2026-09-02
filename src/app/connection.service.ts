@@ -152,7 +152,7 @@ export class ConnectionService {
               // Production websocket path served behind the Nginx reverse proxy
               return `${wsProtocol}//${window.location.host}/ws/`;
           })()
-        : 'ws://localhost:8765/';
+        : `ws://${window.location.hostname}:8765/`;
 
     static connections: {
         [componentId: string]: {
@@ -176,7 +176,7 @@ export class ConnectionService {
     // The optional second parameter provides either a Subject or a boolean
     // If a Subject is present it will be subscribed for the login credentials, otherwise an internal observer
     // will be used for accessing the session token as login credential
-    // If the secon parameter is truthy the handshake messages (first 2 messages) will be delivered to the subscriber
+    // If the second parameter is truthy the handshake messages (first 2 messages) will be delivered to the subscriber
     getNewConnection(
         subscriber: ConnectionSubscriber,
         loginSubject?: rxjs.Subject<LoginCredentials>,
@@ -202,9 +202,13 @@ export class ConnectionService {
         console.debug('LoginSubjectOrObserveHandshake: ', loginSubjectOrObserveHandshake);
         console.debug('is primary: ', isPrimary);
         console.debug('Backend address: ', this.BACKEND_ADDRESS);
+        // A Subject (rather than a boolean) identifies a login connection (see LoginComponent);
+        // announce it via the WebSocket subprotocol so the backend can recognize it during the handshake.
+        const isLoginConnection = loginSubjectOrObserveHandshake instanceof rxjs.Subject;
         let connection = this.webSocket({
             url: this.BACKEND_ADDRESS,
             deserializer: (event) => MessageFactory.deserialize(event) as Message,
+            ...(isLoginConnection ? { protocol: 'mp-login' } : {}),
         });
         let loginSubject: LoginSubject;
         loginSubject =
