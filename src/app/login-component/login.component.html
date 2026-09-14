@@ -13,5 +13,10 @@
             placeholder="Enter thy name, navigator"
         />
         <button (click)="logIn()">Enter</button>
+        @if (hasAuthenticatedUser) {
+            <button type="button" (click)="loginAsAuthenticatedUser()">
+                Login as {{ authenticatedUser || 'authenticated user' }}
+            </button>
+        }
     </div>
 }

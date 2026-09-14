@@ -2,7 +2,12 @@
     <header class="app-container__header">
         <h1>Haushaltbuch</h1>
         @if (shouldShowLogout()) {
-            <button class="logout-button" type="button" (click)="logout()">Logout</button>
+            <div class="app-container__account">
+                @if (username) {
+                    <span class="app-container__username">{{ username }}</span>
+                }
+                <button class="logout-button" type="button" (click)="logout()">Logout</button>
+            </div>
         }
     </header>
 
@@ -70,6 +75,9 @@
 
     <footer class="app-container__footer">
         <span>Frontend: {{ frontendVersion }}</span>
-        <span>Backend: {{ backendVersion }}</span>
+        <span
+            >Backend: {{ backendVersion
+            }}{{ backendStatus ? ' (' + backendStatus + ')' : '' }}</span
+        >
     </footer>
 </div>

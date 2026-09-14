@@ -16,6 +16,11 @@ import { LoginCredentials } from '../messages/admin.messages';
 export class LoginComponent extends ConnectedComponent implements OnInit {
     getLoginCredentials = false;
     loginFailureReason: string | null = null;
+    hasAuthenticatedUser = false;
+    authenticatedUser: string | null = null;
+    private authenticatedUserLoginAttempted = false;
+    private suppressAuthenticatedUserLogin =
+        sessionStorage.getItem('SuppressAuthenticatedUserLogin') === 'true';
 
     constructor(private specificService: ConnectionService) {
         super(specificService);
@@ -44,12 +49,39 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
         console.debug(message);
         console.groupEnd();
         if (message.type == MessageType.Hello) {
+            const hasAuthenticatedUser =
+                'authenticated_user' in message && message.authenticated_user === true;
+            this.hasAuthenticatedUser = hasAuthenticatedUser;
+            if (
+                hasAuthenticatedUser &&
+                !this.suppressAuthenticatedUserLogin &&
+                !this.authenticatedUserLoginAttempted
+            ) {
+                this.authenticatedUserLoginAttempted = true;
+                this.getLoginCredentials = false;
+                this.loginFailureReason = null;
+                // log in without credentials, like single-user mode; backend resolves the username
+                this.loginSubject.next({});
+                return;
+            }
+            if (hasAuthenticatedUser) {
+                this.getLoginCredentials = true;
+                return;
+            }
             let status = message.status;
             if (status == 'singleUser') {
                 this.loginFailureReason = null;
                 this.loginSubject.next({});
             } else {
                 this.getLoginCredentials = true;
+            }
+        } else if (message.type == MessageType.Welcome) {
+            const welcomeUser =
+                'authenticated_user' in message && typeof message.authenticated_user === 'string'
+                    ? message.authenticated_user
+                    : undefined;
+            if (welcomeUser) {
+                this.authenticatedUser = welcomeUser;
             }
         } else if (message.type == MessageType.Bye) {
             this.username = '';
@@ -74,8 +106,25 @@ export class LoginComponent extends ConnectedComponent implements OnInit {
 
     logIn(): void {
         console.log('Login button pressed (', this.username, ')');
+        this.authenticatedUserLoginAttempted = true;
+        this.suppressAuthenticatedUserLogin = false;
+        sessionStorage.removeItem('SuppressAuthenticatedUserLogin');
         this.loginFailureReason = null;
         this.loginSubject.next({ user: this.username });
+    }
+
+    loginAsAuthenticatedUser(): void {
+        if (!this.hasAuthenticatedUser) {
+            return;
+        }
+        console.log('Login button pressed for authenticated user');
+        this.authenticatedUserLoginAttempted = true;
+        this.suppressAuthenticatedUserLogin = false;
+        sessionStorage.removeItem('SuppressAuthenticatedUserLogin');
+        this.getLoginCredentials = false;
+        this.loginFailureReason = null;
+        // log in without credentials; the backend resolves the authenticated user itself
+        this.loginSubject.next({});
     }
 
     // Creates the connection to the backend when the component is initialized.
