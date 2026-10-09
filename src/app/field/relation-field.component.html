@@ -10,6 +10,7 @@
         <input
             #inputElement
             [value]="isOpen ? (filterText$ | async) : value ? value.display_name : 'Select...'"
+            [readonly]="readonly"
             (input)="onInput($event)"
             (keydown)="onKeyDown($event)"
             (focus)="onFocus()"
@@ -33,6 +34,7 @@
             [class.selected]="(opt.id === null && !value) || opt.id === value?.id"
             [class.highlighted]="i === selectedIndex"
             [class.empty-action]="opt.id === null"
+            [class.readonly]="readonly"
             (click)="selectOption(opt)"
             [title]="opt.display_name"
         >

@@ -34,6 +34,7 @@ type SelectOption = Omit<ListObject, 'id'> & {
 export class RelationFieldComponent extends ConnectedComponent implements OnInit, OnDestroy {
     @Input() value: SelectOption | null = null;
     @Input() schema: any;
+    @Input() readonly: boolean = false;
     @Output() valueChange = new EventEmitter<SelectOption | null>();
 
     @ViewChild('inputElement') inputElement!: ElementRef<HTMLInputElement>;
@@ -156,7 +157,11 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
                 this.fetchPossibleValues();
             }
         } else if (message.type !== MessageType.Hello) {
-            console.error(`${this.componentID} handling Unexpected message`, message);
+            console.error(
+                `${this.componentID} handling Unexpected message`,
+                message.type ?? 'unknown',
+                message
+            );
         }
         console.groupEnd();
     }

@@ -14,6 +14,7 @@ export class DictFieldComponent {
 
     jsonValue = '';
     parseError: string | null = null;
+    @Input() readonly: boolean = false;
 
     private _value: Record<string, any> | null = null;
 

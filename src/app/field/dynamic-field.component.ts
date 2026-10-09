@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DateTimeFieldComponent } from './datetime-field.component';
 import { RelationFieldComponent } from './relation-field.component';
 import { DictFieldComponent } from './dict-field.component';
+import { AttributeSchema } from '../business-object/bo-schema/bo.schema.types';
 
 @Component({
     selector: 'app-dynamic-field',
@@ -20,9 +21,13 @@ import { DictFieldComponent } from './dict-field.component';
 })
 export class DynamicFieldComponent {
     @Input() key!: string;
-    @Input() schema: any = {};
+    @Input() schema!: AttributeSchema;
     @Input() value: any;
     @Output() valueChange = new EventEmitter<any>();
+
+    get isReadOnly(): boolean {
+        return this.schema?.accessLevel === 'read_only';
+    }
 
     // Emit when input blurred or value changed
     onBlur() {
