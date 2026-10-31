@@ -29,26 +29,32 @@ export class DynamicFieldComponent {
         return this.schema?.accessLevel === 'read_only';
     }
 
+    emitIfWriteable() {
+        if (!this.isReadOnly) {
+            this.valueChange.emit(this.value);
+        }
+    }
+
     // Emit when input blurred or value changed
     onBlur() {
-        this.valueChange.emit(this.value);
+        this.emitIfWriteable();
     }
 
     // Handle datetime field changes (timezone-aware value emitted from DateTimeFieldComponent)
     onDateTimeChange(newValue: string | null) {
         this.value = newValue;
-        this.valueChange.emit(this.value);
+        this.emitIfWriteable();
     }
 
     // Handle relation field changes
     onRelationChange(newValue: any) {
         this.value = newValue;
-        this.valueChange.emit(this.value);
+        this.emitIfWriteable();
     }
 
     // Handle dict field changes
     onDictChange(newValue: Record<string, any> | null) {
         this.value = newValue;
-        this.valueChange.emit(this.value);
+        this.emitIfWriteable();
     }
 }
