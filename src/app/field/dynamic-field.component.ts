@@ -29,7 +29,7 @@ export class DynamicFieldComponent {
         return this.schema?.accessLevel === 'read_only';
     }
 
-    emitIfWriteable() {
+    emitIfWriteable(): void {
         if (!this.isReadOnly) {
             this.valueChange.emit(this.value);
         }
