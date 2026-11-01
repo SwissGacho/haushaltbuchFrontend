@@ -34,6 +34,7 @@ type SelectOption = Omit<ListObject, 'id'> & {
 export class RelationFieldComponent extends ConnectedComponent implements OnInit, OnDestroy {
     @Input() value: SelectOption | null = null;
     @Input() schema: any;
+    @Input() readonly: boolean = false;
     @Output() valueChange = new EventEmitter<SelectOption | null>();
 
     @ViewChild('inputElement') inputElement!: ElementRef<HTMLInputElement>;
@@ -78,6 +79,10 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
         return this.schema?.flags?.relation?.relation || '';
     }
 
+    get isReadOnly(): boolean {
+        return this.schema?.accessLevel === 'read_only';
+    }
+
     fetchPossibleValues() {
         if (!this.boType) {
             return;
@@ -108,6 +113,8 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
 
     override handleMessages(message: IncomingMessage): void {
         console.groupCollapsed(this.componentID, 'received', message.type, 'message');
+
+        // Handle Object messages
         if (message.type === MessageType.Object && this.isLoading) {
             console.log(`${this.componentID} handling Object list`, message);
             const objectMessage = message as ObjectMessage;
@@ -143,7 +150,10 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
                 );
                 setTimeout(() => this.inputElement.nativeElement.focus());
             }
-        } else if (message.type === MessageType.Welcome) {
+        }
+
+        // Handle Welcome messages
+        else if (message.type === MessageType.Welcome) {
             console.log(`${this.componentID} received Welcome message`, message);
             console.log(
                 `${this.componentID} checking if should open on load:`,
@@ -155,14 +165,29 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
             if (this.shouldOpenOnLoad || this.isLoading) {
                 this.fetchPossibleValues();
             }
-        } else if (message.type !== MessageType.Hello) {
-            console.error(`${this.componentID} handling Unexpected message`, message);
+        }
+
+        // Handle Hello messages (no action needed)
+        else if (message.type !== MessageType.Hello) {
+            console.error(
+                `${this.componentID} handling Unexpected message`,
+                message.type ?? 'unknown',
+                message
+            );
         }
         console.groupEnd();
     }
 
     selectOption(option: SelectOption) {
+        if (this.isReadOnly) {
+            console.warn(`${this.componentID} is read-only, cannot select option`);
+            return;
+        }
         console.log(`${this.componentID} option selected`, option);
+        if (this.isReadOnly) {
+            console.warn(`${this.componentID} is read-only, cannot select option`);
+            return;
+        }
         const currentId = this.value?.id ?? null;
         const selectedId = option.id ?? null;
 
@@ -184,6 +209,10 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
     }
 
     toggleOpen() {
+        if (this.isReadOnly) {
+            return;
+        }
+
         if (this.isOpen) {
             this.isOpen = false;
             this.filterText$.next('');
@@ -225,6 +254,10 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
     }
 
     onInput(event: Event) {
+        if (this.isReadOnly) {
+            return;
+        }
+
         const target = event.target as HTMLInputElement;
         const value = target.value;
         this.filterText$.next(value);
@@ -236,6 +269,10 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
     }
 
     onFocus() {
+        if (this.isReadOnly) {
+            return; // No need to fetch options if read-only
+        }
+
         if (!this.optionsLoaded && !this.isLoading) {
             this.shouldOpenOnLoad = false;
             this.fetchPossibleValues();
@@ -253,6 +290,10 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
     }
 
     onKeyDown(event: KeyboardEvent) {
+        if (this.isReadOnly) {
+            return; // Prevent any key actions if read-only
+        }
+
         if (
             !this.isOpen &&
             (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Enter')

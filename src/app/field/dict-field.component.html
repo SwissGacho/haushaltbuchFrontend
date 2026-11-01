@@ -3,6 +3,7 @@
         [(ngModel)]="jsonValue"
         (blur)="onBlur()"
         class="dict-field-input"
+        [readonly]="readonly"
         [class.invalid]="!!parseError"
         rows="6"
         spellcheck="false"

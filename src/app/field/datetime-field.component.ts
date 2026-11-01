@@ -14,6 +14,7 @@ export class DateTimeFieldComponent {
         this._rawValue = rawValue || '';
         this._displayValue = this.formatDateTimeLocal(rawValue || '');
     }
+    @Input() readonly: boolean = false;
 
     @Output() valueChange = new EventEmitter<string | null>();
 

@@ -23,3 +23,11 @@ body {
 .toggle-marker[aria-expanded='true']::before {
     content: var(--toggle-icon-expanded, '▼');
 }
+
+input:read-only,
+textarea:read-only,
+.readonly {
+    background-color: var(--field-readonly-bg, #f0f0f0);
+    color: var(--field-readonly-color, #6c757d);
+    cursor: var(--field-readonly-cursor, default);
+}

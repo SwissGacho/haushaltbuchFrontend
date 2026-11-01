@@ -1,16 +1,23 @@
 <ng-container [ngSwitch]="schema?.type">
     <span *ngSwitchCase="'str'">
-        <input type="text" [(ngModel)]="value" (blur)="onBlur()" />
+        <input type="text" [(ngModel)]="value" [readonly]="isReadOnly" (blur)="onBlur()" />
     </span>
 
     <span *ngSwitchCase="'int'">
-        <input type="number" step="1" [(ngModel)]="value" (blur)="onBlur()" />
+        <input
+            type="number"
+            step="1"
+            [(ngModel)]="value"
+            [readonly]="isReadOnly"
+            (blur)="onBlur()"
+        />
     </span>
 
     <span *ngSwitchCase="'relation'">
         <app-relation-field
             [value]="value"
             [schema]="schema"
+            [readonly]="isReadOnly"
             (valueChange)="onRelationChange($event)"
         ></app-relation-field>
     </span>
@@ -18,19 +25,24 @@
     <span *ngSwitchCase="'datetime'">
         <app-datetime-field
             [value]="value"
+            [readonly]="isReadOnly"
             (valueChange)="onDateTimeChange($event)"
         ></app-datetime-field>
     </span>
 
     <span *ngSwitchCase="'date'">
-        <input type="date" [(ngModel)]="value" (blur)="onBlur()" />
+        <input type="date" [(ngModel)]="value" [readonly]="isReadOnly" (blur)="onBlur()" />
     </span>
 
     <span *ngSwitchCase="'dict'">
-        <app-dict-field [value]="value" (valueChange)="onDictChange($event)"></app-dict-field>
+        <app-dict-field
+            [value]="value"
+            [readonly]="isReadOnly"
+            (valueChange)="onDictChange($event)"
+        ></app-dict-field>
     </span>
 
     <span *ngSwitchDefault>
-        <input [(ngModel)]="value" (blur)="onBlur()" />
+        <input [(ngModel)]="value" [readonly]="isReadOnly" (blur)="onBlur()" />
     </span>
 </ng-container>
