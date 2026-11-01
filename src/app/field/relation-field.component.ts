@@ -254,6 +254,10 @@ export class RelationFieldComponent extends ConnectedComponent implements OnInit
     }
 
     onInput(event: Event) {
+        if (this.isReadOnly) {
+            return;
+        }
+
         const target = event.target as HTMLInputElement;
         const value = target.value;
         this.filterText$.next(value);
